@@ -11,6 +11,8 @@ export const authEndpoints = {
 export const leadEndpoints = {
     FETCH_RM_LEADS_API: BASE_URL + "/rm-leads", // Adjust to match your backend route
     FETCH_LEADS_API: BASE_URL + "/leads/fetch-leads",
+    UNDER_US_REQUEST: BASE_URL + "/under-us-request",
+    DELETE_LEAD_API: BASE_URL + "/delete-lead"
   };
   
 
