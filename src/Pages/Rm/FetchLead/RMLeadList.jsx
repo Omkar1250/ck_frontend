@@ -74,7 +74,7 @@ const LeadList = () => {
   const handleUnderUsRequest = async () => {
     try {
       const res = await underUsRequest(token, selectedLead?.id);
-      
+        
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
     }
@@ -119,8 +119,8 @@ const LeadList = () => {
     return <p className="text-red-500 text-center mt-6 text-lg">{error}</p>;
 
   return (
-    <div className="max-w-6xl mx-auto mt-10 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
+    <div className="max-w-6xl mx-auto px-4 mt-24 sm:px-6 lg:px-8">
+      <h2 className="text-3xl mt-6 font-bold  text-center text-richblack-800">
         RM Leads
       </h2>
 
@@ -155,14 +155,19 @@ const LeadList = () => {
             {filteredLeads.map((lead) => {
               const isDisabled =
                 lead.under_us_status === "pending" ||
-                lead.under_us_status === "approved" ||
-                lead.under_us_status === "rejected";
-
+                lead.under_us_status === "approved" 
+                
+                
               return (
                 <div
-                  key={lead.id}
-                  className="border p-5 bg-white shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl"
-                >
+                key={lead.id}
+                className={`
+                  border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl
+                  ${lead.under_us_status === "rejected" ? "bg-bgCard" : ""}
+                  ${lead.under_us_status === "approved" ? "bg-bgAprCard" : ""}
+                  ${!["rejected", "approved"].includes(lead.under_us_status) ? "bg-white" : ""}
+                `}
+              >
                   <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
                     <h3 className="text-xl font-semibold text-gray-800">
                       {lead.name}

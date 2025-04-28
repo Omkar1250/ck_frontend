@@ -2,9 +2,9 @@ import { useSelector } from "react-redux";
 import { matchPath, useLocation } from "react-router";
 import { NavLink } from "react-router-dom";
 
-export default function SidebarLink({ link }) {
+export default function SidebarLink({ link, setSidebarOpen }) {
   const location = useLocation();
-  const token = useSelector((state)=>state.auth)
+  const token = useSelector((state) => state.auth);
 
   const matchRoute = (route) => {
     return matchPath({ path: route }, location.pathname);
@@ -12,12 +12,18 @@ export default function SidebarLink({ link }) {
 
   const isActive = matchRoute(link.path);
 
+  const handleClick = () => {
+    // Close the sidebar on link click
+    setSidebarOpen(false);
+  };
+
   return (
     <NavLink
       to={link.path}
       className={`relative flex items-center px-8 py-2 text-sm font-medium transition-all duration-200 ${
         isActive ? "bg-btnColor text-textColor font-semibold" : "bg-opacity-0 font-semibold text-textColor"
       }`}
+      onClick={handleClick} // Call handleClick when the link is clicked
     >
       {/* Active route indicator */}
       <span

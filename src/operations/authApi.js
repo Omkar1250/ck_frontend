@@ -26,7 +26,7 @@ export function adminLogin(personal_number, password, navigate) {
     localStorage.setItem("token", JSON.stringify(response.data.token))
     localStorage.setItem("user", JSON.stringify(response.data.user))
       toast.success("Login Successful");
-      navigate('/dashboard/refer-lead-list'); // your next page or dashboard redirect
+      navigate('/dashboard/refer-lead'); // your next page or dashboard redirect
 
     } catch (error) {
       console.error("Login Error:", error);

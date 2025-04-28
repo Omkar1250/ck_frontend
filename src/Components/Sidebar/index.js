@@ -1,102 +1,123 @@
-import { useEffect, useRef, useState } from "react";
-import { useLocation, NavLink, useNavigate } from "react-router-dom";
-import { sidebarLinks } from "../../data/dashboardLinks";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import SidebarLink from "../SidebarLinks";
 import { logout } from "../../operations/authApi";
+import { sidebarLinks } from "../../data/dashboardLinks";
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
-  const location = useLocation();
-  const { pathname } = location;
-  const user = useSelector((state) => state.profile.user);
-  const token = useSelector((state)=> state.auth)
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  
-  
-  const trigger = useRef(null);
-  const sidebar = useRef(null);
+  const user = useSelector((state) => state.profile.user); // Get user details
+  const token = useSelector((state) => state.auth.token); // Get authentication token
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  // Get sidebar expanded state from localStorage or default to false
-  const storedSidebarExpanded = localStorage.getItem('sidebar-expanded');
-  const [sidebarExpanded, setSidebarExpanded] = useState(storedSidebarExpanded === 'true');
-  
+  const triggerRef = useRef(null);
+  const sidebarRef = useRef(null);
+
+  // Sidebar expanded state
+  const storedSidebarExpanded = localStorage.getItem("sidebar-expanded");
+  const [sidebarExpanded, setSidebarExpanded] = useState(storedSidebarExpanded === "true");
+
+  // Effect: Update localStorage and body class on sidebarExpanded state changes
   useEffect(() => {
-    // Update localStorage when sidebarExpanded state changes
-    localStorage.setItem('sidebar-expanded', sidebarExpanded.toString());
-    // Add or remove the 'sidebar-expanded' class on the body element
-    document.body.classList.toggle('sidebar-expanded', sidebarExpanded);
+    localStorage.setItem("sidebar-expanded", sidebarExpanded.toString());
+    document.body.classList.toggle("sidebar-expanded", sidebarExpanded);
   }, [sidebarExpanded]);
 
-  // Close sidebar if clicked outside
-  useEffect(() => {
-    const clickHandler = ({ target }) => {
-      if (!sidebar.current || !trigger.current) return;
-      if (!sidebarOpen || sidebar.current.contains(target) || trigger.current.contains(target)) return;
-      setSidebarOpen(false); // Close sidebar if clicked outside
-    };
+  // Effect: Handle clicks outside the sidebar to close it
+  const clickHandler = useCallback(
+    ({ target }) => {
+      if (!sidebarRef.current || !triggerRef.current) return;
+      if (
+        !sidebarOpen ||
+        sidebarRef.current.contains(target) ||
+        triggerRef.current.contains(target)
+      )
+        return;
 
-    document.addEventListener('click', clickHandler);
+      setSidebarOpen(false); // Close the sidebar
+    },
+    [sidebarOpen, setSidebarOpen]
+  );
+
+  useEffect(() => {
+    document.addEventListener("click", clickHandler);
     return () => {
-      document.removeEventListener('click', clickHandler);
+      document.removeEventListener("click", clickHandler);
     };
-  }, [sidebarOpen, setSidebarOpen]);
+  }, [clickHandler]);
+
+  // Filter sidebar links based on user role
+  const filteredLinks = useMemo(() => {
+    return sidebarLinks.filter((link) => !link.type || user?.role === link.type);
+  }, [user]);
+
+  // Reusable button styles
+  const buttonStyles =
+    "w-full rounded-md bg-greenBtn px-4 py-2 text-white font-semibold hover:opacity-90 transition";
 
   return (
     <aside
-      ref={sidebar}
-      className={`bg-bgSidebar  absolute z-9999 left-0 pt-16 flex h-screen w-72 flex-col overflow-y-hidden duration-300 ease-linear lg:static lg:translate-x-0 ${
+      ref={sidebarRef}
+      className={`bg-bgSidebar absolute z-[100] left-0 top-14 lg:pt-16 flex h-screen w-72 flex-col overflow-y-hidden duration-200 ease-linear lg:static lg:translate-x-0 ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
       {/* SIDEBAR HEADER */}
       <div className="flex items-center justify-end gap-2 px-6 py-1 lg:py-3">
-        
-
         {/* Hamburger Button for Mobile */}
         <button
-          ref={trigger}
+          ref={triggerRef}
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-controls="sidebar"
           aria-expanded={sidebarOpen ? "true" : "false"}
-          className="block lg:hidden text-textColor font-bold  text-2xl"
+          aria-label="Toggle Sidebar"
+          className="block lg:hidden text-textColor font-bold text-2xl"
         >
           X
         </button>
       </div>
 
       {/* Menu Links */}
-      <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-        <div className="flex flex-col">
-          {sidebarLinks.map((link) => {
-            if (link.type && user?.role !== link.type) return null;
-            return <SidebarLink key={link.id} link={link} name={link.name} />;
-          })}
-        </div>
+      <MenuLinks links={filteredLinks} setSidebarOpen={setSidebarOpen} />
+
+      {/* Logout/Login Section */}
+      <div className="p-4">
+        {token ? (
+          <button
+            className={buttonStyles}
+            onClick={() => dispatch(logout(navigate))}
+            aria-label="Logout"
+          >
+            Logout
+          </button>
+        ) : (
+          <button
+            className={buttonStyles}
+            onClick={() => navigate("/login")}
+            aria-label="Login"
+          >
+            Login
+          </button>
+        )}
       </div>
-      <div className="mt-auto p-4">
-  {
-    token ? (
-      <button
-        className="w-full rounded-md bg-btnColor px-4 py-2 text-white font-semibold hover:opacity-90 transition"
-        onClick={() => dispatch(logout(navigate))}
-      >
-        Logout
-      </button>
-    ) : (
-      <button
-        className="w-full rounded-md bg-btnColor px-4 py-2 text-white font-semibold hover:opacity-90 transition"
-        onClick={() => navigate("/login")} // Optional redirect to login
-      >
-        Login
-      </button>
-    )
-  }
-</div>
-
-
     </aside>
   );
 }
 
-
+// MenuLinks Component for better modularity
+function MenuLinks({ links, setSidebarOpen }) {
+  return (
+    <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+      <div className="flex flex-col">
+        {links.map((link) => (
+          <SidebarLink
+            key={link.id}
+            link={link}
+            setSidebarOpen={setSidebarOpen} // Pass setSidebarOpen here
+          />
+        ))}
+      </div>
+    </div>
+  );
+}

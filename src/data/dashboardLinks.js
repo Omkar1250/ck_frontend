@@ -1,5 +1,13 @@
 import { ACCOUNT_TYPE } from "../utils/constants";
 export const sidebarLinks = [
+  
+  {
+    id: 0,
+    name: "Refer Lead",
+    path: "/dashboard",
+    type: ACCOUNT_TYPE.USER,
+  },
+  
   {
     id: 1,
     name: "Refer Lead List",
@@ -58,14 +66,14 @@ export const sidebarLinks = [
   {
     id: 10,
     name: "Payements",
-    path: "/dashboard/your-payement",
+    path: "/dashboard/your/payment",
     type: ACCOUNT_TYPE.USER,
   },
   {
     id: 11,
     name: "View Team Profile",
     path: "/dashboard/view-team-profile",
-    type: ACCOUNT_TYPE.USER,
+    type: ACCOUNT_TYPE.ADMIN,
     
   },
   {
@@ -130,14 +138,14 @@ export const sidebarLinks = [
   },
   {
     id: 22,
-    name: "Payements",
-    path: "/dashboard/admin/payements",
+    name: "Payments",
+    path: "/dashboard/admin/payments",
     type: ACCOUNT_TYPE.ADMIN,
   },
   {
     id: 23,
     name: "Conversion Points",
-    path: "/dashboard/conversion Points",
+    path: "/dashboard/conversion/points",
     type: ACCOUNT_TYPE.ADMIN,
   },
  
