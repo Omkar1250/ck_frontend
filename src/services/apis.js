@@ -1,4 +1,9 @@
-const BASE_URL = "http://localhost:4000/api/v1"
+
+const BASE_URL = process.env.REACT_APP_BASE_URL;
+
+if (!BASE_URL) {
+    console.error("REACT_APP_BASE_URL is not set in the environment variables");
+}
 
 //Admin Auth Endpoints
 export const authEndpoints = {
