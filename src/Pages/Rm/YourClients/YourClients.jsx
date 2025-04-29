@@ -6,11 +6,11 @@ import {
 import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
-import { useNavigate } from "react-router-dom";
+
 
 const YourClients = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+
   const { token } = useSelector((state) => state.auth);
   const { activationApproved, loading, error, currentPage, totalPages } = useSelector(
     (state) => state.activationApproved

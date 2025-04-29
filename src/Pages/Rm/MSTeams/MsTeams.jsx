@@ -10,11 +10,9 @@ import Modal from "../../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
-import { useNavigate } from "react-router-dom";
-
 const MsTeams = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+
   const { token } = useSelector((state) => state.auth);
   const { msTeamsApproved, loading, error, currentPage, totalPages } = useSelector(
     (state) => state.msTeamsApproved
@@ -65,7 +63,7 @@ const MsTeams = () => {
       formData.append("screenshot", screenshotFile); // Ensure the field name matches the backend
   
       // Make the API request
-      const res = await msTeamsRequest(token, selectedLead?.id, formData);
+       await msTeamsRequest(token, selectedLead?.id, formData);
       toast.success("Ms-Teams request sent successfully!");
       setIsUnderModalOpen(false);
     } catch (error) {
@@ -75,7 +73,7 @@ const MsTeams = () => {
 
   const handleRmDelete = async () => {
     try {
-      const res = await deleteLead(token, selectedLead?.id);
+    await deleteLead(token, selectedLead?.id);
       toast.success("Lead deleted successfully!");
       setIsDeleteModalOpen(false);
     } catch (error) {

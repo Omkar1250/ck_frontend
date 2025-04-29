@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { rmTransactionsSummary } from "../../../operations/rmApi";
 import SearchInput from "../../../Components/SearchInput"; // Reusable Search Component
-import toast from "react-hot-toast";
+
 
 const RmPayments = () => {
   const dispatch = useDispatch();

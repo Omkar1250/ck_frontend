@@ -11,11 +11,9 @@ import Modal from "../../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
-import { useNavigate } from "react-router-dom";
 
 const LeadList = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate()
   const { token } = useSelector((state) => state.auth);
   const { leads, loading, error, currentPage, totalPages } = useSelector(
     (state) => state.leads
@@ -73,7 +71,7 @@ const LeadList = () => {
 
   const handleUnderUsRequest = async () => {
     try {
-      const res = await underUsRequest(token, selectedLead?.id);
+       await underUsRequest(token, selectedLead?.id);
         
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
@@ -82,7 +80,7 @@ const LeadList = () => {
 
   const handleRmDelete = async () => {
     try {
-      const res = await deleteLead(token, selectedLead?.id);
+       await deleteLead(token, selectedLead?.id);
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
     }

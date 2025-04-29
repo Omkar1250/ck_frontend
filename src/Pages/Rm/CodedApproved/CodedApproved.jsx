@@ -10,11 +10,11 @@ import Modal from "../../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
-import { useNavigate } from "react-router-dom";
+
 
 const CodedApproved = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+
   const { token } = useSelector((state) => state.auth);
   const { codedApproved, loading, error, currentPage, totalPages } = useSelector(
     (state) => state.codedApproved
@@ -65,7 +65,7 @@ const CodedApproved = () => {
       formData.append("screenshot", screenshotFile); // Ensure the field name matches the backend
   
       // Make the API request
-      const res = await aomaRequest(token, selectedLead?.id, formData);
+       await aomaRequest(token, selectedLead?.id, formData);
       toast.success("AOMA request sent successfully!");
       setIsUnderModalOpen(false);
     } catch (error) {
@@ -75,7 +75,7 @@ const CodedApproved = () => {
 
   const handleRmDelete = async () => {
     try {
-      const res = await deleteLead(token, selectedLead?.id);
+      await deleteLead(token, selectedLead?.id);
       toast.success("Lead deleted successfully!");
       setIsDeleteModalOpen(false);
     } catch (error) {

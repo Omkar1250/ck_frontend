@@ -16,7 +16,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
   // Sidebar expanded state
   const storedSidebarExpanded = localStorage.getItem("sidebar-expanded");
-  const [sidebarExpanded, setSidebarExpanded] = useState(storedSidebarExpanded === "true");
+  const [sidebarExpanded] = useState(storedSidebarExpanded === "true");
 
   // Effect: Update localStorage and body class on sidebarExpanded state changes
   useEffect(() => {

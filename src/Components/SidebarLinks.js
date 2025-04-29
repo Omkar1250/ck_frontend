@@ -1,10 +1,10 @@
-import { useSelector } from "react-redux";
+
 import { matchPath, useLocation } from "react-router";
 import { NavLink } from "react-router-dom";
 
 export default function SidebarLink({ link, setSidebarOpen }) {
   const location = useLocation();
-  const token = useSelector((state) => state.auth);
+ 
 
   const matchRoute = (route) => {
     return matchPath({ path: route }, location.pathname);

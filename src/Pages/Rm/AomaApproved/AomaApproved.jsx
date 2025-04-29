@@ -3,8 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   activationRequest,
   aomaApprovedList,
-  aomaRequest,
-  codedApprovedList,
   deleteLead,
 } from "../../../operations/rmApi";
 import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
@@ -12,11 +10,10 @@ import Modal from "../../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
-import { useNavigate } from "react-router-dom";
+
 
 const AomaApproved = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
   const { aomaApproved, loading, error, currentPage, totalPages } = useSelector(
     (state) => state.aomaApproved
@@ -67,7 +64,7 @@ const AomaApproved = () => {
       formData.append("screenshot", screenshotFile); // Ensure the field name matches the backend
   
       // Make the API request
-      const res = await activationRequest(token, selectedLead?.id, formData);
+      await activationRequest(token, selectedLead?.id, formData);
       toast.success("ACTIVATION request sent successfully!");
       setIsUnderModalOpen(false);
     } catch (error) {
@@ -78,8 +75,7 @@ const AomaApproved = () => {
   const handleRmDelete = async () => {
     try {
       const res = await deleteLead(token, selectedLead?.id);
-      toast.success("Lead deleted successfully!");
-      setIsDeleteModalOpen(false);
+      console.log("Lead deleted successfully:", res);
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
     }
