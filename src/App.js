@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./Pages/Login";
 import PrivateRoute from "./Components/PrivateRoute";
 import DefaultLayout from "./Layout/DefaultLayout";
+import CreateRole from "./Pages/Admin/CreateRole";
 
 // Lazy-loaded components for code splitting
 const UnderusApproved = lazy(() => import("./Pages/Rm/UnderusApproved/UnderusApproved"));
@@ -40,7 +41,7 @@ function App() {
 
         {/* RM Routes */}
         <Route element={<PrivateRoute><DefaultLayout /></PrivateRoute>}>
-          <Route path="/dashboard" element={<ReferLead />} />
+          <Route path="/dashboard/rm" element={<ReferLead />} />
           <Route path="/dashboard/refer-lead-list" element={<ReferLeadList />} />
           <Route path="/dashboard/fetch-lead-list" element={<FetchLead />} />
           <Route path="/dashboard/under-us-approved" element={<UnderusApproved />} />
@@ -56,6 +57,7 @@ function App() {
         {/* Admin Routes */}
         <Route element={<PrivateRoute><DefaultLayout /></PrivateRoute>}>
           <Route path="/dashboard/view-team-profile" element={<TeamProfile />} />
+          <Route path="/dashboard/admin" element={<CreateRole />} />
           <Route path="/dashboard/ms-team-id-pass" element={<MsTeamsId />} />
           <Route path="/dashboard/under-us-request" element={<UnderUsRequest />} />
           <Route path="/dashboard/coded-requests" element={<CodedRequest />} />

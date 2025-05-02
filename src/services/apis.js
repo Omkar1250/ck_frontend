@@ -38,3 +38,33 @@ export const leadEndpoints = {
   };
   
 
+//   Admin controller APIs 
+
+export const adminEndpoints = {
+    CREATE_RM_API: BASE_URL + "/rm/signup",
+    GET_ALL_RMS_API: BASE_URL + "/get/all-rms",
+    GET_RM_BY_ID_API: BASE_URL + "/rm",
+    DELETE_RM_API : BASE_URL + "delete/rm",
+    UPDATE_RM_DETAILS: BASE_URL + "/update/rm",
+    UNDER_US_REQUEST_LEADS: BASE_URL + "/get-underus-requests",
+    UNDER_US_APPROVE_API: BASE_URL + "/under-us-approval",
+    CODE_REQUEST_API: BASE_URL + "/get-code-requests",
+    CODE_APPROVE_API: BASE_URL + "/code-approval",
+    AOMA_APPROVE_API: BASE_URL +"/approve-aoma-request",
+    GET_AOMA_REQUEST_LIST_API: BASE_URL + "/get-aoma-requests",
+    GET_ACTIVATION_REQUEST_LIST_API: BASE_URL + "/get-activation-requests",
+    ACTIVATION_APPROVE_API: BASE_URL + "/approve-activation",
+    MSTEAMS_APPROVE_API: BASE_URL + "/approve-ms-teams",
+    MS_TEAMS_REQUEST_LIST_API: BASE_URL + "/get-ms-teams-requests",
+    APPROVE_SIP_REQUEST_API: BASE_URL + "/approve-sip-request",
+    GET_SIP_REQUESTS_API: BASE_URL + "/get-sip-requests",
+    ANALYTICS_RMS_API: BASE_URL + "/get-analytics",
+    GET_JRMS_API: BASE_URL + "/get-all-jrm",
+    RM_PAYOUT_LIST: BASE_URL + "/rm-payment-list",
+    RM_TOTAL_POINTS: BASE_URL + "/total-points",
+    RM_PAYMENT: BASE_URL+ "/admin-payout",
+    GET_CONVERSION_POINTS_API: BASE_URL + "/get-conversion-points",
+    UPDATE_CONVERSION_POINTS_API: BASE_URL + "/update-conversion-points",
+    GET_DELETE_REQUEST_LIST_API: BASE_URL + "/get-delete-request-list"
+}
+

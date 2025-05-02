@@ -63,7 +63,7 @@ const UnderUsApproved = () => {
   // Handle deleting a lead
   const handleRmDelete = async () => {
     try {
-      await deleteLeadToAdmin(token, selectedLead?.id);
+      await deleteLeadToAdmin(token, selectedLead?.id, selectedLead?.name, selectedLead?.mobile_number, selectedLead?.whatsapp_mobile_number);
       toast.success("Lead deleted successfully!");
       setIsDeleteModalOpen(false);
     } catch (error) {

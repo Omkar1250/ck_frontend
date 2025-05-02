@@ -11,6 +11,14 @@ import aomaLeadsReducer from "../Slices/aomaSlice"
 import activationApprovedReducer from "../Slices/activationApprovedSlice"
 import msTeamsApprovedReducer from "../Slices/msTeamsApprovedSlice"
 import sipApprovedReducer from "../Slices/sipApprovedSlice"
+import underusReducer from "../Slices/adminSlices/underusRequest"
+import codedRequestReducer from "../Slices/adminSlices/codedRequest"
+import aomaRequestsReducer from "../Slices/adminSlices/aomaRequests"
+import activationRequestsReducer from "../Slices/adminSlices/activationRequests"
+import msTeamsRequestsReducer from "../Slices/adminSlices/msTeamsRequests"
+import sipRequestsReducer from "../Slices/adminSlices/sipRequests"
+import usersReducer from "../Slices/adminSlices/userSlice"
+import deleteRequestsReducer from "../Slices/adminSlices/deleteRequestSlice"
 const rootReducer = combineReducers({
     auth: authReducer,
     profile:profileReducer,
@@ -24,6 +32,19 @@ const rootReducer = combineReducers({
     activationApproved: activationApprovedReducer,
     msTeamsApproved: msTeamsApprovedReducer,
     sipApproved: sipApprovedReducer,
+
+    //Admin Slices
+    underUsRequests:underusReducer,
+    codedRequests:codedRequestReducer,
+    aomaRequests:aomaRequestsReducer,
+    activationRequests:activationRequestsReducer,
+    msTeamsRequests:msTeamsRequestsReducer,
+    sipRequests:sipRequestsReducer,
+    users: usersReducer,
+    deleteRequests:deleteRequestsReducer,
+
+    
+
 
 
 

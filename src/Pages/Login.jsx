@@ -9,7 +9,9 @@ import cbking from '../assets/logo/CYBERKING.png';
 function AdminLogin() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, token } = useSelector((state) => state.auth); // Access the token from auth state
+
+  const { loading, token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.profile);
 
   const [formData, setFormData] = useState({
     personal_number: "",
@@ -18,16 +20,20 @@ function AdminLogin() {
 
   const [errors, setErrors] = useState({ personal_number: "", password: "" });
 
-  // Redirect if token is already present
+  // Handle redirect after successful login
   useEffect(() => {
-    if (token) {
-      navigate("/dashboard"); // Redirect to the dashboard if the token exists
+    if (token && user) {
+      if (user.role === "rm") {
+        navigate("/dashboard/rm");
+      } else {
+        navigate("/dashboard/admin");
+      }
     }
-  }, [token, navigate]);
+  }, [token, user, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" }); // Clear errors for the field being updated
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const validateForm = () => {
@@ -56,7 +62,7 @@ function AdminLogin() {
       return;
     }
 
-    dispatch(adminLogin(formData.personal_number, formData.password, () => navigate("/dashboard")));
+    dispatch(adminLogin(formData.personal_number, formData.password));
   };
 
   return (
@@ -84,19 +90,18 @@ function AdminLogin() {
               value={formData.personal_number}
               onChange={handleChange}
               className={`w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 ${
-                errors.personal_number ? "border-bgCard focus:ring-red-400" : "focus:ring-blue-400"
+                errors.personal_number ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
               }`}
               placeholder="Enter mobile number"
               aria-label="Mobile Number"
             />
             {errors.personal_number && (
-              <p className="text-bgCard text-sm mt-1">{errors.personal_number}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.personal_number}</p>
             )}
           </div>
 
           {/* Password Field */}
           <div>
-          
             <input
               type="password"
               id="password"
@@ -104,13 +109,13 @@ function AdminLogin() {
               value={formData.password}
               onChange={handleChange}
               className={`w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 ${
-                errors.password ? "border-bgCard focus:ring-bgCard" : "focus:ring-blue-400"
+                errors.password ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
               }`}
               placeholder="Enter password"
               aria-label="Password"
             />
             {errors.password && (
-              <p className="text-bgCard text-sm mt-1">{errors.password}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
           </div>
 

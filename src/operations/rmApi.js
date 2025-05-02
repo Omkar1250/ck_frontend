@@ -274,12 +274,15 @@ export const deleteLead = async (token, leadId) => {
 };
 
 // DELTE LEAD AN EXPORT LIST TO ADMIN 
-export const deleteLeadToAdmin = async (token, leadId) => {
+export const deleteLeadToAdmin = async (token, leadId, name, mobile_number, whatsapp_number) => {
   try {
     const response = await apiConnector(
       "DELETE",                     // HTTP method
       `${ADMINLIST_DELETE_LEAD_API}/${leadId}`, // 🧠 Pass ID in URL like /api/leads/:id
-      null,                         // No body for DELETE
+      {name,
+        mobile_number,
+        whatsapp_number
+      },                         // No body for DELETE
       {
         Authorization: `Bearer ${token}`, // Headers
       }
