@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {  FaSearch } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import Modal from "../../Components/Modal";
 import toast from "react-hot-toast";
 import { fetchDeleteRequests } from "../../operations/adminApi";
@@ -8,6 +8,10 @@ import { deleteLead } from "../../operations/rmApi";
 import debounce from "lodash.debounce";
 import LeadGrid from "../../Components/LeadGrid";
 import Pagination from "../../Components/Pagination";
+import jsPDF from "jspdf"; // PDF library
+import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx"; // Excel library
+
 const DeleteRequest = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
@@ -97,6 +101,42 @@ const DeleteRequest = () => {
     debouncedSearch(normalizedValue);
   };
 
+  // Export to PDF
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+  
+    doc.text("Delete Requests", 14, 10);
+  
+    const tableData = deleteRequests.map((request, index) => [
+      index + 1,
+      request.name || "N/A",
+      request.mobile_number || "N/A",
+      request.whatsapp_number || "N/A",
+      request.deleted_at || "N/A",
+    ]);
+  
+    // Use the imported autoTable function instead of doc.autoTable
+    autoTable(doc, {
+      head: [["#", "Name", "Mobile Number", "WhatsApp Number", "Deleted At"]],
+      body: tableData,
+      startY: 20,
+    });
+  
+    doc.save("delete_requests.pdf");
+    toast.success("PDF downloaded successfully!");
+  };
+  
+
+  // Export to Excel
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(deleteRequests);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Delete Requests");
+
+    XLSX.writeFile(workbook, "delete_requests.xlsx");
+    toast.success("Excel file downloaded successfully!");
+  };
+
   if (loading)
     return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
 
@@ -126,6 +166,21 @@ const DeleteRequest = () => {
           onChange={handleSearchChange} // Handle input changes
         />
         <FaSearch className="absolute right-3 top-3 text-gray-400" />
+      </div>
+
+      <div className="flex justify-end gap-4 mb-4">
+        <button
+          onClick={exportToPDF}
+          className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700"
+        >
+          Download PDF
+        </button>
+        <button
+          onClick={exportToExcel}
+          className="px-4 py-2 bg-caribbeangreen-400 text-white rounded-lg hover:bg-caribbeangreen-600"
+        >
+          Download Excel
+        </button>
       </div>
 
       {deleteRequests.length === 0 ? (
