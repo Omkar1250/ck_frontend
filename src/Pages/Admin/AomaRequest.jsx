@@ -5,11 +5,7 @@ import Modal from "../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
-import {
-  aomaAction,
-  aomaRequestList,
-  
-} from "../../operations/adminApi";
+import { aomaAction, aomaRequestList } from "../../operations/adminApi";
 
 const AomaRequest = () => {
   const dispatch = useDispatch();
@@ -30,15 +26,15 @@ const AomaRequest = () => {
   const [modalImage, setModalImage] = useState("");
 
   useEffect(() => {
-    dispatch(aomaRequestList(currentPage));
-  }, [dispatch, currentPage]);
+    dispatch(aomaRequestList(currentPage, 5, searchQuery));
+  }, [dispatch, currentPage, searchQuery]);
 
   const handleNext = () => {
-    if (currentPage < totalPages) dispatch(aomaRequestList(currentPage + 1));
+    if (currentPage < totalPages) dispatch(aomaRequestList(currentPage + 1, 5, searchQuery));
   };
 
   const handlePrev = () => {
-    if (currentPage > 1) dispatch(aomaRequestList(currentPage - 1));
+    if (currentPage > 1) dispatch(aomaRequestList(currentPage - 1, 5, searchQuery));
   };
 
   const copyToClipboard = (number) => {
@@ -62,7 +58,7 @@ const AomaRequest = () => {
       );
       setIsModalOpen(false);
       setSelectedLead(null);
-      dispatch(aomaRequestList(currentPage));
+      dispatch(aomaRequestList(currentPage, 5, searchQuery));
     } catch (error) {
       toast.error(error.message || "Failed to process request.");
     }
@@ -98,11 +94,11 @@ const AomaRequest = () => {
 
   if (error)
     return (
-      <div className="text-center mt-6">
+      <div className="text-center mt-16">
         <p className="text-red-500 text-lg">{error}</p>
         <button
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          onClick={() => dispatch(aomaRequestList(currentPage))}
+          onClick={() => dispatch(aomaRequestList(currentPage, 5, searchQuery))}
         >
           Retry
         </button>
@@ -141,7 +137,6 @@ const AomaRequest = () => {
         handlePrev={handlePrev}
       />
 
-      {/* Modal for Approve/Reject */}
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
@@ -165,13 +160,12 @@ const AomaRequest = () => {
             </button>
           </div>
         )}
-        <p className="text-gray-700 text-sm mt-4">
+        <p className="text-richblack-700 text-sm mt-4">
           Are you sure you want to{" "}
           <span className="font-semibold">{modalAction}</span> this lead?
         </p>
       </Modal>
 
-      {/* Image Modal */}
       {showImageModal && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
           <div className="bg-white p-4 rounded-lg max-w-3xl w-full max-h-[150vh] overflow-auto">

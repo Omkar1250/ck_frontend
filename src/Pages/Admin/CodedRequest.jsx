@@ -1,14 +1,11 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
 import Modal from "../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
-import {
-  codedRequestList,
-  handleCodedAction
-} from "../../operations/adminApi";
+import { handleCodedAction, codedRequestList } from "../../operations/adminApi";
 
 const CodedRequest = () => {
   const dispatch = useDispatch();
@@ -24,19 +21,23 @@ const CodedRequest = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [modalAction, setModalAction] = useState(""); // "approve" or "reject"
+  const [modalAction, setModalAction] = useState("");
   const [batchCode, setBatchCode] = useState("");
 
   useEffect(() => {
-    dispatch(codedRequestList(currentPage));
-  }, [dispatch, currentPage]);
+    dispatch(codedRequestList(currentPage, 5, searchQuery));
+  }, [dispatch, currentPage, searchQuery]);
 
   const handleNext = () => {
-    if (currentPage < totalPages) dispatch(codedRequestList(currentPage + 1));
+    if (currentPage < totalPages) {
+      dispatch(codedRequestList(currentPage + 1, 5, searchQuery));
+    }
   };
 
   const handlePrev = () => {
-    if (currentPage > 1) dispatch(codedRequestList(currentPage - 1));
+    if (currentPage > 1) {
+      dispatch(codedRequestList(currentPage - 1, 5, searchQuery));
+    }
   };
 
   const copyToClipboard = (number) => {
@@ -52,23 +53,18 @@ const CodedRequest = () => {
     window.location.href = `tel:${number}`;
   };
 
-  const handleCodeApproval = async () => {
+  const handleCodedActionSubmit = async () => {
     if (modalAction === "approve" && (!batchCode || batchCode.trim().length < 3)) {
       toast.error("Batch code must be at least 3 characters.");
       return;
     }
 
     try {
-      await handleCodedAction(
-        token,
-        selectedLead?.id,
-        modalAction,
-        batchCode.trim()
-      );
+      await handleCodedAction(token, selectedLead?.id, modalAction, batchCode.trim());
       toast.success(`Request ${modalAction === "approve" ? "approved" : "rejected"} successfully!`);
       setIsModalOpen(false);
       setBatchCode("");
-      dispatch(codedRequestList(currentPage));
+      dispatch(codedRequestList(currentPage, 5, searchQuery));
     } catch (error) {
       toast.error(error.message || "Failed to process request.");
     }
@@ -87,36 +83,9 @@ const CodedRequest = () => {
     setBatchCode("");
   };
 
-  const filteredLeads = useMemo(
-    () =>
-      codedRequests.filter(
-        (lead) =>
-          lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          lead.mobile_number.includes(searchQuery) ||
-          lead.whatsapp_mobile_number.includes(searchQuery)
-      ),
-    [codedRequests, searchQuery]
-  );
-
-  if (loading)
-    return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
-
-  if (error)
-    return (
-      <div className="text-center mt-6">
-        <p className="text-red-500 text-lg">{error}</p>
-        <button
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          onClick={() => dispatch(codedRequestList(currentPage))}
-        >
-          Retry
-        </button>
-      </div>
-    );
-
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Code Requests</h2>
+      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Coded Requests</h2>
 
       <SearchInput
         value={searchQuery}
@@ -125,11 +94,23 @@ const CodedRequest = () => {
         placeholder="Search by name or mobile number..."
       />
 
-      {filteredLeads.length === 0 ? (
+      {loading ? (
+        <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>
+      ) : error ? (
+        <div className="text-center mt-16">
+          <p className="text-red-500 text-lg">{error}</p>
+          <button
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            onClick={() => dispatch(codedRequestList(currentPage, 5, searchQuery))}
+          >
+            Retry
+          </button>
+        </div>
+      ) : codedRequests.length === 0 ? (
         <p className="text-gray-600 text-center text-lg">No leads found.</p>
       ) : (
         <LeadGrid
-          leads={filteredLeads}
+          leads={codedRequests}
           copyToClipboard={copyToClipboard}
           openWhatsApp={openWhatsApp}
           makeCall={makeCall}
@@ -144,11 +125,10 @@ const CodedRequest = () => {
         handlePrev={handlePrev}
       />
 
-      {/* Modal for Approve/Reject */}
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
-        onSubmit={handleCodeApproval}
+        onSubmit={handleCodedActionSubmit}
         name={selectedLead?.name}
         mobile_number={selectedLead?.mobile_number}
         whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}

@@ -152,6 +152,7 @@ const Payments = () => {
           deductPoints={deductPoints}
           setDeductPoints={setDeductPoints}
           copyToClipboard={copyToClipboard} // To handle UPI ID copying
+          fetchTotalPoints={fetchTotalPoints} 
         />
       )}
     </div>

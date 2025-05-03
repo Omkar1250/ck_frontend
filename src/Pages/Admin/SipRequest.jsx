@@ -5,12 +5,7 @@ import Modal from "../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
-import {
-  codedRequestList,
-  handleCodedAction,
-  sipAction,
-  sipRequestList
-} from "../../operations/adminApi";
+import { sipAction, sipRequestList } from "../../operations/adminApi";
 
 const SipRequest = () => {
   const dispatch = useDispatch();
@@ -26,20 +21,18 @@ const SipRequest = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [modalAction, setModalAction] = useState(""); // "approve" or "reject"
- 
+  const [modalAction, setModalAction] = useState("");
 
   useEffect(() => {
-    dispatch(sipRequestList(currentPage));
-  }, [dispatch, currentPage]);
+    dispatch(sipRequestList(currentPage, 5, searchQuery)); // Corrected pagination logic
+  }, [dispatch, currentPage, searchQuery]);
 
   const handleNext = () => {
-    dispatch(sipRequestList(currentPage));
-    if (currentPage < totalPages) dispatch(sipRequestList(currentPage + 1));
+    if (currentPage < totalPages) dispatch(sipRequestList(currentPage + 1, 5, searchQuery));
   };
 
   const handlePrev = () => {
-    if (currentPage > 1) dispatch(sipRequestList(currentPage - 1));
+    if (currentPage > 1) dispatch(sipRequestList(currentPage - 1, 5, searchQuery));
   };
 
   const copyToClipboard = (number) => {
@@ -56,17 +49,11 @@ const SipRequest = () => {
   };
 
   const handleSipApproval = async () => {
-
     try {
-      await sipAction(
-        token,
-        selectedLead?.id,
-        modalAction,
-      );
+      await sipAction(token, selectedLead?.id, modalAction);
       toast.success(`Request ${modalAction === "approve" ? "approved" : "rejected"} successfully!`);
       setIsModalOpen(false);
-  
-      dispatch(sipRequestList(currentPage));
+      dispatch(sipRequestList(currentPage, 5, searchQuery)); // Corrected pagination logic
     } catch (error) {
       toast.error(error.message || "Failed to process request.");
     }
@@ -82,7 +69,6 @@ const SipRequest = () => {
     setIsModalOpen(false);
     setSelectedLead(null);
     setModalAction("");
-  
   };
 
   const filteredLeads = useMemo(
@@ -101,11 +87,11 @@ const SipRequest = () => {
 
   if (error)
     return (
-      <div className="text-center mt-6">
+      <div className="text-center mt-16">
         <p className="text-red-500 text-lg">{error}</p>
         <button
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          onClick={() => dispatch(codedRequestList(currentPage))}
+          onClick={() => dispatch(sipRequestList(currentPage, 5, searchQuery))}
         >
           Retry
         </button>
@@ -153,7 +139,6 @@ const SipRequest = () => {
         title={modalAction === "approve" ? "Approve Request" : "Reject Request"}
         action={modalAction}
       >
-  
         <p>Are you sure you want to {modalAction} this lead?</p>
       </Modal>
     </div>

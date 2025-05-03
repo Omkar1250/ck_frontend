@@ -18,6 +18,7 @@ import {
  import { setLoading, setAnalyticsData, setAnalyticsError } from "../Slices/analyticsSlice"
  import { setAllUsers, setUsersLoading, setUsersError } from "../Slices/adminSlices/userSlice"
  import { setDeleteLoading, setDeleteSuccess, setDeleteError } from "../Slices/adminSlices/deleteRequestSlice"
+
  
  const { adminEndpoints } = require("../services/apis");
 
@@ -102,29 +103,34 @@ export const updateRm = async (token, id, formData) => {
 };
 
 
-export const underUsRequestList = (page = 1, limit = 5) => async (dispatch, getState) => {
+export const underUsRequestList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
   try {
     dispatch(setUnderUsLoading());
-    
-    const { token } = getState().auth; // Extract token from state
-    console.log("Token from RM Leads:", token);
-    
-    const response = await apiConnector(
-      "GET",
-      `${UNDER_US_REQUEST_LEADS}?page=${page}&limit=${limit}`,
-      null, 
-      {
-        Authorization: `Bearer ${token}` // Pass token in headers
-      }
-    );
 
-    dispatch(setUnderUsSuccess(response.data));
+    const { token } = getState().auth;
+
+    // Construct query parameters
+    const queryParams = { page, limit, ...(search.trim() && { search }) };
+
+    const response = await apiConnector("GET", UNDER_US_REQUEST_LEADS, queryParams, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    if (response?.data?.success) {
+      dispatch(setUnderUsSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Under Us Requests";
+      dispatch(setUnderUsError(errorMessage));
+    }
   } catch (error) {
-    dispatch(
-      setUnderUsError(error?.response?.data?.message || "Could not fetch leads")
-    );
+    if (process.env.NODE_ENV === "development") {
+      console.error("UnderUs API Error:", error);
+    }
+    dispatch(setUnderUsError(error?.message || "Error fetching Under Us Requests"));
   }
 };
+
+
 
 export const handleUnderUsAction = async (token, leadId, action) => {
     try {
@@ -272,76 +278,158 @@ export const handleUnderUsAction = async (token, leadId, action) => {
     }
   };
 
-  export const codedRequestList = (page = 1, limit = 5) => async (dispatch, getState) => {
+  export const codedRequestList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
     try {
+      // Dispatch loading state
       dispatch(setCodedLoading());
-      
-      const { token } = getState().auth; // Extract token from state
-      console.log("Token from RM Leads:", token);
-      
+  
+      // Retrieve token from Redux state
+      const { token } = getState().auth;
+  
+      // Construct query string
+      const queryParams = { page, limit };
+      if (search.trim()) {
+        queryParams.search = search;
+      }
+      const query = new URLSearchParams(queryParams).toString();
+  
+      // Debug: API request URL
+      console.log("Coded API Request:", `${CODE_REQUEST_API}?${query}`);
+  
+      // Make the GET API call
       const response = await apiConnector(
         "GET",
-        `${CODE_REQUEST_API}?page=${page}&limit=${limit}`,
-        null, 
+        `${CODE_REQUEST_API}?${query}`,
+        null,
         {
-          Authorization: `Bearer ${token}` // Pass token in headers
+          Authorization: `Bearer ${token}`,
         }
       );
   
-      dispatch(setCodedSuccess(response.data));
+      // Debug: API Response
+      console.log("Coded API Response:", response);
+  
+      // Check response and dispatch success or error
+      if (response?.data?.success) {
+        dispatch(setCodedSuccess(response?.data));
+      } else {
+        const errorMessage = response?.data?.message || "Failed to fetch Coded Requests";
+        console.warn("Coded API Response Error:", errorMessage);
+        dispatch(setCodedError(errorMessage));
+      }
     } catch (error) {
-      dispatch(
-        setCodedError(error?.response?.data?.message || "Could not fetch leads")
-      );
+      // Debug: Full error details
+      console.error("Coded API Error Details:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response,
+      });
+  
+      dispatch(setCodedError(error?.message || "Error fetching Coded Requests"));
     }
   };
 
-  export const aomaRequestList = (page = 1, limit = 5) => async (dispatch, getState) => {
-    try {
-      dispatch(setAomaLoading());
-      
-      const { token } = getState().auth; // Extract token from state
-      
-      
-      const response = await apiConnector(
-        "GET",
-        `${GET_AOMA_REQUEST_LIST_API}?page=${page}&limit=${limit}`,
-        null, 
-        {
-          Authorization: `Bearer ${token}` // Pass token in headers
-        }
-      );
-  
-      dispatch(setAomaSuccess(response.data));
-    } catch (error) {
-      dispatch(
-        setAomaError(error?.response?.data?.message || "Could not fetch leads")
-      );
+  // Aoma 
+  export const aomaRequestList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch(setAomaLoading());
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
     }
-  };
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Debug: API request URL
+    console.log("AOMA API Request:", `${GET_AOMA_REQUEST_LIST_API}?${query}`);
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${GET_AOMA_REQUEST_LIST_API}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+
+    // Debug: API Response
+    console.log("AOMA API Response:", response);
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setAomaSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch AOMA Requests";
+      console.warn("AOMA API Response Error:", errorMessage);
+      dispatch(setAomaError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("AOMA API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setAomaError(error?.message || "Error fetching AOMA Requests"));
+  }
+};
 
   //ACTIVATION REQUEST LIST
-  export const activationRequestList = (page = 1, limit = 5) => async (dispatch, getState) => {
+  export const activationRequestList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
     try {
+      // Dispatch loading state
       dispatch(setActivationLoading());
-      
-      const { token } = getState().auth; // Extract token from state
-      
-      
+  
+      // Retrieve token from Redux state
+      const { token } = getState().auth;
+  
+      // Construct query string
+      const queryParams = { page, limit };
+      if (search.trim()) {
+        queryParams.search = search;
+      }
+      const query = new URLSearchParams(queryParams).toString();
+  
+      // Debug: API request URL
+      console.log("Activation API Request:", `${GET_ACTIVATION_REQUEST_LIST_API}?${query}`);
+  
+      // Make the GET API call
       const response = await apiConnector(
         "GET",
-        `${GET_ACTIVATION_REQUEST_LIST_API}?page=${page}&limit=${limit}`,
-        null, 
+        `${GET_ACTIVATION_REQUEST_LIST_API}?${query}`,
+        null,
         {
-          Authorization: `Bearer ${token}` // Pass token in headers
+          Authorization: `Bearer ${token}`,
         }
       );
   
-      dispatch(setActivationSuccess(response.data));
+      // Debug: API Response
+      console.log("Activation API Response:", response);
+  
+      // Check response and dispatch success or error
+      if (response?.data?.success) {
+        dispatch(setActivationSuccess(response?.data));
+      } else {
+        const errorMessage = response?.data?.message || "Failed to fetch Activation Requests";
+        console.warn("Activation API Response Error:", errorMessage);
+        dispatch(setActivationError(errorMessage));
+      }
     } catch (error) {
-      dispatch(
-        setActivationError(error?.response?.data?.message || "Could not fetch leads")
-      );
+      // Debug: Full error details
+      console.error("Activation API Error Details:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response,
+      });
+  
+      dispatch(setActivationError(error?.message || "Error fetching Activation Requests"));
     }
   };
 
@@ -349,46 +437,103 @@ export const handleUnderUsAction = async (token, leadId, action) => {
   //MS TEAMS LIST
   export const msTeamsRequestList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
     try {
+      // Dispatch loading state
       dispatch(setMsTeamsLoading());
+  
+      // Retrieve token from Redux state
       const { token } = getState().auth;
   
+      // Construct query string
+      const queryParams = { page, limit };
+      if (search.trim()) {
+        queryParams.search = search;
+      }
+      const query = new URLSearchParams(queryParams).toString();
+  
+      // Debug: API request URL
+      console.log("MS Teams API Request:", `${MS_TEAMS_REQUEST_LIST_API}?${query}`);
+  
+      // Make the GET API call
       const response = await apiConnector(
         "GET",
-        `${MS_TEAMS_REQUEST_LIST_API}?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
+        `${MS_TEAMS_REQUEST_LIST_API}?${query}`,
         null,
         {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         }
       );
   
-      dispatch(setMsTeamsSuccess(response.data));
+      // Debug: API Response
+      console.log("MS Teams API Response:", response);
+  
+      // Check response and dispatch success or error
+      if (response?.data?.success) {
+        dispatch(setMsTeamsSuccess(response?.data));
+      } else {
+        const errorMessage = response?.data?.message || "Failed to fetch MS Teams Requests";
+        console.warn("MS Teams API Response Error:", errorMessage);
+        dispatch(setMsTeamsError(errorMessage));
+      }
     } catch (error) {
-      dispatch(setMsTeamsError(error?.response?.data?.message || "Could not fetch leads"));
+      // Debug: Full error details
+      console.error("MS Teams API Error Details:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response,
+      });
+  
+      dispatch(setMsTeamsError(error?.message || "Error fetching MS Teams Requests"));
     }
   };
 
-
-  export const sipRequestList = (page = 1, limit = 5) => async (dispatch, getState) => {
+  export const sipRequestList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
     try {
+      // Dispatch loading state
       dispatch(setSipLoading());
-      
-      const { token } = getState().auth; // Extract token from state
-      
-      
+  
+      // Retrieve token from Redux state
+      const { token } = getState().auth;
+  
+      // Construct query string
+      const queryParams = { page, limit };
+      if (search.trim()) {
+        queryParams.search = search;
+      }
+      const query = new URLSearchParams(queryParams).toString();
+  
+      // Debug: API request URL
+      console.log("SIP API Request:", `${GET_SIP_REQUESTS_API}?${query}`);
+  
+      // Make the GET API call
       const response = await apiConnector(
         "GET",
-        `${GET_SIP_REQUESTS_API}?page=${page}&limit=${limit}`,
-        null, 
+        `${GET_SIP_REQUESTS_API}?${query}`,
+        null,
         {
-          Authorization: `Bearer ${token}` // Pass token in headers
+          Authorization: `Bearer ${token}`,
         }
       );
   
-      dispatch(setSipSuccess(response.data));
+      // Debug: API Response
+      console.log("SIP API Response:", response);
+  
+      // Check response and dispatch success or error
+      if (response?.data?.success) {
+        dispatch(setSipSuccess(response?.data));
+      } else {
+        const errorMessage = response?.data?.message || "Failed to fetch SIP Requests";
+        console.warn("SIP API Response Error:", errorMessage);
+        dispatch(setSipError(errorMessage));
+      }
     } catch (error) {
-      dispatch(
-        setSipError(error?.response?.data?.message || "Could not fetch leads")
-      );
+      // Debug: Full error details
+      console.error("SIP API Error Details:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response,
+      });
+  
+      dispatch(setSipError(error?.message || "Error fetching SIP Requests"));
     }
   };
   
@@ -475,8 +620,10 @@ export const getTotalPointsOfAllJRMs = async (token, rmId) => {
       Authorization: `Bearer ${token}`,
     });
 
+
+    console.log("Total Points of Rm::::", response.data)
     // Return the total points or 0 as fallback
-    return response?.totalPoints || 0;
+    return response?.data.totalPoints || 0;
   } catch (error) {
     console.error("Error fetching total points:", error.message);
 

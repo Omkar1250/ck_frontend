@@ -11,21 +11,20 @@ import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
 
-
 const AomaApproved = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
-  const { aomaApproved, loading, error, currentPage, totalPages } = useSelector(
-    (state) => state.aomaApproved
-  );
+  const { aomaApproved, loading, error, currentPage, totalPages } =
+    useSelector((state) => state.aomaApproved);
 
   const [isUnderModalOpen, setIsUnderModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [uploadedScreenshot, setUploadedScreenshot] = useState(null);
-  const [screenshotFile, setScreenshotFile] = useState(null); // File object for uploading
+  const [screenshotFile, setScreenshotFile] = useState(null);
   const [isScreenshotViewOpen, setIsScreenshotViewOpen] = useState(false);
+  const [useStar, setUseStar] = useState(false);
 
   useEffect(() => {
     dispatch(aomaApprovedList(currentPage));
@@ -57,16 +56,15 @@ const AomaApproved = () => {
       toast.error("Please upload a screenshot before submitting the request.");
       return;
     }
-  
+
     try {
-      // Create FormData object
       const formData = new FormData();
-      formData.append("screenshot", screenshotFile); // Ensure the field name matches the backend
-  
-      // Make the API request
+      formData.append("screenshot", screenshotFile);
+      formData.append("useStar", useStar);
+
       await activationRequest(token, selectedLead?.id, formData);
       toast.success("ACTIVATION request sent successfully!");
-      setIsUnderModalOpen(false);
+      closeModals();
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
     }
@@ -74,8 +72,9 @@ const AomaApproved = () => {
 
   const handleRmDelete = async () => {
     try {
-      const res = await deleteLead(token, selectedLead?.id);
-      console.log("Lead deleted successfully:", res);
+      await deleteLead(token, selectedLead?.id);
+      toast.success("Lead deleted successfully.");
+      closeModals();
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
     }
@@ -95,9 +94,10 @@ const AomaApproved = () => {
     setIsUnderModalOpen(false);
     setIsDeleteModalOpen(false);
     setSelectedLead(null);
-    setUploadedScreenshot(null); // Reset uploaded screenshot
-    setScreenshotFile(null); // Clear the file object
-    setIsScreenshotViewOpen(false); // Close screenshot view
+    setUploadedScreenshot(null);
+    setScreenshotFile(null);
+    setIsScreenshotViewOpen(false);
+    setUseStar(false);
   };
 
   const handleScreenshotUpload = (event) => {
@@ -105,7 +105,7 @@ const AomaApproved = () => {
     if (file) {
       const fileURL = URL.createObjectURL(file);
       setUploadedScreenshot(fileURL);
-      setScreenshotFile(file); // Store the file for uploading
+      setScreenshotFile(file);
       toast.success("Screenshot uploaded successfully!");
     }
   };
@@ -148,12 +148,13 @@ const AomaApproved = () => {
               return (
                 <div
                   key={lead.id}
-                  className={`
-                    border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl
-                    ${lead.activation_request_status === "rejected" ? "bg-bgCard" : ""}
-                    ${lead.activation_request_status === "approved" ? "bg-bgAprCard" : ""}
-                    ${!["rejected", "approved"].includes(lead.activation_request_status) ? "bg-white" : ""}
-                  `}
+                  className={`border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl ${
+                    lead.activation_request_status === "rejected"
+                      ? "bg-bgCard"
+                      : lead.activation_request_status === "approved"
+                      ? "bg-bgAprCard"
+                      : "bg-white"
+                  }`}
                 >
                   <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
                     <h3 className="text-xl font-semibold text-gray-800">
@@ -258,88 +259,109 @@ const AomaApproved = () => {
             </button>
           </div>
 
-          {/* Under Us Modal */}
+          {/* Activation Modal */}
           <Modal
-  isOpen={isUnderModalOpen}
-  onClose={closeModals}
-  onSubmit={handleActivationReq}
-  title="Send ACTIVATION Request"
-  action="Send"
->
-  <div>
-    {!uploadedScreenshot ? (
-      <div className="flex flex-col items-center gap-4 mt-4">
-        <label
-          htmlFor="screenshot-upload"
-          className="px-6 py-2 bg-blue-500 text-white rounded-lg cursor-pointer hover:bg-blue-600 text-center"
-        >
-          Upload Screenshot
-        </label>
-        <input
-          id="screenshot-upload"
-          type="file"
-          accept="image/*"
-          onChange={handleScreenshotUpload}
-          className="hidden"
-        />
-        <p className="text-sm text-richblack-500">Supported formats: JPG, PNG</p>
-      </div>
-    ) : (
-      <div className="flex flex-col gap-4 items-center">
-        <div className="flex justify-center items-center gap-4">
-          <button
-            onClick={() => setIsScreenshotViewOpen(true)}
-            className="px-6 py-2 bg-greenBtn text-white rounded-lg hover:bg-btnColor"
+            isOpen={isUnderModalOpen}
+            onClose={closeModals}
+            onSubmit={handleActivationReq}
+            title="Send ACTIVATION Request"
+            action="Send"
+            name={selectedLead?.name}
+            mobile_number={selectedLead?.mobile_number}
+            whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
           >
-            View Screenshot
-          </button>
-          <label
-            htmlFor="screenshot-reupload"
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg cursor-pointer hover:bg-blue-600"
-          >
-            Replace Screenshot
-          </label>
-          <input
-            id="screenshot-reupload"
-            type="file"
-            accept="image/*"
-            onChange={handleScreenshotUpload}
-            className="hidden"
-          />
-        </div>
-        <p className="text-sm text-richblack-500">You can replace the screenshot if needed.</p>
-      </div>
-    )}
+            <div className="flex flex-col items-center gap-4 mt-4">
+              {!uploadedScreenshot ? (
+                <>
+                  <label
+                    htmlFor="screenshot-upload"
+                    className="px-6 py-2 bg-blue-500 text-white rounded-lg cursor-pointer hover:bg-blue-600 text-center"
+                  >
+                    Upload Screenshot
+                  </label>
+                  <input
+                    id="screenshot-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleScreenshotUpload}
+                    className="hidden"
+                  />
+                  <p className="text-sm text-richblack-500">
+                    Supported formats: JPG, PNG
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-center items-center gap-4">
+                    <button
+                      onClick={() => setIsScreenshotViewOpen(true)}
+                      className="px-6 py-2 bg-greenBtn text-white rounded-lg hover:bg-btnColor"
+                    >
+                      View Screenshot
+                    </button>
+                    <label
+                      htmlFor="screenshot-reupload"
+                      className="px-6 py-2 bg-blue-500 text-white rounded-lg cursor-pointer hover:bg-blue-600"
+                    >
+                      Replace Screenshot
+                    </label>
+                    <input
+                      id="screenshot-reupload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleScreenshotUpload}
+                      className="hidden"
+                    />
+                  </div>
+                  <p className="text-sm text-richblack-500">
+                    You can replace the screenshot if needed.
+                  </p>
+                </>
+              )}
+            </div>
 
-    {isScreenshotViewOpen && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-75 flex items-center justify-center">
-        <div className="relative bg-white p-4 rounded-lg shadow-lg">
-          <img
-            src={uploadedScreenshot}
-            alt="Screenshot"
-            className="max-w-[90%] max-h-[80vh] m-auto"
-          />
-          <button
-            onClick={() => setIsScreenshotViewOpen(false)}
-            className="absolute top-2 right-2 px-4 py-1 bg-bgCard text-white text-sm rounded-sm hover:bg-btnColor"
-          >
-            X
-          </button>
-        </div>
-      </div>
-    )}
-  </div>
-</Modal>
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <input
+                type="checkbox"
+                checked={useStar}
+                onChange={() => setUseStar(!useStar)}
+                id="use-star-checkbox"
+              />
+              <label htmlFor="use-star-checkbox" className="text-sm text-richblack-800">
+                Use 1 star for auto-approval
+              </label>
+            </div>
+
+            {isScreenshotViewOpen && (
+              <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-75 flex items-center justify-center z-50">
+                <div className="relative bg-white p-4 rounded-lg shadow-lg">
+                  <img
+                    src={uploadedScreenshot}
+                    alt="Screenshot"
+                    className="max-w-[90%] max-h-[80vh] m-auto"
+                  />
+                  <button
+                    onClick={() => setIsScreenshotViewOpen(false)}
+                    className="absolute top-2 right-2 px-4 py-1 bg-bgCard text-white text-sm rounded-sm hover:bg-btnColor"
+                  >
+                    X
+                  </button>
+                </div>
+              </div>
+            )}
+          </Modal>
 
           {/* Delete Modal */}
           <Modal
             isOpen={isDeleteModalOpen}
             onClose={closeModals}
             onSubmit={handleRmDelete}
-            title="Delete Lead"
+            title="Confirm Delete"
             action="Delete"
           >
-            <p>Are you sure you want to delete this lead?</p>
+            <p className="text-center mt-4 text-richblack-800">
+              Are you sure you want to delete this lead?
+            </p>
           </Modal>
         </>
       )}

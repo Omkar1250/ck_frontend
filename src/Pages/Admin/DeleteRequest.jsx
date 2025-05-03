@@ -28,7 +28,7 @@ const DeleteRequest = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Fetch delete requests whenever the page, searchQuery changes
+  // Fetch delete requests whenever the page or searchQuery changes
   useEffect(() => {
     dispatch(fetchDeleteRequests(currentPage, 10, searchQuery));
   }, [dispatch, currentPage, searchQuery]);
@@ -104,9 +104,8 @@ const DeleteRequest = () => {
   // Export to PDF
   const exportToPDF = () => {
     const doc = new jsPDF();
-  
     doc.text("Delete Requests", 14, 10);
-  
+
     const tableData = deleteRequests.map((request, index) => [
       index + 1,
       request.name || "N/A",
@@ -114,18 +113,17 @@ const DeleteRequest = () => {
       request.whatsapp_number || "N/A",
       request.deleted_at || "N/A",
     ]);
-  
+
     // Use the imported autoTable function instead of doc.autoTable
     autoTable(doc, {
       head: [["#", "Name", "Mobile Number", "WhatsApp Number", "Deleted At"]],
       body: tableData,
       startY: 20,
     });
-  
+
     doc.save("delete_requests.pdf");
     toast.success("PDF downloaded successfully!");
   };
-  
 
   // Export to Excel
   const exportToExcel = () => {
@@ -142,7 +140,7 @@ const DeleteRequest = () => {
 
   if (error)
     return (
-      <div className="text-center mt-6">
+      <div className="text-center mt-16">
         <p className="text-red-500 text-lg">{error}</p>
         <button
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -160,7 +158,7 @@ const DeleteRequest = () => {
       <div className="relative mb-4">
         <input
           type="text"
-          placeholder="Search by name or mobile number..."
+          placeholder="Search  mobile number..."
           value={searchQuery} // Bind searchQuery to input value
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           onChange={handleSearchChange} // Handle input changes

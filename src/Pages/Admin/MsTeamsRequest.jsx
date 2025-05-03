@@ -5,11 +5,7 @@ import Modal from "../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
-import {
-  msTeamsAction,
-  msTeamsRequestList,
-  
-} from "../../operations/adminApi";
+import { msTeamsAction, msTeamsRequestList } from "../../operations/adminApi";
 
 const MsTeamsRequest = () => {
   const dispatch = useDispatch();
@@ -30,15 +26,15 @@ const MsTeamsRequest = () => {
   const [modalImage, setModalImage] = useState("");
 
   useEffect(() => {
-    dispatch(msTeamsRequestList(currentPage));
-  }, [dispatch, currentPage]);
+    dispatch(msTeamsRequestList(currentPage, 5, searchQuery)); // Corrected pagination logic
+  }, [dispatch, currentPage, searchQuery]);
 
   const handleNext = () => {
-    if (currentPage < totalPages) dispatch(msTeamsRequestList(currentPage + 1));
+    if (currentPage < totalPages) dispatch(msTeamsRequestList(currentPage + 1, 5, searchQuery));
   };
 
   const handlePrev = () => {
-    if (currentPage > 1) dispatch(msTeamsRequestList(currentPage - 1));
+    if (currentPage > 1) dispatch(msTeamsRequestList(currentPage - 1, 5, searchQuery));
   };
 
   const copyToClipboard = (number) => {
@@ -62,7 +58,7 @@ const MsTeamsRequest = () => {
       );
       setIsModalOpen(false);
       setSelectedLead(null);
-      dispatch(msTeamsRequestList(currentPage));
+      dispatch(msTeamsRequestList(currentPage, 5, searchQuery)); // Corrected pagination logic
     } catch (error) {
       toast.error(error.message || "Failed to process request.");
     }
@@ -98,11 +94,11 @@ const MsTeamsRequest = () => {
 
   if (error)
     return (
-      <div className="text-center mt-6">
+      <div className="text-center mt-16">
         <p className="text-red-500 text-lg">{error}</p>
         <button
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          onClick={() => dispatch(msTeamsRequestList(currentPage))}
+          onClick={() => dispatch(msTeamsRequestList(currentPage, 5, searchQuery))}
         >
           Retry
         </button>

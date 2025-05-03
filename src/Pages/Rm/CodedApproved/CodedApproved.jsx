@@ -27,7 +27,7 @@ const CodedApproved = () => {
   const [uploadedScreenshot, setUploadedScreenshot] = useState(null);
   const [screenshotFile, setScreenshotFile] = useState(null); // File object for uploading
   const [isScreenshotViewOpen, setIsScreenshotViewOpen] = useState(false);
-
+  const [useStar, setUseStar] = useState(false); // State for checkbox
   useEffect(() => {
     dispatch(codedApprovedList(currentPage));
   }, [dispatch, token, currentPage]);
@@ -63,7 +63,7 @@ const CodedApproved = () => {
       // Create FormData object
       const formData = new FormData();
       formData.append("screenshot", screenshotFile); // Ensure the field name matches the backend
-  
+      formData.append("useStar", useStar);
       // Make the API request
        await aomaRequest(token, selectedLead?.id, formData);
       toast.success("AOMA request sent successfully!");
@@ -267,6 +267,9 @@ const CodedApproved = () => {
   onSubmit={handleCodeRequest}
   title="Send AOMA Request"
   action="Send"
+  name={selectedLead?.name}
+  mobile_number={selectedLead?.mobile_number}
+  whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
 >
   <div>
     {!uploadedScreenshot ? (
@@ -291,7 +294,7 @@ const CodedApproved = () => {
         <div className="flex justify-center items-center gap-4">
           <button
             onClick={() => setIsScreenshotViewOpen(true)}
-            className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+            className="px-6 py-2 bg-caribbeangreen-500 text-white rounded-lg hover:bg-green-600"
           >
             View Screenshot
           </button>
@@ -323,13 +326,22 @@ const CodedApproved = () => {
           />
           <button
             onClick={() => setIsScreenshotViewOpen(false)}
-            className="absolute top-2 right-2 px-4 py-1 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600"
+            className="absolute top-2 right-2 px-4 py-1 bg-pink-500 text-white text-sm rounded-lg hover:bg-red-600"
           >
             Close
           </button>
         </div>
       </div>
     )}
+    <div className="flex items-center justify-center gap-3 mb-4">
+      <input
+        type="checkbox"
+        checked={useStar}
+        onChange={() => setUseStar(!useStar)}
+        className="mr-2"
+      />
+      <label className="text-gray-700">Use Star for Auto-Approve</label>
+    </div>
   </div>
 </Modal>
 

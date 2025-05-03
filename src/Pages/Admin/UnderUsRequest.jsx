@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
 import Modal from "../../Components/Modal";
@@ -21,18 +21,22 @@ const UnderUsRequest = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [modalAction, setModalAction] = useState(""); // "approve" or "reject"
+  const [modalAction, setModalAction] = useState("");
 
   useEffect(() => {
-    dispatch(underUsRequestList(currentPage));
-  }, [dispatch, currentPage]);
+    dispatch(underUsRequestList(currentPage, 5, searchQuery)); // Corrected order
+  }, [dispatch, currentPage, searchQuery]);
 
   const handleNext = () => {
-    if (currentPage < totalPages) dispatch(underUsRequestList(currentPage + 1));
+    if (currentPage < totalPages) {
+      dispatch(underUsRequestList(currentPage + 1, 5, searchQuery));
+    }
   };
 
   const handlePrev = () => {
-    if (currentPage > 1) dispatch(underUsRequestList(currentPage - 1));
+    if (currentPage > 1) {
+      dispatch(underUsRequestList(currentPage - 1, 5, searchQuery));
+    }
   };
 
   const copyToClipboard = (number) => {
@@ -53,7 +57,7 @@ const UnderUsRequest = () => {
       await handleUnderUsAction(token, selectedLead?.id, modalAction);
       toast.success(`Request ${modalAction === "approve" ? "approved" : "rejected"} successfully!`);
       setIsModalOpen(false);
-      dispatch(underUsRequestList(currentPage)); // refresh list
+      dispatch(underUsRequestList(currentPage, 5, searchQuery)); // Corrected
     } catch (error) {
       toast.error(error.message || "Failed to process request.");
     }
@@ -71,33 +75,6 @@ const UnderUsRequest = () => {
     setModalAction("");
   };
 
-  const filteredLeads = useMemo(
-    () =>
-      underUsRequests.filter(
-        (lead) =>
-          lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          lead.mobile_number.includes(searchQuery) ||
-          lead.whatsapp_mobile_number.includes(searchQuery)
-      ),
-    [underUsRequests, searchQuery]
-  );
-
-  if (loading)
-    return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
-
-  if (error)
-    return (
-      <div className="text-center mt-6">
-        <p className="text-red-500 text-lg">{error}</p>
-        <button
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          onClick={() => dispatch(underUsRequestList(currentPage))}
-        >
-          Retry
-        </button>
-      </div>
-    );
-
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Under Us Requests</h2>
@@ -109,11 +86,23 @@ const UnderUsRequest = () => {
         placeholder="Search by name or mobile number..."
       />
 
-      {filteredLeads.length === 0 ? (
+      {loading ? (
+        <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>
+      ) : error ? (
+        <div className="text-center mt-16">
+          <p className="text-red-500 text-lg">{error}</p>
+          <button
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            onClick={() => dispatch(underUsRequestList(currentPage, 5, searchQuery))} // Corrected
+          >
+            Retry
+          </button>
+        </div>
+      ) : underUsRequests.length === 0 ? (
         <p className="text-gray-600 text-center text-lg">No leads found.</p>
       ) : (
         <LeadGrid
-          leads={filteredLeads}
+          leads={underUsRequests}
           copyToClipboard={copyToClipboard}
           openWhatsApp={openWhatsApp}
           makeCall={makeCall}
@@ -121,9 +110,13 @@ const UnderUsRequest = () => {
         />
       )}
 
-      <Pagination currentPage={currentPage} totalPages={totalPages} handleNext={handleNext} handlePrev={handlePrev} />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        handleNext={handleNext}
+        handlePrev={handlePrev}
+      />
 
-      {/* Modal for Approve/Reject */}
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
