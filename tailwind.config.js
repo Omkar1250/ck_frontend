@@ -16,6 +16,7 @@ module.exports = {
       delBtn:"#E61D12",
       bgCard:"#E23232",
       bgAprCard:"#E0ECFF",
+      bgUni:"#51E1FF",
       black: "#000",
       transparent: "#ffffff00",
       richblack: {

@@ -19,6 +19,7 @@ import msTeamsRequestsReducer from "../Slices/adminSlices/msTeamsRequests"
 import sipRequestsReducer from "../Slices/adminSlices/sipRequests"
 import usersReducer from "../Slices/adminSlices/userSlice"
 import deleteRequestsReducer from "../Slices/adminSlices/deleteRequestSlice"
+import trailReducer from "../Slices/adminSlices/allLeadSlice"
 const rootReducer = combineReducers({
     auth: authReducer,
     profile:profileReducer,
@@ -42,6 +43,8 @@ const rootReducer = combineReducers({
     sipRequests:sipRequestsReducer,
     users: usersReducer,
     deleteRequests:deleteRequestsReducer,
+    trails:trailReducer,
+    
 
     
 

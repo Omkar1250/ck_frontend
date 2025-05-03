@@ -18,7 +18,7 @@ import {
  import { setLoading, setAnalyticsData, setAnalyticsError } from "../Slices/analyticsSlice"
  import { setAllUsers, setUsersLoading, setUsersError } from "../Slices/adminSlices/userSlice"
  import { setDeleteLoading, setDeleteSuccess, setDeleteError } from "../Slices/adminSlices/deleteRequestSlice"
-
+ import { setTrailLoading, setTrailSuccess, setTrailError } from "../Slices/adminSlices/allLeadSlice"
  
  const { adminEndpoints } = require("../services/apis");
 
@@ -46,7 +46,9 @@ const {
     RM_PAYMENT,
     GET_CONVERSION_POINTS_API,
     UPDATE_CONVERSION_POINTS_API,
-    GET_DELETE_REQUEST_LIST_API
+    GET_DELETE_REQUEST_LIST_API,
+    GET_ALL_LEADS_API,
+    UNIVERSAL_APPROVE_API
     
 
 } = adminEndpoints;
@@ -763,5 +765,60 @@ export const fetchDeleteRequests = (page = 1, limit = 10, search = "") => async 
 
     // Dispatch error action
     dispatch(setDeleteError(error.message || "Error fetching delete requests"));
+  }
+};
+
+
+export const getAllLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    dispatch(setTrailLoading());
+    console.log("API called with page:", page, "limit:", limit, "search:", search);
+    const { token } = getState().auth;
+
+    // Construct query parameters
+    const queryParams = new URLSearchParams({
+      page,
+      limit,
+      ...(search.trim() && { search }),
+    }).toString();
+
+    // Construct the full URL with query parameters
+    const url = `${GET_ALL_LEADS_API}?${queryParams}`;
+
+    // Send the GET request with the constructed URL and Authorization header
+    const response = await apiConnector("GET", url, null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    // Handle the response
+    if (response?.data?.success) {
+      dispatch(setTrailSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Under Us Requests";
+      dispatch(setTrailError(errorMessage));
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("UnderUs API Error:", error);
+    }
+    dispatch(setTrailError(error?.message || "Error fetching Under Us Requests"));
+  }
+};
+
+
+export const approveLeadAction = (token,leadId, action) => async (dispatch) => {
+  try {
+    const res = await apiConnector("POST", `${UNIVERSAL_APPROVE_API}/${leadId}`,
+    {
+      action,
+    },
+    {
+      Authorization: `Bearer ${token}`,
+  });   
+    toast.success(`${action} approved successfully`);
+    dispatch(getAllLeads()); // 🔁 Refresh leads
+  } catch (error) {
+    toast.error("Approval failed", error.message);
+    console.error(error);
   }
 };

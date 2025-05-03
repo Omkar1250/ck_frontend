@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
-import Modal from "../../Components/Modal";
+import Modal from "../../Components/Modal"
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";

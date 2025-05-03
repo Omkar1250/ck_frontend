@@ -65,6 +65,8 @@ export const adminEndpoints = {
     RM_PAYMENT: BASE_URL+ "/admin-payout",
     GET_CONVERSION_POINTS_API: BASE_URL + "/get-conversion-points",
     UPDATE_CONVERSION_POINTS_API: BASE_URL + "/update-conversion-points",
-    GET_DELETE_REQUEST_LIST_API: BASE_URL + "/get-delete-request-list"
+    GET_DELETE_REQUEST_LIST_API: BASE_URL + "/get-delete-request-list",
+    GET_ALL_LEADS_API: BASE_URL + "/get-all-leads",
+    UNIVERSAL_APPROVE_API: BASE_URL + "/lead/approve",
 }
 
