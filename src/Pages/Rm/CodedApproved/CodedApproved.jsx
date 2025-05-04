@@ -67,6 +67,7 @@ const CodedApproved = () => {
       // Make the API request
        await aomaRequest(token, selectedLead?.id, formData);
       toast.success("AOMA request sent successfully!");
+      dispatch(codedApprovedList(currentPage))
       setIsUnderModalOpen(false);
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
@@ -78,6 +79,8 @@ const CodedApproved = () => {
       await deleteLead(token, selectedLead?.id);
       toast.success("Lead deleted successfully!");
       setIsDeleteModalOpen(false);
+      dispatch(codedApprovedList(currentPage)); // ⬅ Refresh the data
+            closeModals();
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
     }
@@ -109,6 +112,7 @@ const CodedApproved = () => {
       setUploadedScreenshot(fileURL);
       setScreenshotFile(file); // Store the file for uploading
       toast.success("Screenshot uploaded successfully!");
+      
     }
   };
 

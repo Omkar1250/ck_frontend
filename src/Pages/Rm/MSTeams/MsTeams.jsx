@@ -75,7 +75,9 @@ const MsTeams = () => {
     try {
     await deleteLead(token, selectedLead?.id);
       toast.success("Lead deleted successfully!");
+      dispatch(msTeamsApprovedList())
       setIsDeleteModalOpen(false);
+      closeModals()
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
     }

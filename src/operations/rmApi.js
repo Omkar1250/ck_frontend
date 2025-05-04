@@ -67,33 +67,60 @@ const {
   
 } = leadEndpoints;
 
-export const fetchRMLeads = (page = 1, limit = 5) => async (dispatch, getState) => {
-    try {
-      dispatch(setLoading());
-      
-      const { token } = getState().auth; // Extract token from state
-      console.log("Token from RM Leads:", token);
-      
-      const response = await apiConnector(
-        "GET",
-        `${FETCH_RM_LEADS_API}?page=${page}&limit=${limit}`,
-        null, 
-        {
-          Authorization: `Bearer ${token}` // Pass token in headers
-        }
-      );
-  
-      dispatch(setLeadsSuccess(response.data));
-    } catch (error) {
-      dispatch(
-        setLeadsError(error?.response?.data?.message || "Could not fetch leads")
-      );
+export const fetchRMLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch(setLoading());
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
     }
-  };
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Debug: API request URL
+    console.log("RM Leads API Request:", `${FETCH_RM_LEADS_API}?${query}`);
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${FETCH_RM_LEADS_API}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+    // Debug: API Response
+    console.log("RM Leads API Response:", response);
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setLeadsSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch RM Leads";
+      console.warn("RM Leads API Response Error:", errorMessage);
+      dispatch(setLeadsError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("RM Leads API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setLeadsError(error?.message || "Error fetching RM Leads"));
+  }
+};
   
 
 
-export const fetchLeads =  async (token) => {
+export const fetchLeads =  async (token, ) => {
   try {
    
     
@@ -128,19 +155,20 @@ export const underUsRequest = async (token, leadId) => {
     }
 
     toast.success("Underus Request Sent Successfully");
-    return response; // ✅ Return response if needed
+  
   } catch (error) {
     toast.error(error?.response?.data?.message || error.message);
+  
   }
 };
 
 //Coded requeset
-export const codedRequest = async (token, leadId) => {
+export const codedRequest = async (token, leadId, dispatch) => {
   try {
     const response = await apiConnector(
       "POST",
       CODED_REQUEST_API,
-      { leadId }, // ✅ Pass as an object
+      { leadId },
       {
         Authorization: `Bearer ${token}`,
       }
@@ -150,8 +178,10 @@ export const codedRequest = async (token, leadId) => {
       throw new Error(response?.data?.message || "Failed to send coded request");
     }
 
-    toast.success("Coded Request Sent Successfully");
-    return response; // ✅ Return response if needed
+ 
+
+    // ✅ Refresh the list
+   
   } catch (error) {
     toast.error(error?.response?.data?.message || error.message);
   }
@@ -301,152 +331,314 @@ export const deleteLeadToAdmin = async (token, leadId, name, mobile_number, what
 
 
 //UNDERUS APPROVED LIST
-export const underUsApprovedLeads = (page = 1, limit = 5) => async (dispatch, getState) => {
+export const underUsApprovedLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
   try {
+    // Dispatch loading state
     dispatch(setUnderUsLoading());
-    
-    const { token } = getState().auth; // Extract token from state
-    console.log("Token from RM Leads:", token);
-    
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Debug: API request URL
+    console.log("Under Us Approved Leads API Request:", `${UNDER_US_APPROVED_LEADS_API}?${query}`);
+
+    // Make the GET API call
     const response = await apiConnector(
       "GET",
-      `${UNDER_US_APPROVED_LEADS_API}?page=${page}&limit=${limit}`,
-      null, 
+      `${UNDER_US_APPROVED_LEADS_API}?${query}`,
+      null,
       {
-        Authorization: `Bearer ${token}` // Pass token in headers
+        Authorization: `Bearer ${token}`, // Pass token in headers
       }
     );
 
-    dispatch(setUnderUsApprovedSuccess(response.data));
+    // Debug: API Response
+    console.log("Under Us Approved Leads API Response:", response);
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setUnderUsApprovedSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Under Us Approved Leads";
+      console.warn("Under Us Approved Leads API Response Error:", errorMessage);
+      dispatch(setUnderUsApprovedError(errorMessage));
+    }
   } catch (error) {
-    dispatch(
-      setUnderUsApprovedError(error?.response?.data?.message || "Could not fetch leads")
-    );
+    // Debug: Full error details
+    console.error("Under Us Approved Leads API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setUnderUsApprovedError(error?.message || "Error fetching Under Us Approved Leads"));
   }
 };
 
 //CODED APPROVED LIST
-export const codedApprovedList = (page = 1, limit = 5) => async (dispatch, getState) => {
+export const codedApprovedList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
   try {
+    // Dispatch loading state
     dispatch(setCodedLoading());
-    
-    const { token } = getState().auth; // Extract token from state
-    console.log("Token from RM Leads:", token);
-    
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Debug: API request URL
+    console.log("Coded Approved API Request:", `${CODED_APPROVED_LIST_API}?${query}`);
+
+    // Make the GET API call
     const response = await apiConnector(
       "GET",
-      `${CODED_APPROVED_LIST_API}?page=${page}&limit=${limit}`,
-      null, 
+      `${CODED_APPROVED_LIST_API}?${query}`,
+      null,
       {
-        Authorization: `Bearer ${token}` // Pass token in headers
+        Authorization: `Bearer ${token}`, // Pass token in headers
       }
     );
 
-    dispatch(setCodedApprovedSuccess(response.data));
+    // Debug: API Response
+    console.log("Coded Approved API Response:", response);
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setCodedApprovedSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Coded Approved Leads";
+      console.warn("Coded Approved API Response Error:", errorMessage);
+      dispatch(setCodedApprovedError(errorMessage));
+    }
   } catch (error) {
-    dispatch(
-      setCodedApprovedError(error?.response?.data?.message || "Could not fetch leads")
-    );
+    // Debug: Full error details
+    console.error("Coded Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setCodedApprovedError(error?.message || "Error fetching Coded Approved Leads"));
   }
 };
 
 //AOMA APPROVED LIST
-export const aomaApprovedList = (page = 1, limit = 5) => async (dispatch, getState) => {
+export const aomaApprovedList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
   try {
+    // Dispatch loading state
     dispatch(setAomaLoading());
-    
-    const { token } = getState().auth; // Extract token from state
-    console.log("Token from RM Leads:", token);
-    
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Debug: API request URL
+    console.log("AOMA Approved API Request:", `${AOMA_APPROVED_LIST_API}?${query}`);
+
+    // Make the GET API call
     const response = await apiConnector(
       "GET",
-      `${AOMA_APPROVED_LIST_API}?page=${page}&limit=${limit}`,
-      null, 
+      `${AOMA_APPROVED_LIST_API}?${query}`,
+      null,
       {
-        Authorization: `Bearer ${token}` // Pass token in headers
+        Authorization: `Bearer ${token}`, // Pass token in headers
       }
     );
 
-    dispatch(setAomaApprovedSuccess(response.data));
+    // Debug: API Response
+    console.log("AOMA Approved API Response:", response);
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setAomaApprovedSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch AOMA Approved Leads";
+      console.warn("AOMA Approved API Response Error:", errorMessage);
+      dispatch(setAomaApprovedError(errorMessage));
+    }
   } catch (error) {
-    dispatch(
-      setAomaApprovedError(error?.response?.data?.message || "Could not fetch leads")
-    );
+    // Debug: Full error details
+    console.error("AOMA Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setAomaApprovedError(error?.message || "Error fetching AOMA Approved Leads"));
   }
 };
 
 
 //ACTIVATION APPROVED LIST
-export const activationApprovedList  = (page = 1, limit = 5) => async (dispatch, getState) => {
+export const activationApprovedList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
   try {
+    // Dispatch loading state
     dispatch(setActivationLoading());
-    
-    const { token } = getState().auth; // Extract token from state
-    console.log("Token from RM Leads:", token);
-    
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Debug: API request URL
+    console.log("Activation Approved API Request:", `${ACTIVATION_APPROVED_LIST_API}?${query}`);
+
+    // Make the GET API call
     const response = await apiConnector(
       "GET",
-      `${ACTIVATION_APPROVED_LIST_API}?page=${page}&limit=${limit}`,
-      null, 
+      `${ACTIVATION_APPROVED_LIST_API}?${query}`,
+      null,
       {
-        Authorization: `Bearer ${token}` // Pass token in headers
+        Authorization: `Bearer ${token}`, // Pass token in headers
       }
     );
 
-    dispatch(setActivationApprovedSuccess(response.data));
+    // Debug: API Response
+    console.log("Activation Approved API Response:", response);
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setActivationApprovedSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Activation Approved Leads";
+      console.warn("Activation Approved API Response Error:", errorMessage);
+      dispatch(setActivationApprovedError(errorMessage));
+    }
   } catch (error) {
-    dispatch(
-      setActivationApprovedError(error?.response?.data?.message || "Could not fetch leads")
-    );
+    // Debug: Full error details
+    console.error("Activation Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setActivationApprovedError(error?.message || "Error fetching Activation Approved Leads"));
   }
 };
 
 //MS TEAMS APPROVED LIST
-export const msTeamsApprovedList  = (page = 1, limit = 5) => async (dispatch, getState) => {
+export const msTeamsApprovedList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
   try {
+    // Dispatch loading state
     dispatch(setMsTeamsLoading());
-    
-    const { token } = getState().auth; // Extract token from state
-    console.log("Token from RM Leads:", token);
-    
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Debug: API request URL
+    console.log("MS Teams Approved API Request:", `${MS_TEAMS_APPROVED_LIST_API}?${query}`);
+
+    // Make the GET API call
     const response = await apiConnector(
       "GET",
-      `${MS_TEAMS_APPROVED_LIST_API}?page=${page}&limit=${limit}`,
-      null, 
+      `${MS_TEAMS_APPROVED_LIST_API}?${query}`,
+      null,
       {
-        Authorization: `Bearer ${token}` // Pass token in headers
+        Authorization: `Bearer ${token}`, // Pass token in headers
       }
     );
 
-    dispatch(setMsTeamsApprovedSuccess(response.data));
+    // Debug: API Response
+    console.log("MS Teams Approved API Response:", response);
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setMsTeamsApprovedSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch MS Teams Approved Leads";
+      console.warn("MS Teams Approved API Response Error:", errorMessage);
+      dispatch(setMsTeamsApprovedError(errorMessage));
+    }
   } catch (error) {
-    dispatch(
-      setMsTeamsApprovedError(error?.response?.data?.message || "Could not fetch leads")
-    );
+    // Debug: Full error details
+    console.error("MS Teams Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setMsTeamsApprovedError(error?.message || "Error fetching MS Teams Approved Leads"));
   }
 };
 
-export const sipApprovedList  = (page = 1, limit = 5) => async (dispatch, getState) => {
+export const sipApprovedList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
   try {
+    // Dispatch loading state
     dispatch(setSipLoading());
-    
-    const { token } = getState().auth; // Extract token from state
-    console.log("Token from RM Leads:", token);
-    
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Debug: API request URL
+    console.log("SIP Approved API Request:", `${SIP_APPROVED_LIST_API}?${query}`);
+
+    // Make the GET API call
     const response = await apiConnector(
       "GET",
-      `${SIP_APPROVED_LIST_API}?page=${page}&limit=${limit}`,
-      null, 
+      `${SIP_APPROVED_LIST_API}?${query}`,
+      null,
       {
-        Authorization: `Bearer ${token}` // Pass token in headers
+        Authorization: `Bearer ${token}`, // Pass token in headers
       }
     );
 
-    dispatch(setSipApprovedSuccess(response.data));
+    // Debug: API Response
+    console.log("SIP Approved API Response:", response);
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setSipApprovedSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch SIP Approved Leads";
+      console.warn("SIP Approved API Response Error:", errorMessage);
+      dispatch(setSipApprovedError(errorMessage));
+    }
   } catch (error) {
-    dispatch(
-      setSipApprovedError(error?.response?.data?.message || "Could not fetch leads")
-    );
+    // Debug: Full error details
+    console.error("SIP Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setSipApprovedError(error?.message || "Error fetching SIP Approved Leads"));
   }
 };
 
@@ -506,27 +698,54 @@ export const rmTransactionsSummary = (page = 1, limit = 5) => async (dispatch, g
 
 
 //FETCH REFER LEAD LIST
-export const fetchReferLeadList = (page = 1, limit = 5) => async (dispatch, getState) => {
+export const fetchReferLeadList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
   try {
+    // Dispatch loading state
     dispatch(setReferLoading());
-    
-    const { token } = getState().auth; // Extract token from state
-    console.log("Token from RM Leads:", token);
-    
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Debug: API request URL
+    console.log("Refer Leads API Request:", `${FETCH_REFER_LEAD_API}?${query}`);
+
+    // Make the GET API call
     const response = await apiConnector(
       "GET",
-      `${FETCH_REFER_LEAD_API}?page=${page}&limit=${limit}`,
-      null, 
+      `${FETCH_REFER_LEAD_API}?${query}`,
+      null,
       {
-        Authorization: `Bearer ${token}` // Pass token in headers
+        Authorization: `Bearer ${token}`, // Pass token in headers
       }
     );
 
-    dispatch(setReferLeadsSuccess(response.data));
+    // Debug: API Response
+    console.log("Refer Leads API Response:", response);
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setReferLeadsSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Refer Leads";
+      console.warn("Refer Leads API Response Error:", errorMessage);
+      dispatch(setReferLeadsError(errorMessage));
+    }
   } catch (error) {
-    dispatch(
-      setReferLeadsError(error?.response?.data?.message || "Could not fetch leads")
-    );
+    // Debug: Full error details
+    console.error("Refer Leads API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setReferLeadsError(error?.message || "Error fetching Refer Leads"));
   }
 };
 

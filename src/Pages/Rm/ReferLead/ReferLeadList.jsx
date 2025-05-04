@@ -61,20 +61,27 @@ const ReferLeadList = () => {
   const handleUnderUsRequest = async () => {
     try {
       await underUsRequest(token, selectedLead?.id);
-
+      toast.success("Request sent successfully.");
+      dispatch(fetchReferLeadList(currentPage)); // ⬅ Refresh the data
+      closeModals(); // ⬅ Close modal after action
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
     }
   };
+  
 
   // Handle deleting a lead
   const handleRmDelete = async () => {
     try {
       await deleteLead(token, selectedLead?.id);
+      toast.success("Lead deleted successfully.");
+      dispatch(fetchReferLeadList(currentPage)); // ⬅ Refresh the data
+      closeModals(); // ⬅ Close modal after action
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
     }
   };
+  
 
   // Modal handlers
   const openUnderModal = (lead) => {

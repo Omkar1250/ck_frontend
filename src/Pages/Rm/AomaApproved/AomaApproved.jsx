@@ -64,6 +64,7 @@ const AomaApproved = () => {
 
       await activationRequest(token, selectedLead?.id, formData);
       toast.success("ACTIVATION request sent successfully!");
+      dispatch(aomaApprovedList())
       closeModals();
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
@@ -74,6 +75,7 @@ const AomaApproved = () => {
     try {
       await deleteLead(token, selectedLead?.id);
       toast.success("Lead deleted successfully.");
+      dispatch(aomaApprovedList())
       closeModals();
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");

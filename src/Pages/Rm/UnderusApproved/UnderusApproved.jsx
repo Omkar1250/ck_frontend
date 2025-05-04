@@ -55,21 +55,31 @@ const UnderUsApproved = () => {
       await codedRequest(token, selectedLead?.id);
       toast.success("Request sent successfully!");
       setIsUnderModalOpen(false);
+      dispatch(underUsApprovedLeads(currentPage)); // Refresh leads
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
     }
   };
+  
 
   // Handle deleting a lead
   const handleRmDelete = async () => {
     try {
-      await deleteLeadToAdmin(token, selectedLead?.id, selectedLead?.name, selectedLead?.mobile_number, selectedLead?.whatsapp_mobile_number);
+      await deleteLeadToAdmin(
+        token,
+        selectedLead?.id,
+        selectedLead?.name,
+        selectedLead?.mobile_number,
+        selectedLead?.whatsapp_mobile_number
+      );
       toast.success("Lead deleted successfully!");
       setIsDeleteModalOpen(false);
+      dispatch(underUsApprovedLeads(currentPage)); // Refresh leads
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
     }
   };
+  
 
   // Modal handlers
   const openUnderModal = (lead) => {

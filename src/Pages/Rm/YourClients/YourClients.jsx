@@ -141,8 +141,13 @@ const YourClients = () => {
                           className="text-richblack-200 text-xl hover:text-blue-600 cursor-pointer"
                         />
                       </div>
-                    </div>
+                      <div className="flex justify-end">
+                    <span>{lead.batch_code}</span>
                   </div>
+                    </div>
+                    
+                  </div>
+                 
                 </div>
               );
             })}

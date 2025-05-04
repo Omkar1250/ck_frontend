@@ -68,5 +68,7 @@ export const adminEndpoints = {
     GET_DELETE_REQUEST_LIST_API: BASE_URL + "/get-delete-request-list",
     GET_ALL_LEADS_API: BASE_URL + "/get-all-leads",
     UNIVERSAL_APPROVE_API: BASE_URL + "/lead/approve",
+    MS_TEAMS_ID_PASS_API: BASE_URL + "/get-list-msteams-login",
+    MS_TEAMS_DETAILS_API: BASE_URL + "/ms-teams-details"
 }
 

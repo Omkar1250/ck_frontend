@@ -19,7 +19,12 @@ import {
  import { setAllUsers, setUsersLoading, setUsersError } from "../Slices/adminSlices/userSlice"
  import { setDeleteLoading, setDeleteSuccess, setDeleteError } from "../Slices/adminSlices/deleteRequestSlice"
  import { setTrailLoading, setTrailSuccess, setTrailError } from "../Slices/adminSlices/allLeadSlice"
- 
+ import {
+  setMsLoading,
+  setMsSuccess,
+  setMsError,
+setCurrentPage, // now we have the setCurrentPage reducer
+}  from "../Slices/adminSlices/msLeads"
  const { adminEndpoints } = require("../services/apis");
 
 const {
@@ -48,7 +53,9 @@ const {
     UPDATE_CONVERSION_POINTS_API,
     GET_DELETE_REQUEST_LIST_API,
     GET_ALL_LEADS_API,
-    UNIVERSAL_APPROVE_API
+    UNIVERSAL_APPROVE_API,
+    MS_TEAMS_ID_PASS_API,
+    MS_TEAMS_DETAILS_API
     
 
 } = adminEndpoints;
@@ -820,5 +827,61 @@ export const approveLeadAction = (token,leadId, action) => async (dispatch) => {
   } catch (error) {
     toast.error("Approval failed", error.message);
     console.error(error);
+  }
+};
+
+export const getAllMsLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    dispatch(setMsLoading());
+    console.log("API called with page:", page, "limit:", limit, "search:", search);
+    const { token } = getState().auth;
+
+    // Construct query parameters
+    const queryParams = new URLSearchParams({
+      page,
+      limit,
+      ...(search.trim() && { search }),
+    }).toString();
+
+    // Construct the full URL with query parameters
+    const url = `${MS_TEAMS_ID_PASS_API}?${queryParams}`;
+
+    // Send the GET request with the constructed URL and Authorization header
+    const response = await apiConnector("GET", url, null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    // Handle the response
+    if (response?.data?.success) {
+      dispatch(setMsSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Ms-Teams leads";
+      dispatch(setMsError(errorMessage));
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("M-i-pass API Error:", error);
+    }
+    dispatch(setMsError(error?.message || "Error Ms Under Us Requests"));
+  }
+};
+
+
+  
+export const msDetailsAction = async (token, leadId, action) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      `${MS_TEAMS_DETAILS_API}/${leadId}`,
+      action,
+      {
+    
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("msDetailsAction error:", error);
+    throw error;
   }
 };

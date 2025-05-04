@@ -72,7 +72,9 @@ const LeadList = () => {
   const handleUnderUsRequest = async () => {
     try {
        await underUsRequest(token, selectedLead?.id);
-        
+       toast.success("Request sent successfully");
+       dispatch(fetchRMLeads(currentPage)); // Add this
+       closeModals()
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
     }
@@ -81,6 +83,8 @@ const LeadList = () => {
   const handleRmDelete = async () => {
     try {
        await deleteLead(token, selectedLead?.id);
+       dispatch(fetchRMLeads(currentPage));
+       closeModals()
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
     }
@@ -124,7 +128,7 @@ const LeadList = () => {
 
       <div className="flex justify-end p-2">
         <button
-          className="bg-btnColor p-4 rounded-lg"
+          className="bg-btnColor p-2 rounded-lg text-white"
           onClick={handleLeadFetch}
           disabled={isFetching}
         >

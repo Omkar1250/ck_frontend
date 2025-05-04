@@ -20,6 +20,7 @@ import sipRequestsReducer from "../Slices/adminSlices/sipRequests"
 import usersReducer from "../Slices/adminSlices/userSlice"
 import deleteRequestsReducer from "../Slices/adminSlices/deleteRequestSlice"
 import trailReducer from "../Slices/adminSlices/allLeadSlice"
+import msLeadsReducer from "../Slices/adminSlices/msLeads"
 const rootReducer = combineReducers({
     auth: authReducer,
     profile:profileReducer,
@@ -44,6 +45,7 @@ const rootReducer = combineReducers({
     users: usersReducer,
     deleteRequests:deleteRequestsReducer,
     trails:trailReducer,
+    msLeads:msLeadsReducer,
     
 
     

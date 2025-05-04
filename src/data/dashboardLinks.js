@@ -65,7 +65,7 @@ export const sidebarLinks = [
   },
   {
     id: 10,
-    name: "Payements",
+    name: "Payments",
     path: "/dashboard/your/payment",
     type: ACCOUNT_TYPE.USER,
   },
