@@ -97,7 +97,17 @@ const Sip = () => {
   if (loading)
     return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
   if (error)
-    return <p className="text-red-500 text-center mt-6 text-lg">{error}</p>;
+    return (
+      <div className="text-center mt-6">
+            <p className="text-red-500 text-lg">No leads found</p>
+            <button
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              onClick={() => dispatch(sipApprovedList(currentPage))}
+            >
+              Retry
+            </button>
+          </div>
+    );
 
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">

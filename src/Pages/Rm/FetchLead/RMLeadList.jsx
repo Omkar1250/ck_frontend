@@ -22,12 +22,10 @@ const LeadList = () => {
   const [fetchTime, setFetchTime] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
 
-  // Modal management
   const [isUnderModalOpen, setIsUnderModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
 
-  // Search
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -71,10 +69,10 @@ const LeadList = () => {
 
   const handleUnderUsRequest = async () => {
     try {
-       await underUsRequest(token, selectedLead?.id);
-       toast.success("Request sent successfully");
-       dispatch(fetchRMLeads(currentPage)); // Add this
-       closeModals()
+      await underUsRequest(token, selectedLead?.id);
+      toast.success("Request sent successfully");
+      dispatch(fetchRMLeads(currentPage));
+      closeModals();
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
     }
@@ -82,9 +80,9 @@ const LeadList = () => {
 
   const handleRmDelete = async () => {
     try {
-       await deleteLead(token, selectedLead?.id);
-       dispatch(fetchRMLeads(currentPage));
-       closeModals()
+      await deleteLead(token, selectedLead?.id);
+      dispatch(fetchRMLeads(currentPage));
+      closeModals();
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
     }
@@ -104,8 +102,6 @@ const LeadList = () => {
     setIsUnderModalOpen(false);
     setIsDeleteModalOpen(false);
     setSelectedLead(null);
-    
-    
   };
 
   const filteredLeads = leads.filter(
@@ -115,14 +111,9 @@ const LeadList = () => {
       lead.whatsapp_mobile_number.includes(searchQuery)
   );
 
-  if (loading)
-    return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
-  if (error)
-    return <p className="text-red-500 text-center mt-6 text-lg">{error}</p>;
-
   return (
     <div className="max-w-6xl mx-auto px-4 mt-24 sm:px-6 lg:px-8">
-      <h2 className="text-3xl mt-6 font-bold  text-center text-richblack-800">
+      <h2 className="text-3xl mt-6 font-bold text-center text-richblack-800">
         RM Leads
       </h2>
 
@@ -149,7 +140,21 @@ const LeadList = () => {
         placeholder="Search by name or mobile number..."
       />
 
-      {filteredLeads.length === 0 ? (
+      {loading ? (
+        <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>
+      ) : error ? (
+        <div className="flex items-center justify-center flex-col">
+            <p className="text-red-500 text-center mt-6 text-lg">No leads Found</p>
+            <button
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                onClick={() => dispatch(fetchRMLeads(currentPage))}
+              >
+                Retry
+              </button>
+        </div>
+      
+        
+      ) : filteredLeads.length === 0 ? (
         <p className="text-gray-600 text-center text-lg">No leads found.</p>
       ) : (
         <>
@@ -157,19 +162,22 @@ const LeadList = () => {
             {filteredLeads.map((lead) => {
               const isDisabled =
                 lead.under_us_status === "pending" ||
-                lead.under_us_status === "approved" 
-                
-                
+                lead.under_us_status === "approved";
+
               return (
                 <div
-                key={lead.id}
-                className={`
-                  border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl
-                  ${lead.under_us_status === "rejected" ? "bg-bgCard" : ""}
-                  ${lead.under_us_status === "approved" ? "bg-bgAprCard" : ""}
-                  ${!["rejected", "approved"].includes(lead.under_us_status) ? "bg-white" : ""}
-                `}
-              >
+                  key={lead.id}
+                  className={`
+                    border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl
+                    ${lead.under_us_status === "rejected" ? "bg-bgCard" : ""}
+                    ${lead.under_us_status === "approved" ? "bg-bgAprCard" : ""}
+                    ${
+                      !["rejected", "approved"].includes(lead.under_us_status)
+                        ? "bg-white"
+                        : ""
+                    }
+                  `}
+                >
                   <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
                     <h3 className="text-xl font-semibold text-gray-800">
                       {lead.name}
@@ -272,38 +280,38 @@ const LeadList = () => {
               Next
             </button>
           </div>
-
-          {/* Under Us Modal */}
-          <Modal
-            isOpen={isUnderModalOpen}
-            onClose={closeModals}
-            onSubmit={handleUnderUsRequest}
-            title="Send Under Us Request"
-            action="Send"
-            ActionDesc="Request sent successfully"
-            name={selectedLead?.name}
-            mobile_number={selectedLead?.mobile_number}
-            whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
-          >
-            <p>Are you sure you want to send a request to admin for approval?</p>
-          </Modal>
-
-          {/* Delete Modal */}
-          <Modal
-            isOpen={isDeleteModalOpen}
-            onClose={closeModals}
-            onSubmit={handleRmDelete}
-            title="Delete Lead"
-            action="Delete"
-            ActionDesc="Lead Deleted Successfully"
-            name={selectedLead?.name}
-            mobile_number={selectedLead?.mobile_number}
-            whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
-          >
-            <p>Are you sure you want to delete this lead?</p>
-          </Modal>
         </>
       )}
+
+      {/* Under Us Modal */}
+      <Modal
+        isOpen={isUnderModalOpen}
+        onClose={closeModals}
+        onSubmit={handleUnderUsRequest}
+        title="Send Under Us Request"
+        action="Send"
+        ActionDesc="Request sent successfully"
+        name={selectedLead?.name}
+        mobile_number={selectedLead?.mobile_number}
+        whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
+      >
+        <p>Are you sure you want to send a request to admin for approval?</p>
+      </Modal>
+
+      {/* Delete Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={closeModals}
+        onSubmit={handleRmDelete}
+        title="Delete Lead"
+        action="Delete"
+        ActionDesc="Lead Deleted Successfully"
+        name={selectedLead?.name}
+        mobile_number={selectedLead?.mobile_number}
+        whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
+      >
+        <p>Are you sure you want to delete this lead?</p>
+      </Modal>
     </div>
   );
 };

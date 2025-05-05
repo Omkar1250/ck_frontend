@@ -114,7 +114,7 @@ const UnderUsApproved = () => {
   if (loading) return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
   if (error) return (
     <div className="text-center mt-6">
-      <p className="text-red-500 text-lg">{error}</p>
+      <p className="text-red-500 text-lg">No leads found</p>
       <button
         className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         onClick={() => dispatch(underUsApprovedLeads(currentPage))}

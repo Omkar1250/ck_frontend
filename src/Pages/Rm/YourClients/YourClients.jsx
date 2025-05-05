@@ -75,7 +75,7 @@ const YourClients = () => {
   if (loading)
     return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
   if (error)
-    return <p className="text-red-500 text-center mt-6 text-lg">{error}</p>;
+    return <p className="text-red-500 text-center mt-6 text-lg">No leads found</p>;
 
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
