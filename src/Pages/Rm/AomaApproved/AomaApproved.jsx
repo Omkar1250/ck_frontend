@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   activationRequest,
@@ -10,6 +10,7 @@ import Modal from "../../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
+import { setCurrentPage } from "../../../Slices/aomaSlice";
 
 const AomaApproved = () => {
   const dispatch = useDispatch();
@@ -27,16 +28,24 @@ const AomaApproved = () => {
   const [useStar, setUseStar] = useState(false);
 
   useEffect(() => {
-    dispatch(aomaApprovedList(currentPage));
-  }, [dispatch, token, currentPage]);
+    dispatch(aomaApprovedList(currentPage || 1, 5, searchQuery));
+  }, [dispatch, currentPage, searchQuery]);
 
-  const handleNext = () => {
-    if (currentPage < totalPages) dispatch(aomaApprovedList(currentPage + 1));
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) dispatch(aomaApprovedList(currentPage - 1));
-  };
+   const handleNext = useCallback(() => {
+     if (currentPage < totalPages) {
+       const newPage = currentPage + 1;
+       dispatch(setCurrentPage(newPage));
+       dispatch(aomaApprovedList(newPage, 5, searchQuery)); // Fetch leads for new page
+     }
+   }, [dispatch, currentPage, totalPages, searchQuery]);
+ 
+   const handlePrev = useCallback(() => {
+     if (currentPage > 1) {
+       const newPage = currentPage - 1;
+       dispatch(setCurrentPage(newPage));
+       dispatch(aomaApprovedList(newPage, 5, searchQuery)); // Fetch leads for new page
+     }
+   }, [dispatch, currentPage, searchQuery]);
 
   const copyToClipboard = (number) => {
     navigator.clipboard.writeText(number);
@@ -64,8 +73,8 @@ const AomaApproved = () => {
 
       await activationRequest(token, selectedLead?.id, formData);
       toast.success("ACTIVATION request sent successfully!");
-      dispatch(aomaApprovedList())
-      closeModals();
+   dispatch(aomaApprovedList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
+        closeModals(); // ⬅ Close modal after action
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
     }
@@ -75,8 +84,8 @@ const AomaApproved = () => {
     try {
       await deleteLead(token, selectedLead?.id);
       toast.success("Lead deleted successfully.");
-      dispatch(aomaApprovedList())
-      closeModals();
+      dispatch(aomaApprovedList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
+           closeModals(); // ⬅ Close modal after action
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
     }
@@ -112,18 +121,29 @@ const AomaApproved = () => {
     }
   };
 
-  const filteredLeads = aomaApproved.filter(
-    (lead) =>
-      lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      lead.mobile_number.includes(searchQuery) ||
-      lead.whatsapp_mobile_number.includes(searchQuery)
-  );
+ const filteredLeads = useMemo(
+     () =>
+       aomaApproved.filter(
+         (lead) =>
+           lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           lead.mobile_number.includes(searchQuery) 
+           
+       ),
+     [aomaApproved, searchQuery]
+   );
 
-  if (loading)
-    return <p className="text-blue-600 text-center mt-16 text-lg">Loading...</p>;
-  if (error)
-    return <p className="text-btnColor text-center mt-6 text-lg">No Leads found</p>;
-
+  if (loading) return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
+   if (error) return (
+     <div className="text-center mt-6">
+       <p className="text-red-500 text-lg">No leads found</p>
+       <button
+         className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+         onClick={() => dispatch(aomaApprovedList(currentPage))}
+       >
+         Retry
+       </button>
+     </div>
+   );
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
@@ -153,7 +173,7 @@ const AomaApproved = () => {
                   className={`border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl ${
                     lead.activation_request_status === "rejected"
                       ? "bg-bgCard"
-                      : lead.activation_request_status === "approved"
+                      : lead.activation_request_status === "requested"
                       ? "bg-bgAprCard"
                       : "bg-white"
                   }`}
@@ -360,6 +380,9 @@ const AomaApproved = () => {
             onSubmit={handleRmDelete}
             title="Confirm Delete"
             action="Delete"
+            name={selectedLead?.name}
+            mobile_number={selectedLead?.mobile_number}
+            whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
           >
             <p className="text-center mt-4 text-richblack-800">
               Are you sure you want to delete this lead?

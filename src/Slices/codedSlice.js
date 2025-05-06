@@ -26,6 +26,9 @@ const codedApprovedSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    setCurrentPage: (state, action) => {
+      state.currentPage = action.payload; // Update the current page
+    },
   },
 });
 
@@ -33,6 +36,8 @@ export const {
   setCodedLoading,
   setCodedApprovedSuccess,
   setCodedApprovedError,
+  setCurrentPage
+  
 } = codedApprovedSlice.actions;
 
 export default codedApprovedSlice.reducer;

@@ -153,8 +153,6 @@ export const underUsRequest = async (token, leadId) => {
     if (!response.data.success) {
       throw new Error(response?.data?.message || "Failed to send underus request");
     }
-
-    toast.success("Underus Request Sent Successfully");
   
   } catch (error) {
     toast.error(error?.response?.data?.message || error.message);

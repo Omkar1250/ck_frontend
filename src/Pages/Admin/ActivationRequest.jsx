@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
 import { activationAction, activationRequestList } from "../../operations/adminApi";
 
+const IMAGE_URL = process.env.REACT_APP_IMAGE_URL;
 const ActivationRequest = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
@@ -83,8 +84,8 @@ const ActivationRequest = () => {
       activationRequests.filter(
         (lead) =>
           lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          lead.mobile_number.includes(searchQuery) ||
-          lead.whatsapp_mobile_number.includes(searchQuery)
+          lead.mobile_number.includes(searchQuery) 
+          
       ),
     [activationRequests, searchQuery]
   );
@@ -151,7 +152,7 @@ const ActivationRequest = () => {
           <div className="flex flex-col items-center justify-center mt-4">
             <button
               onClick={() => {
-                setModalImage(`http://localhost:4000/${selectedLead?.activation_screenshot}`);
+                setModalImage(`${IMAGE_URL}/${selectedLead?.activation_screenshot}`);
                 setShowImageModal(true);
               }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

@@ -10,7 +10,7 @@ import Modal from "../../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
-
+import { setCurrentPage } from "../../../Slices/referLeadSlice";
 
 const ReferLeadList = () => {
   const dispatch = useDispatch();
@@ -29,17 +29,25 @@ const ReferLeadList = () => {
 
   // Fetch leads when component mounts or page changes
   useEffect(() => {
-    dispatch(fetchReferLeadList(currentPage));
-  }, [dispatch, currentPage]);
+    dispatch(fetchReferLeadList(currentPage || 1, 5, searchQuery));
+  }, [dispatch, currentPage, searchQuery]);
 
   // Pagination handlers
   const handleNext = useCallback(() => {
-    if (currentPage < totalPages) dispatch(fetchReferLeadList(currentPage + 1));
-  }, [dispatch, currentPage, totalPages]);
+    if (currentPage < totalPages) {
+      const newPage = currentPage + 1;
+      dispatch(setCurrentPage(newPage));
+      dispatch(fetchReferLeadList(newPage, 5, searchQuery)); // Fetch leads for new page
+    }
+  }, [dispatch, currentPage, totalPages, searchQuery]);
 
   const handlePrev = useCallback(() => {
-    if (currentPage > 1) dispatch(fetchReferLeadList(currentPage - 1));
-  }, [dispatch, currentPage]);
+    if (currentPage > 1) {
+      const newPage = currentPage - 1;
+      dispatch(setCurrentPage(newPage));
+      dispatch(fetchReferLeadList(newPage, 5, searchQuery)); // Fetch leads for new page
+    }
+  }, [dispatch, currentPage, searchQuery]);
 
   // Copy to clipboard
   const copyToClipboard = useCallback((number) => {
@@ -62,20 +70,19 @@ const ReferLeadList = () => {
     try {
       await underUsRequest(token, selectedLead?.id);
       toast.success("Request sent successfully.");
-      dispatch(fetchReferLeadList(currentPage)); // ⬅ Refresh the data
+      dispatch(fetchReferLeadList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
       closeModals(); // ⬅ Close modal after action
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
     }
   };
-  
 
   // Handle deleting a lead
   const handleRmDelete = async () => {
     try {
       await deleteLead(token, selectedLead?.id);
       toast.success("Lead deleted successfully.");
-      dispatch(fetchReferLeadList(currentPage)); // ⬅ Refresh the data
+      dispatch(fetchReferLeadList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
       closeModals(); // ⬅ Close modal after action
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
@@ -106,17 +113,25 @@ const ReferLeadList = () => {
       referLeads.filter(
         (lead) =>
           lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          lead.mobile_number.includes(searchQuery) ||
-          lead.whatsapp_mobile_number.includes(searchQuery)
+          lead.mobile_number.includes(searchQuery) 
+          
       ),
     [referLeads, searchQuery]
   );
 
   // Render loading and error states
-  if (loading)
-    return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
-  if (error)
-    return <p className="text-red-500 text-center mt-6 text-lg">{error}</p>;
+ if (loading) return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
+  if (error) return (
+    <div className="text-center mt-6">
+      <p className="text-red-500 text-lg">No leads found</p>
+      <button
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        onClick={() => dispatch(fetchReferLeadList(currentPage))}
+      >
+        Retry
+      </button>
+    </div>
+  );
 
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
@@ -157,7 +172,7 @@ const ReferLeadList = () => {
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {!searchQuery && totalPages > 1 && (
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -210,9 +225,8 @@ const LeadCard = ({
 }) => (
   <div
     className={`border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl ${
-      lead.under_us_status === "rejected" ? "bg-bgCard" : ""
-    } ${lead.under_us_status === "approved" ? "bg-bgAprCard" : ""} ${
-      !["rejected", "approved"].includes(lead.under_us_status) ? "bg-white" : ""
+      lead.under_us_status === "rejected" ? "bg-red-200" : "bg-white",
+      lead.under_us_status === "pending" ? "bg-bgAprCard" : "bg-white"
     }`}
   >
     <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">

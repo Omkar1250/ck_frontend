@@ -26,6 +26,9 @@ const msTeamsApprovedSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    setCurrentPage: (state, action) => {
+      state.currentPage = action.payload; // Update the current page
+    },
   },
 });
 
@@ -33,6 +36,8 @@ export const {
   setMsTeamsLoading,
   setMsTeamsApprovedSuccess,
   setMsTeamsApprovedError,
+  setCurrentPage
+  
 } = msTeamsApprovedSlice.actions;
 
 export default msTeamsApprovedSlice.reducer;

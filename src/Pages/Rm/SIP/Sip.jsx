@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   sipApprovedList,
   deleteLead,
   sipRequest,
+  deleteLeadToAdmin,
 
 
  
@@ -13,6 +14,7 @@ import Modal from "../../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
+import { setCurrentPage } from "../../../Slices/sipApprovedSlice";
 
 
 const Sip = () => {
@@ -29,16 +31,25 @@ const Sip = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    dispatch(sipApprovedList(currentPage));
-  }, [dispatch, token, currentPage]);
+    dispatch(sipApprovedList(currentPage || 1, 5, searchQuery));
+  }, [dispatch, currentPage, searchQuery]);
 
-  const handleNext = () => {
-    if (currentPage < totalPages) dispatch(sipApprovedList(currentPage + 1));
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) dispatch(sipApprovedList(currentPage - 1));
-  };
+ // Pagination handlers
+   const handleNext = useCallback(() => {
+     if (currentPage < totalPages) {
+       const newPage = currentPage + 1;
+       dispatch(setCurrentPage(newPage));
+       dispatch(sipApprovedList(newPage, 5, searchQuery)); // Fetch leads for new page
+     }
+   }, [dispatch, currentPage, totalPages, searchQuery]);
+ 
+   const handlePrev = useCallback(() => {
+     if (currentPage > 1) {
+       const newPage = currentPage - 1;
+       dispatch(setCurrentPage(newPage));
+       dispatch(sipApprovedList(newPage, 5, searchQuery)); // Fetch leads for new page
+     }
+   }, [dispatch, currentPage, searchQuery]);
 
   const copyToClipboard = (number) => {
     navigator.clipboard.writeText(number);
@@ -56,6 +67,8 @@ const Sip = () => {
   const handleSipRequest = async () => {
     try {
      await sipRequest(token, selectedLead?.id);
+     dispatch(sipApprovedList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
+           closeModals(); // ⬅ Close modal after action
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
     }
@@ -63,7 +76,9 @@ const Sip = () => {
 
   const handleRmDelete = async () => {
     try {
-     await deleteLead(token, selectedLead?.id);
+     await deleteLeadToAdmin(token, selectedLead?.id);
+     dispatch(sipApprovedList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
+           closeModals(); // ⬅ Close modal after action
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
     }
@@ -86,14 +101,16 @@ const Sip = () => {
   };
 
   // ✅ Only show approved leads
-  const filteredLeads = sipApproved
-    .filter(
-      (lead) =>
-        lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        lead.mobile_number.includes(searchQuery) ||
-        lead.whatsapp_mobile_number.includes(searchQuery)
+  const filteredLeads = useMemo(
+      () =>
+        sipApproved.filter(
+          (lead) =>
+            lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            lead.mobile_number.includes(searchQuery) 
+            
+        ),
+      [sipApproved, searchQuery]
     );
-
   if (loading)
     return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
   if (error)
@@ -141,8 +158,8 @@ const Sip = () => {
                 className={`
                   border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl
                   ${lead.sip_request_status=== "rejected" ? "bg-bgCard" : ""}
-                  ${lead.sip_request_status === "approved" ? "bg-bgAprCard" : ""}
-                  ${!["rejected", "approved"].includes(lead.sip_request_status) ? "bg-white" : ""}
+                  ${lead.sip_request_status === "requested" ? "bg-bgAprCard" : ""}
+                  ${!["rejected", "requested"].includes(lead.sip_request_status) ? "bg-white" : ""}
                 `}
               >
                   <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">

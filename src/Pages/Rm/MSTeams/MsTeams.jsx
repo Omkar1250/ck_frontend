@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   deleteLead,
@@ -10,6 +10,7 @@ import Modal from "../../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
+import { setCurrentPage } from "../../../Slices/msTeamsApprovedSlice";
 const MsTeams = () => {
   const dispatch = useDispatch();
 
@@ -27,16 +28,24 @@ const MsTeams = () => {
   const [isScreenshotViewOpen, setIsScreenshotViewOpen] = useState(false);
 
   useEffect(() => {
-    dispatch(msTeamsApprovedList(currentPage));
-  }, [dispatch, token, currentPage]);
+    dispatch(msTeamsApprovedList(currentPage || 1, 5, searchQuery));
+  }, [dispatch, currentPage, searchQuery]);
 
-  const handleNext = () => {
-    if (currentPage < totalPages) dispatch(msTeamsApprovedList(currentPage + 1));
-  };
+const handleNext = useCallback(() => {
+    if (currentPage < totalPages) {
+      const newPage = currentPage + 1;
+      dispatch(setCurrentPage(newPage));
+      dispatch(msTeamsApprovedList(newPage, 5, searchQuery)); // Fetch leads for new page
+    }
+  }, [dispatch, currentPage, totalPages, searchQuery]);
 
-  const handlePrev = () => {
-    if (currentPage > 1) dispatch(msTeamsApprovedList(currentPage - 1));
-  };
+  const handlePrev = useCallback(() => {
+    if (currentPage > 1) {
+      const newPage = currentPage - 1;
+      dispatch(setCurrentPage(newPage));
+      dispatch(msTeamsApprovedList(newPage, 5, searchQuery)); // Fetch leads for new page
+    }
+  }, [dispatch, currentPage, searchQuery]);
 
   const copyToClipboard = (number) => {
     navigator.clipboard.writeText(number);
@@ -65,7 +74,8 @@ const MsTeams = () => {
       // Make the API request
        await msTeamsRequest(token, selectedLead?.id, formData);
       toast.success("Ms-Teams request sent successfully!");
-      setIsUnderModalOpen(false);
+       dispatch(msTeamsApprovedList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
+            closeModals(); // ⬅ Close modal after action
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
     }
@@ -75,8 +85,8 @@ const MsTeams = () => {
     try {
     await deleteLead(token, selectedLead?.id);
       toast.success("Lead deleted successfully!");
-      dispatch(msTeamsApprovedList())
-      setIsDeleteModalOpen(false);
+       dispatch(msTeamsApprovedList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
+            closeModals(); // ⬅ Close modal after action
       closeModals()
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
@@ -112,12 +122,16 @@ const MsTeams = () => {
     }
   };
 
-  const filteredLeads = msTeamsApproved.filter(
-    (lead) =>
-      lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      lead.mobile_number.includes(searchQuery) ||
-      lead.whatsapp_mobile_number.includes(searchQuery)
-  );
+  const filteredLeads = useMemo(
+     () =>
+       msTeamsApproved.filter(
+         (lead) =>
+           lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           lead.mobile_number.includes(searchQuery) 
+           
+       ),
+     [msTeamsApproved, searchQuery]
+   );
 
   if (loading)
     return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
@@ -163,8 +177,8 @@ const MsTeams = () => {
                   className={`
                     border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl
                     ${lead.ms_teams_request_status === "rejected" ? "bg-bgCard" : ""}
-                    ${lead.ms_teams_request_status === "approved" ? "bg-bgAprCard" : ""}
-                    ${!["rejected", "approved"].includes(lead.activation_request_status) ? "bg-white" : ""}
+                    ${lead.ms_teams_request_status === "requested" ? "bg-bgAprCard" : ""}
+                    ${!["rejected", "requested"].includes(lead.ms_teams_request_status) ? "bg-white" : ""}
                   `}
                 >
                   <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">

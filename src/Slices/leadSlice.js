@@ -26,9 +26,12 @@ const leadSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    setCurrentPage: (state, action) => {
+      state.currentPage = action.payload; // Update the current page
+    },
   },
 });
 
-export const { setLoading, setLeadsSuccess, setLeadsError } = leadSlice.actions;
+export const { setLoading, setLeadsSuccess, setLeadsError,setCurrentPage } = leadSlice.actions;
 
 export default leadSlice.reducer;

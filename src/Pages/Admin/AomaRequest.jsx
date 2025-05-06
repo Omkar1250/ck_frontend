@@ -10,6 +10,7 @@ import {
   aomaRequestList,
   
 } from "../../operations/adminApi";
+const IMAGE_URL = process.env.REACT_APP_IMAGE_URL;
 
 const AomaRequest = () => {
   const dispatch = useDispatch();
@@ -87,8 +88,7 @@ const AomaRequest = () => {
       aomaRequests.filter(
         (lead) =>
           lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          lead.mobile_number.includes(searchQuery) ||
-          lead.whatsapp_mobile_number.includes(searchQuery)
+          lead.mobile_number.includes(searchQuery) 
       ),
     [aomaRequests, searchQuery]
   );
@@ -156,7 +156,7 @@ const AomaRequest = () => {
           <div className="flex flex-col items-center justify-center mt-4">
             <button
               onClick={() => {
-                setModalImage(`http://localhost:4000/${selectedLead.aoma_screenshot}`);
+                setModalImage(`${IMAGE_URL}/${selectedLead.aoma_screenshot}`);
                 setShowImageModal(true);
               }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

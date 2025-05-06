@@ -6,7 +6,7 @@ import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
 import { msTeamsAction, msTeamsRequestList } from "../../operations/adminApi";
-
+const IMAGE_URL = process.env.REACT_APP_IMAGE_URL;
 const MsTeamsRequest = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
@@ -83,8 +83,7 @@ const MsTeamsRequest = () => {
       msTeamsRequests.filter(
         (lead) =>
           lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          lead.mobile_number.includes(searchQuery) ||
-          lead.whatsapp_mobile_number.includes(searchQuery)
+          lead.mobile_number.includes(searchQuery)
       ),
     [msTeamsRequests, searchQuery]
   );
@@ -152,7 +151,7 @@ const MsTeamsRequest = () => {
           <div className="flex flex-col items-center justify-center mt-4">
             <button
               onClick={() => {
-                setModalImage(`http://localhost:4000/${selectedLead?.ms_teams_screenshot}`);
+                setModalImage(`${IMAGE_URL}/${selectedLead?.ms_teams_screenshot}`);
                 setShowImageModal(true);
               }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

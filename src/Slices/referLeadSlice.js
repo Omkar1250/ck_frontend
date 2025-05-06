@@ -26,9 +26,12 @@ const referLeadSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    setCurrentPage: (state, action) => {
+      state.currentPage = action.payload; // Update the current page
+    },
   },
 });
 
-export const { setReferLoading, setReferLeadsSuccess, setReferLeadsError } = referLeadSlice.actions;
+export const { setReferLoading, setReferLeadsSuccess, setReferLeadsError,setCurrentPage } = referLeadSlice.actions;
 
 export default referLeadSlice.reducer;

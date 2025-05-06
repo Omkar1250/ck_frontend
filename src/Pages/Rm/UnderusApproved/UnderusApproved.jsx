@@ -6,6 +6,7 @@ import Modal from "../../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
+import { setCurrentPage } from "../../../Slices/underUsapprovedSlice";
 
 const UnderUsApproved = () => {
   const dispatch = useDispatch();
@@ -21,17 +22,26 @@ const UnderUsApproved = () => {
 
   // Fetch leads on component mount or page change
   useEffect(() => {
-    dispatch(underUsApprovedLeads(currentPage));
-  }, [dispatch, currentPage]);
+    dispatch(underUsApprovedLeads(currentPage || 1, 5, searchQuery));
+  }, [dispatch, currentPage, searchQuery]);
 
   // Handlers for pagination
-  const handleNext = useCallback(() => {
-    if (currentPage < totalPages) dispatch(underUsApprovedLeads(currentPage + 1));
-  }, [dispatch, currentPage, totalPages]);
-
-  const handlePrev = useCallback(() => {
-    if (currentPage > 1) dispatch(underUsApprovedLeads(currentPage - 1));
-  }, [dispatch, currentPage]);
+   // Pagination handlers
+   const handleNext = useCallback(() => {
+     if (currentPage < totalPages) {
+       const newPage = currentPage + 1;
+       dispatch(setCurrentPage(newPage));
+       dispatch(underUsApprovedLeads(newPage, 5, searchQuery)); // Fetch leads for new page
+     }
+   }, [dispatch, currentPage, totalPages, searchQuery]);
+ 
+   const handlePrev = useCallback(() => {
+     if (currentPage > 1) {
+       const newPage = currentPage - 1;
+       dispatch(setCurrentPage(newPage));
+       dispatch(underUsApprovedLeads(newPage, 5, searchQuery)); // Fetch leads for new page
+     }
+   }, [dispatch, currentPage, searchQuery]);
 
   // Copy to clipboard
   const copyToClipboard = useCallback((number) => {
@@ -54,8 +64,8 @@ const UnderUsApproved = () => {
     try {
       await codedRequest(token, selectedLead?.id);
       toast.success("Request sent successfully!");
-      setIsUnderModalOpen(false);
-      dispatch(underUsApprovedLeads(currentPage)); // Refresh leads
+     dispatch(underUsApprovedLeads(currentPage, 5, searchQuery)); // ⬅ Refresh the data
+           closeModals(); // ⬅ Close modal after action
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
     }
@@ -73,8 +83,8 @@ const UnderUsApproved = () => {
         selectedLead?.whatsapp_mobile_number
       );
       toast.success("Lead deleted successfully!");
-      setIsDeleteModalOpen(false);
-      dispatch(underUsApprovedLeads(currentPage)); // Refresh leads
+      dispatch(underUsApprovedLeads(currentPage, 5, searchQuery)); // ⬅ Refresh the data
+            closeModals(); // ⬅ Close modal after action
     } catch (error) {
       toast.error(error.message || "Failed to delete lead.");
     }
@@ -104,8 +114,7 @@ const UnderUsApproved = () => {
       underUsApproved.filter(
         (lead) =>
           lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          lead.mobile_number.includes(searchQuery) ||
-          lead.whatsapp_mobile_number.includes(searchQuery)
+          lead.mobile_number.includes(searchQuery) 
       ),
     [underUsApproved, searchQuery]
   );
@@ -148,7 +157,15 @@ const UnderUsApproved = () => {
         />
       )}
 
-      <Pagination currentPage={currentPage} totalPages={totalPages} handleNext={handleNext} handlePrev={handlePrev} />
+       {/* Pagination */}
+       {!searchQuery && totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              handleNext={handleNext}
+              handlePrev={handlePrev}
+            />
+          )}
 
       {/* Modals */}
       <Modal
@@ -210,8 +227,8 @@ const LeadCard = ({ lead, isDisabled, copyToClipboard, openWhatsApp, makeCall, o
   <div
     className={`border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl ${
       lead.code_request_status === "rejected" ? "bg-bgCard" : ""
-    } ${lead.code_request_status === "approved" ? "bg-bgAprCard" : ""} ${
-      !["rejected", "approved"].includes(lead.code_request_status) ? "bg-white" : ""
+    } ${lead.code_request_status === "requested" ? "bg-bgAprCard" : ""} ${
+      !["rejected", "requested"].includes(lead.code_request_status) ? "bg-white" : ""
     }`}
   >
     <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
@@ -273,7 +290,9 @@ const Pagination = ({ currentPage, totalPages, handleNext, handlePrev }) => (
       onClick={handlePrev}
       disabled={currentPage === 1}
       className={`px-5 py-2 rounded-lg text-white text-base w-36 ${
-        currentPage === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+        currentPage === 1
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-blue-600 hover:bg-blue-700"
       }`}
     >
       Previous
@@ -285,7 +304,9 @@ const Pagination = ({ currentPage, totalPages, handleNext, handlePrev }) => (
       onClick={handleNext}
       disabled={currentPage === totalPages}
       className={`px-5 py-2 rounded-lg text-white text-base w-36 ${
-        currentPage === totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+        currentPage === totalPages
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-blue-600 hover:bg-blue-700"
       }`}
     >
       Next

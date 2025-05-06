@@ -26,6 +26,9 @@ const aomaApprovedSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    setCurrentPage: (state, action) => {
+      state.currentPage = action.payload; // Update the current page
+    },
   },
 });
 
@@ -33,6 +36,7 @@ export const {
   setAomaLoading,
   setAomaApprovedSuccess,
   setAomaApprovedError,
+  setCurrentPage
 } = aomaApprovedSlice.actions;
 
 export default aomaApprovedSlice.reducer;

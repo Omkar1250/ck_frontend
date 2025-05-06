@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   activationApprovedList,
@@ -6,12 +6,11 @@ import {
 import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
-
+import { setCurrentPage } from "../../../Slices/activationApprovedSlice";
 
 const YourClients = () => {
   const dispatch = useDispatch();
 
-  const { token } = useSelector((state) => state.auth);
   const { activationApproved, loading, error, currentPage, totalPages } = useSelector(
     (state) => state.activationApproved
   );
@@ -20,8 +19,8 @@ const YourClients = () => {
   const [now, setNow] = useState(new Date());  // ✅ store current time
 
   useEffect(() => {
-    dispatch(activationApprovedList(currentPage));
-  }, [dispatch, token, currentPage]);
+    dispatch(activationApprovedList(currentPage || 1, 5, searchQuery));
+  }, [dispatch, currentPage, searchQuery]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -31,13 +30,21 @@ const YourClients = () => {
     return () => clearInterval(interval); // cleanup
   }, []);
 
-  const handleNext = () => {
-    if (currentPage < totalPages) dispatch(activationApprovedList(currentPage + 1));
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) dispatch(activationApprovedList(currentPage - 1));
-  };
+ const handleNext = useCallback(() => {
+     if (currentPage < totalPages) {
+       const newPage = currentPage + 1;
+       dispatch(setCurrentPage(newPage));
+       dispatch(activationApprovedList(newPage, 5, searchQuery)); // Fetch leads for new page
+     }
+   }, [dispatch, currentPage, totalPages, searchQuery]);
+ 
+   const handlePrev = useCallback(() => {
+     if (currentPage > 1) {
+       const newPage = currentPage - 1;
+       dispatch(setCurrentPage(newPage));
+       dispatch(activationApprovedList(newPage, 5, searchQuery)); // Fetch leads for new page
+     }
+   }, [dispatch, currentPage, searchQuery]);
 
   const copyToClipboard = (number) => {
     navigator.clipboard.writeText(number);
@@ -65,17 +72,30 @@ const YourClients = () => {
     return daysLeft > 0 ? daysLeft : 0;
   }
 
-  const filteredLeads = activationApproved.filter(
-    (lead) =>
-      lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      lead.mobile_number.includes(searchQuery) ||
-      lead.whatsapp_mobile_number.includes(searchQuery)
-  );
+ const filteredLeads = useMemo(
+     () =>
+       activationApproved.filter(
+         (lead) =>
+           lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           lead.mobile_number.includes(searchQuery) 
+           
+       ),
+     [activationApproved, searchQuery]
+   );
 
-  if (loading)
-    return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
-  if (error)
-    return <p className="text-red-500 text-center mt-6 text-lg">No leads found</p>;
+ // Render loading and error states
+ if (loading) return <p className="text-blue-600 text-center mt-16 text-lg">Loading...</p>;
+  if (error) return (
+    <div className="text-center mt-6">
+      <p className="text-red-500 text-lg">No leads found</p>
+      <button
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        onClick={() => dispatch(activationApprovedList(currentPage))}
+      >
+        Retry
+      </button>
+    </div>
+  );
 
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">

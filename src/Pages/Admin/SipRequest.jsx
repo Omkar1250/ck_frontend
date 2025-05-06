@@ -76,8 +76,7 @@ const SipRequest = () => {
       sipRequests.filter(
         (lead) =>
           lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          lead.mobile_number.includes(searchQuery) ||
-          lead.whatsapp_mobile_number.includes(searchQuery)
+          lead.mobile_number.includes(searchQuery) 
       ),
     [sipRequests, searchQuery]
   );

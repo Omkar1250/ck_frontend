@@ -14,7 +14,7 @@ module.exports = {
       btnColor:"#6473AA",
       greenBtn:"#61D74A",
       delBtn:"#E61D12",
-      bgCard:"#E23232",
+      bgCard:"#E61D12",
       bgAprCard:"#E0ECFF",
       bgUni:"#51E1FF",
       black: "#000",
