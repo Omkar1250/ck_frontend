@@ -76,6 +76,7 @@ const RmPayments = () => {
                 {/* Left side: Lead Name */}
                 <div>
                   <p className="font-semibold capitalize text-gray-800">{txn.lead_name}</p>
+                  <p  className="font-semibold capitalize text-gray-800"> {txn. mobile_number}</p>
                 </div>
 
                 {/* Right side: Points, Date, Action */}

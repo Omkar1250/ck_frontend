@@ -87,7 +87,6 @@ const CodedApproved = () => {
   const handleRmDelete = async () => {
     try {
       await deleteLead(token, selectedLead?.id);
-      toast.success("Lead deleted successfully!");
       setIsDeleteModalOpen(false);
        dispatch(codedApprovedList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
             closeModals(); // ⬅ Close modal after action

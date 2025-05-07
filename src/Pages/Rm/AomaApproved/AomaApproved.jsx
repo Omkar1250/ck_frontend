@@ -83,7 +83,7 @@ const AomaApproved = () => {
   const handleRmDelete = async () => {
     try {
       await deleteLead(token, selectedLead?.id);
-      toast.success("Lead deleted successfully.");
+     
       dispatch(aomaApprovedList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
            closeModals(); // ⬅ Close modal after action
     } catch (error) {

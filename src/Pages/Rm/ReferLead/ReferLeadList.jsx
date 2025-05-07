@@ -81,7 +81,6 @@ const ReferLeadList = () => {
   const handleRmDelete = async () => {
     try {
       await deleteLead(token, selectedLead?.id);
-      toast.success("Lead deleted successfully.");
       dispatch(fetchReferLeadList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
       closeModals(); // ⬅ Close modal after action
     } catch (error) {
@@ -224,11 +223,12 @@ const LeadCard = ({
   openDeleteModal,
 }) => (
   <div
-    className={`border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl ${
-      lead.under_us_status === "rejected" ? "bg-red-200" : "bg-white",
-      lead.under_us_status === "pending" ? "bg-bgAprCard" : "bg-white"
-    }`}
-  >
+  className={`border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl ${
+    lead.under_us_status === "rejected" ? "bg-bgCard" : ""
+  } ${lead.under_us_status === "pending" ? "bg-bgAprCard" : ""} ${
+    !["rejected", "pending"].includes(lead.under_us_status) ? "bg-white" : ""
+  }`}
+>
     <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
       <h3 className="text-xl font-semibold text-gray-800">{lead.name}</h3>
       <p className="text-sm text-gray-500">

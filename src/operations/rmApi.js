@@ -189,6 +189,7 @@ export const codedRequest = async (token, leadId, dispatch) => {
 //aoma request
 export const aomaRequest = async (token, leadId, formData) => {
   try {
+    console.log("Printing star from aoma", formData)
     const response = await apiConnector(
       "POST",
       `${REQUEST_AOMA_API}/${leadId}`,

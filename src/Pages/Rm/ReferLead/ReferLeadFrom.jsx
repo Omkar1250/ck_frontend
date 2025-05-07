@@ -71,6 +71,7 @@ export default function ReferLeadForm({ closeModal }) {
         });
         setMobileAvailable(null);
         closeModal(); // Close the modal after successful submission
+        toast.success("Lead Refered Successfully")
       } else {
         setErrors({ submit: res.message || 'Failed to submit lead. Please try again.' });
       }
@@ -78,7 +79,7 @@ export default function ReferLeadForm({ closeModal }) {
       setErrors({ submit: error.response?.data?.message || 'Error submitting lead. Please try again.' });
     } finally {
       setIsSubmitting(false);
-      toast.success("Lead Refered Successfully")
+     
     }
   };
 

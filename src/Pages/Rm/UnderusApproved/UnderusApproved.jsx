@@ -82,7 +82,7 @@ const UnderUsApproved = () => {
         selectedLead?.mobile_number,
         selectedLead?.whatsapp_mobile_number
       );
-      toast.success("Lead deleted successfully!");
+   
       dispatch(underUsApprovedLeads(currentPage, 5, searchQuery)); // ⬅ Refresh the data
             closeModals(); // ⬅ Close modal after action
     } catch (error) {

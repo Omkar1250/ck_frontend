@@ -87,7 +87,7 @@ const LeadList = () => {
     setIsFetching(true);
     try {
       const res = await fetchLeads(token);
-      
+      dispatch(fetchRMLeads(currentPage, 5, searchQuery));
       if (res?.data.success) {
         setFetchTime(new Date());
       }
@@ -235,14 +235,15 @@ const LeadCard = ({
   openUnderModal,
   openDeleteModal,
 }) => {
-  let bgClass = "bg-white";
-  if (lead.under_us_status === "rejected") bgClass = "bg-bgCard";
-  if (lead.under_us_status === "pending") bgClass = "bg-bgAprCard";
-
+  
   return (
     <div
-      className={`border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl ${bgClass}`}
-    >
+    className={`border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl ${
+      lead.under_us_status === "rejected" ? "bg-bgCard" : ""
+    } ${lead.under_us_status === "pending" ? "bg-bgAprCard" : ""} ${
+      !["rejected", "pending"].includes(lead.under_us_status) ? "bg-white" : ""
+    }`}
+  >
       <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
         <h3 className="text-xl font-semibold text-gray-800">{lead.name}</h3>
         <p className="text-sm text-gray-500">

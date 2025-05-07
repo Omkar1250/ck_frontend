@@ -84,7 +84,7 @@ const handleNext = useCallback(() => {
   const handleRmDelete = async () => {
     try {
     await deleteLead(token, selectedLead?.id);
-      toast.success("Lead deleted successfully!");
+    
        dispatch(msTeamsApprovedList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
             closeModals(); // ⬅ Close modal after action
       closeModals()

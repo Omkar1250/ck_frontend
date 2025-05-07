@@ -73,6 +73,7 @@ const MsTeamsId = () => {
     try {
     const res=  await msDetailsAction(token,selectedLead.id, {action: 'approve'});
       toast.success("MS Teams details sent successfully!");
+      dispatch(getAllMsLeads(currentPage, 5, searchQuery));
       closeFormModal();
     } catch (error) {
       toast.error("Failed to send MS Teams details.");
