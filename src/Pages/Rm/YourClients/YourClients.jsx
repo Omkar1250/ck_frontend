@@ -11,7 +11,8 @@ import { setCurrentPage } from "../../../Slices/activationApprovedSlice";
 const YourClients = () => {
   const dispatch = useDispatch();
 
-  const { activationApproved, loading, error, currentPage, totalPages } = useSelector(
+
+  const { activationApproved, loading, error, currentPage, totalPages, totalActivationLeads } = useSelector(
     (state) => state.activationApproved
   );
 
@@ -100,7 +101,7 @@ const YourClients = () => {
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-        Your Clients
+        Your Clients ({totalActivationLeads})
       </h2>
 
       <SearchInput

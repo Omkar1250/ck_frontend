@@ -16,10 +16,9 @@ export default function ReferLeadForm({ closeModal }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mobileAvailable, setMobileAvailable] = useState(null);
 
-  // Validate mobile number format (example: 10-digit number)
   const isValidMobileNumber = (number) => /^[0-9]{10}$/.test(number);
+  const isValidName = (name) => /^[a-zA-Z\s]+$/.test(name.trim());
 
-  // Handle mobile number check
   const handleNumberCheck = async () => {
     if (!isValidMobileNumber(formData.mobile_number)) {
       setErrors({ ...errors, mobile_number: 'Please enter a valid 10-digit mobile number.' });
@@ -39,13 +38,13 @@ export default function ReferLeadForm({ closeModal }) {
     }
   };
 
-  // Handle form submission
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate form fields
     let validationErrors = {};
     if (!formData.name.trim()) validationErrors.name = 'Name is required.';
+    else if (!isValidName(formData.name)) validationErrors.name = 'Name should contain only letters and spaces.';
+
     if (!isValidMobileNumber(formData.mobile_number)) validationErrors.mobile_number = 'Please enter a valid 10-digit mobile number.';
     if (!isValidMobileNumber(formData.whatsapp_mobile_number)) validationErrors.whatsapp_mobile_number = 'Please enter a valid WhatsApp number.';
     setErrors(validationErrors);
@@ -54,24 +53,22 @@ export default function ReferLeadForm({ closeModal }) {
 
     setIsSubmitting(true);
     try {
-      // Prepare payload
       const payload = {
-        name: formData.name,
+        name: formData.name.trim(),
         mobile_number: formData.mobile_number,
         whatsapp_mobile_number: formData.whatsapp_mobile_number,
       };
 
       const res = await submitReferLead(token, payload);
       if (res.success) {
-        // Clear form data and close modal
         setFormData({
           name: '',
           mobile_number: '',
           whatsapp_mobile_number: '',
         });
         setMobileAvailable(null);
-        closeModal(); // Close the modal after successful submission
-        toast.success("Lead Refered Successfully")
+        closeModal();
+        toast.success("Lead Referred Successfully");
       } else {
         setErrors({ submit: res.message || 'Failed to submit lead. Please try again.' });
       }
@@ -79,18 +76,24 @@ export default function ReferLeadForm({ closeModal }) {
       setErrors({ submit: error.response?.data?.message || 'Error submitting lead. Please try again.' });
     } finally {
       setIsSubmitting(false);
-     
     }
   };
 
-  // Handle input change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === 'name') {
+      if (/[^a-zA-Z\s]/.test(value)) return;
+    }
+
+    if (name === 'mobile_number' || name === 'whatsapp_mobile_number') {
+      if (/[^0-9]/.test(value)) return;
+    }
+
     setFormData({ ...formData, [name]: value });
     setErrors({ ...errors, [name]: '' });
   };
 
-  // Handle checkbox change for "Same as WhatsApp"
   const handleCheckboxChange = () => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -125,6 +128,8 @@ export default function ReferLeadForm({ closeModal }) {
             <input
               type="text"
               name="mobile_number"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Account Opening Number"
               value={formData.mobile_number}
               onChange={handleInputChange}
@@ -154,6 +159,8 @@ export default function ReferLeadForm({ closeModal }) {
           <input
             type="text"
             name="whatsapp_mobile_number"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="WhatsApp Number"
             value={formData.whatsapp_mobile_number}
             onChange={handleInputChange}
@@ -177,7 +184,7 @@ export default function ReferLeadForm({ closeModal }) {
           <label className="text-sm text-richblack-700">Same as Mobile Number</label>
         </div>
 
-        {/* Error Message for Submission */}
+        {/* Submission Error */}
         {errors.submit && <p className="text-sm text-bgCard mb-4">{errors.submit}</p>}
 
         {/* Action Buttons */}

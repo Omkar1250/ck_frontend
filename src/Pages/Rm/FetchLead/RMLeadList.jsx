@@ -16,7 +16,7 @@ import { setCurrentPage } from "../../../Slices/leadSlice";
 const LeadList = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
-  const { leads, loading, error, currentPage, totalPages } = useSelector(
+  const { leads, loading, error, currentPage, totalPages,totalLeads } = useSelector(
     (state) => state.leads
   );
   const [fetchTime, setFetchTime] = useState(null);
@@ -128,7 +128,7 @@ const LeadList = () => {
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-        Fetch Lead List
+        Fetch Lead List ({totalLeads})
       </h2>
 
       {/* Fetch button always visible */}
@@ -247,7 +247,7 @@ const LeadCard = ({
       <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
         <h3 className="text-xl font-semibold text-gray-800">{lead.name}</h3>
         <p className="text-sm text-gray-500">
-          Lead fetched: {format(lead.fetched_at)}
+           {format(lead.fetched_at)}
         </p>
       </div>
 

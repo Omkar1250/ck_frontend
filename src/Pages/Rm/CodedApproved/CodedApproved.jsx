@@ -11,13 +11,15 @@ import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
 import { setCurrentPage } from "../../../Slices/codedSlice";
+import dayjs from "dayjs"; // Import dayjs for date manipulation
 
 
 const CodedApproved = () => {
   const dispatch = useDispatch();
+ const {user} = useSelector((state) => state.profile)
 
   const { token } = useSelector((state) => state.auth);
-  const { codedApproved, loading, error, currentPage, totalPages } = useSelector(
+  const { codedApproved, loading, error, currentPage, totalPages,totalCodedLeads } = useSelector(
     (state) => state.codedApproved
   );
 
@@ -82,6 +84,13 @@ const CodedApproved = () => {
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
     }
+  };
+
+   const calculateRemainingDays = (date) => {
+    const approvedDate = dayjs(date);
+    const currentDate = dayjs();
+    const difference = 20 - currentDate.diff(approvedDate, "day"); // Calculate remaining days
+    return difference;
   };
 
   const handleRmDelete = async () => {
@@ -150,7 +159,7 @@ const CodedApproved = () => {
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-        Coded Approved List
+        Coded Approved List ({totalCodedLeads})  <p><span>{user.aoma_stars} ⭐</span></p>
       </h2>
     
 
@@ -170,6 +179,13 @@ const CodedApproved = () => {
               const isDisabled =
                 lead.aoma_request_status === "approved" ||
                 lead.aoma_request_status === "requested";
+                 const remainingDays = calculateRemainingDays(
+                lead.code_approved_at
+              );
+              const timeRemainingClass =
+                remainingDays <= 5
+                  ? "text-pink-500 "
+                  : "text-richblack-700";
 
               return (
                 <div
@@ -185,8 +201,8 @@ const CodedApproved = () => {
                     <h3 className="text-xl font-semibold text-gray-800">
                       {lead.name}
                     </h3>
-                    <p className="text-sm text-gray-500">
-                      Lead fetched: {format(lead.fetched_at)}
+                     <p className={timeRemainingClass}>
+                      Time Remaining: {remainingDays} D
                     </p>
                   </div>
 

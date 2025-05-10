@@ -34,7 +34,8 @@ export const leadEndpoints = {
     REQUEST_AOMA_API: BASE_URL + "/request-aoma",
     REQUEST_ACTIVATION_API: BASE_URL + "/request-activation",
     REQUEST_MS_TEAMS_API: BASE_URL + "/request-ms-teams-activation",
-    REQUET_SIP_API: BASE_URL + "/request-sip"
+    REQUET_SIP_API: BASE_URL + "/request-sip",
+    UNFETCH_LEADS_API : BASE_URL + "/unfetchleads"
   };
   
 

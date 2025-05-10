@@ -1,26 +1,45 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { fetchAnalyticsSummary } from "../../../operations/rmApi";
+import { fetchAnalyticsSummary, unFetchedLeads } from "../../../operations/rmApi";
 
 const Analytics = () => {
   const dispatch = useDispatch();
+  const {token} = useSelector((state)=> state.auth)
   const { analytics, loading, error } = useSelector((state) => state.analytics);
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [unFetched, setUnFetch] = useState(0);
 
   useEffect(() => {
     dispatch(fetchAnalyticsSummary());
   }, [dispatch]);
+   
+  
+ useEffect(() => {
+  const fetchUnassignedLead = async () => {
+    try {
+      const data = await dispatch(unFetchedLeads()); // ✅ dispatch the thunk
+      setUnFetch(data);
+    } catch (err) {
+      console.error("Failed to fetch unfetched leads");
+    }
+  };
+
+  fetchUnassignedLead();
+}, [dispatch]);
+  
 
   const handleDateChange = () => {
     if (startDate && endDate) {
       dispatch(fetchAnalyticsSummary(startDate, endDate));
     }
   };
+  
+
 
   return (
-    <div className="min-h-screen  py-10 px-4">
+    <div className="min-h-screen py-10 px-4">
       <div className="max-w-5xl mx-auto">
         <h2 className="text-4xl font-bold text-center mt-16 text-blue-800 mb-8"> Analytics Summary</h2>
 
@@ -59,6 +78,7 @@ const Analytics = () => {
               { label: "Activation Done", value: analytics.activationDone },
               { label: "MS Teams Login", value: analytics.msTeamsLogin },
               { label: "SIP Setup", value: analytics.sipSetup },
+              { label: "Unfetched Leads", value: unFetched }, // Adding Unfetched Leads to the list
             ].map((item, index) => (
               <div
                 key={index}

@@ -15,13 +15,13 @@ import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
 import { setCurrentPage } from "../../../Slices/sipApprovedSlice";
-
+import dayjs from "dayjs";
 
 const Sip = () => {
   const dispatch = useDispatch();
 
   const { token } = useSelector((state) => state.auth);
-  const { sipApproved, loading, error, currentPage, totalPages } = useSelector(
+  const { sipApproved, loading, error, currentPage, totalPages,totalSipLeads } = useSelector(
     (state) => state.sipApproved
   );
 
@@ -73,6 +73,12 @@ const Sip = () => {
       toast.error(error.message || "Failed to send request.");
     }
   };
+   const calculateRemainingDays = (date) => {
+          const approvedDate = dayjs(date);
+          const currentDate = dayjs();
+          const difference = 10 - currentDate.diff(approvedDate, "day"); // Calculate remaining days
+          return difference;
+        };
 
   const handleRmDelete = async () => {
     try {
@@ -129,7 +135,7 @@ const Sip = () => {
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-        Sip Clients
+        Sip Clients ({totalSipLeads})
       </h2>
 
       <SearchInput
@@ -149,6 +155,13 @@ const Sip = () => {
                 
                 lead.sip_request_status === "approved" ||
                 lead.sip_request_status === "requested" 
+                 const remainingDays = calculateRemainingDays(
+                lead.code_approved_at
+              );
+              const timeRemainingClass =
+                remainingDays <= 5
+                  ? "text-pink-500 "
+                  : "text-richblack-700";
          
                 
                 
@@ -166,8 +179,8 @@ const Sip = () => {
                     <h3 className="text-xl font-semibold text-gray-800">
                       {lead.name}
                     </h3>
-                    <p className="text-sm text-gray-500">
-                      Lead fetched: {format(lead.fetched_at)}
+                 <p className={timeRemainingClass}>
+                      Time Remaining: {remainingDays} D
                     </p>
                   </div>
 

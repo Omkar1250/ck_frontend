@@ -11,11 +11,13 @@ import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
 import { setCurrentPage } from "../../../Slices/msTeamsApprovedSlice";
+import dayjs from "dayjs";
+
 const MsTeams = () => {
   const dispatch = useDispatch();
 
   const { token } = useSelector((state) => state.auth);
-  const { msTeamsApproved, loading, error, currentPage, totalPages } = useSelector(
+  const { msTeamsApproved, loading, error, currentPage, totalPages ,totalMsTeamsLeads} = useSelector(
     (state) => state.msTeamsApproved
   );
 
@@ -81,6 +83,13 @@ const handleNext = useCallback(() => {
     }
   };
 
+   const calculateRemainingDays = (date) => {
+        const approvedDate = dayjs(date);
+        const currentDate = dayjs();
+        const difference = 15 - currentDate.diff(approvedDate, "day"); // Calculate remaining days
+        return difference;
+      };
+  
   const handleRmDelete = async () => {
     try {
     await deleteLead(token, selectedLead?.id);
@@ -151,7 +160,7 @@ const handleNext = useCallback(() => {
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-        MS Teams
+        MS Teams ({totalMsTeamsLeads})
       </h2>
 
       <SearchInput
@@ -171,6 +180,15 @@ const handleNext = useCallback(() => {
                 lead.ms_teams_request_status === "approved" ||
                 lead.ms_teams_request_status === "requested";
 
+                  const remainingDays = calculateRemainingDays(
+                lead.code_approved_at
+              );
+              const timeRemainingClass =
+                remainingDays <= 5
+                  ? "text-pink-500 "
+                  : "text-richblack-700";
+
+
               return (
                 <div
                   key={lead.id}
@@ -185,9 +203,10 @@ const handleNext = useCallback(() => {
                     <h3 className="text-xl font-semibold text-gray-800">
                       {lead.name}
                     </h3>
-                    <p className="text-sm text-gray-500">
-                      Lead fetched: {format(lead.fetched_at)}
+                   <p className={timeRemainingClass}>
+                      Time Remaining: {remainingDays} D
                     </p>
+                 
                   </div>
 
                   <div className="flex flex-col gap-3 text-base text-gray-700">

@@ -11,7 +11,7 @@ import { setCurrentPage } from "../../../Slices/underUsapprovedSlice";
 const UnderUsApproved = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
-  const { underUsApproved, loading, error, currentPage, totalPages } = useSelector(
+  const { underUsApproved, loading, error, currentPage, totalPages,totalApprovedLeads } = useSelector(
     (state) => state.underUsApproved
   );
 
@@ -135,7 +135,7 @@ const UnderUsApproved = () => {
 
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Under Us Approved List</h2>
+      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Under Us Approved List ({totalApprovedLeads})</h2>
 
       <SearchInput
         value={searchQuery}
@@ -233,7 +233,7 @@ const LeadCard = ({ lead, isDisabled, copyToClipboard, openWhatsApp, makeCall, o
   >
     <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
       <h3 className="text-xl font-semibold text-gray-800">{lead.name}</h3>
-      <p className="text-sm text-gray-500">Lead fetched: {format(lead.fetched_at)}</p>
+      <p className="text-sm text-gray-500"> {format(lead.fetched_at)}</p>
     </div>
 
     <div className="flex flex-col gap-3 text-base text-gray-700">

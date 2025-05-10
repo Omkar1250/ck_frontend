@@ -11,11 +11,17 @@ import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
 import { setCurrentPage } from "../../../Slices/aomaSlice";
+import dayjs from "dayjs";
+
 
 const AomaApproved = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
-  const { aomaApproved, loading, error, currentPage, totalPages } =
+  const {user} = useSelector((state) => state.profile)
+
+console.log("user", user)
+
+  const { aomaApproved, loading, error, currentPage, totalPages,totalAomaLeads } =
     useSelector((state) => state.aomaApproved);
 
   const [isUnderModalOpen, setIsUnderModalOpen] = useState(false);
@@ -26,6 +32,9 @@ const AomaApproved = () => {
   const [screenshotFile, setScreenshotFile] = useState(null);
   const [isScreenshotViewOpen, setIsScreenshotViewOpen] = useState(false);
   const [useStar, setUseStar] = useState(false);
+  
+
+
 
   useEffect(() => {
     dispatch(aomaApprovedList(currentPage || 1, 5, searchQuery));
@@ -79,6 +88,12 @@ const AomaApproved = () => {
       toast.error(error.message || "Failed to send request.");
     }
   };
+  const calculateRemainingDays = (date) => {
+      const approvedDate = dayjs(date);
+      const currentDate = dayjs();
+      const difference = 20 - currentDate.diff(approvedDate, "day"); // Calculate remaining days
+      return difference;
+    };
 
   const handleRmDelete = async () => {
     try {
@@ -147,8 +162,9 @@ const AomaApproved = () => {
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-        AOMA Approved List
+        AOMA Approved List ({totalAomaLeads})  <p><span>{user.activation_stars} ⭐</span></p>
       </h2>
+     
 
       <SearchInput
         value={searchQuery}
@@ -167,6 +183,14 @@ const AomaApproved = () => {
                 lead.activation_request_status === "approved" ||
                 lead.activation_request_status === "requested";
 
+                const remainingDays = calculateRemainingDays(
+                lead.code_approved_at
+              );
+              const timeRemainingClass =
+                remainingDays <= 5
+                  ? "text-pink-500 "
+                  : "text-richblack-700";
+
               return (
                 <div
                   key={lead.id}
@@ -182,8 +206,9 @@ const AomaApproved = () => {
                     <h3 className="text-xl font-semibold text-gray-800">
                       {lead.name}
                     </h3>
-                    <p className="text-sm text-gray-500">
-                      Lead fetched: {format(lead.fetched_at)}
+                  
+                     <p className={timeRemainingClass}>
+                      Time Remaining: {remainingDays} D
                     </p>
                   </div>
 

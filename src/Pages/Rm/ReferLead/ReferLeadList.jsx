@@ -15,7 +15,7 @@ import { setCurrentPage } from "../../../Slices/referLeadSlice";
 const ReferLeadList = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
-  const { referLeads, loading, error, currentPage, totalPages } = useSelector(
+  const { referLeads, loading, error, currentPage, totalPages, totalReferLeads } = useSelector(
     (state) => state.referLeads
   );
 
@@ -135,7 +135,7 @@ const ReferLeadList = () => {
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-        Refer Lead List
+        Refer Lead List ({totalReferLeads})
       </h2>
 
       <SearchInput
@@ -232,7 +232,7 @@ const LeadCard = ({
     <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
       <h3 className="text-xl font-semibold text-gray-800">{lead.name}</h3>
       <p className="text-sm text-gray-500">
-        Lead fetched: {format(lead.fetched_at)}
+        {format(lead.fetched_at)}
       </p>
     </div>
 

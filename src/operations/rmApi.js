@@ -61,7 +61,8 @@ const {
   REQUEST_AOMA_API,
   REQUEST_ACTIVATION_API,
   REQUEST_MS_TEAMS_API,
-  REQUET_SIP_API
+  REQUET_SIP_API,
+  UNFETCH_LEADS_API
   
   
   
@@ -808,5 +809,28 @@ export const submitReferLead = async (token, formData) => {
     return {
       error: error.response?.data?.message || error.message || "An unexpected error occurred",
     };
+  }
+};
+
+export const unFetchedLeads = () => async (dispatch, getState) => {
+  try {
+
+    const { token } = getState().auth; // Extract token from auth state
+
+  const response = await apiConnector(
+      "GET",
+      UNFETCH_LEADS_API,
+      null,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    console.log("llll", response.data.data.unFetchedLeads)
+
+return response.data.data.unFetchedLeads
+
+  } catch (error) {
+    console.error("Error fetching analytics summary:", error);
+
   }
 };
