@@ -1,26 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { FaWhatsapp, FaCopy, FaPhoneAlt, FaCheckCircle, FaClock, FaHeartBroken } from "react-icons/fa";
+import {
+  FaWhatsapp,
+  FaCopy,
+  FaPhoneAlt,
+  FaCheckCircle,
+  FaClock,
+  FaHeartBroken,
+} from "react-icons/fa";
 import Modal from "../../Components/Modal";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
-import { getAllLeads } from "../../operations/adminApi";
+import {
+  getAllLeads,
+  permanantDeleteLead,
+  approveLeadAction,
+} from "../../operations/adminApi";
 import { setCurrentPage } from "../../Slices/adminSlices/allLeadSlice";
-import { approveLeadAction } from "../../operations/adminApi"; // Import the approveLeadAction
 
 const UniversalApprove = () => {
   const dispatch = useDispatch();
-  const{token} = useSelector((state)=> state.auth)
-  const { trails = [], loading, error, currentPage, totalPages } = useSelector(
-    (state) => state.trails
-  );
+  const { token } = useSelector((state) => state.auth);
+  const {
+    trails = [],
+    loading,
+    error,
+    currentPage,
+    totalPages,
+  } = useSelector((state) => state.trails);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [modalAction, setModalAction] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  // Fetch leads with pagination and search
   useEffect(() => {
     dispatch(getAllLeads(currentPage || 1, 5, searchQuery));
   }, [dispatch, currentPage, searchQuery]);
@@ -28,16 +42,16 @@ const UniversalApprove = () => {
   const handleNext = () => {
     if (currentPage < totalPages) {
       const newPage = currentPage + 1;
-      dispatch(setCurrentPage(newPage)); // Dispatch the action
-      dispatch(getAllLeads(newPage, 5, searchQuery)); // Fetch leads for new page
+      dispatch(setCurrentPage(newPage));
+      dispatch(getAllLeads(newPage, 5, searchQuery));
     }
   };
 
   const handlePrev = () => {
     if (currentPage > 1) {
       const newPage = currentPage - 1;
-      dispatch(setCurrentPage(newPage)); // Dispatch the action
-      dispatch(getAllLeads(newPage, 5, searchQuery)); // Fetch leads for new page
+      dispatch(setCurrentPage(newPage));
+      dispatch(getAllLeads(newPage, 5, searchQuery));
     }
   };
 
@@ -55,17 +69,20 @@ const UniversalApprove = () => {
   };
 
   const openModal = (lead, action) => {
-     if (lead[`${action}_status`] === "approved") {
-    // If the action is already approved, prevent opening the modal
-    return;
-  }
-    setSelectedLead(lead);
-    setModalAction(action);
-    setIsModalOpen(true);
+    if (action === "delete") {
+      setSelectedLead(lead);
+      setIsDeleteModalOpen(true);
+    } else {
+      if (lead[`${action}_status`] === "approved") return;
+      setSelectedLead(lead);
+      setModalAction(action);
+      setIsModalOpen(true);
+    }
   };
 
-  const closeModal = () => {
+  const closeModals = () => {
     setIsModalOpen(false);
+    setIsDeleteModalOpen(false);
     setSelectedLead(null);
     setModalAction("");
   };
@@ -73,13 +90,25 @@ const UniversalApprove = () => {
   const handleApproval = async () => {
     try {
       if (selectedLead) {
-        await dispatch(approveLeadAction(token,selectedLead.id, modalAction)); // Dispatch the approval action
-        setIsModalOpen(false);
-        dispatch(getAllLeads(currentPage, 5, searchQuery)); // Refresh the leads
+        await dispatch(
+          approveLeadAction(token, selectedLead.id, modalAction)
+        );
+        closeModals();
+        dispatch(getAllLeads(currentPage, 5, searchQuery));
       }
     } catch (error) {
       toast.error("Approval failed");
       console.error(error);
+    }
+  };
+
+  const handleRmDelete = async () => {
+    try {
+      await permanantDeleteLead(token, selectedLead?.id);
+      closeModals();
+      dispatch(getAllLeads(currentPage, 5, searchQuery));
+    } catch (error) {
+      toast.error(error.message || "Failed to delete lead.");
     }
   };
 
@@ -106,13 +135,15 @@ const UniversalApprove = () => {
           <p className="text-red-500 text-lg">{error}</p>
           <button
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            onClick={() => dispatch(getAllLeads(currentPage || 1, 5, searchQuery))}
+            onClick={() =>
+              dispatch(getAllLeads(currentPage || 1, 5, searchQuery))
+            }
           >
             Retry
           </button>
         </div>
       ) : trails.length === 0 ? (
-        <p className="text-rihblack-600 text-center text-lg">No leads found.</p>
+        <p className="text-richblack-600 text-center text-lg">No leads found.</p>
       ) : (
         <LeadGrid
           leads={trails}
@@ -130,17 +161,39 @@ const UniversalApprove = () => {
         handlePrev={handlePrev}
       />
 
+      {/* Approval Modal */}
       <Modal
         isOpen={isModalOpen}
-        onClose={closeModal}
-        onSubmit={handleApproval} // Submit the approval action
+        onClose={closeModals}
+        onSubmit={handleApproval}
         name={selectedLead?.name}
         mobile_number={selectedLead?.mobile_number}
         whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
         title={modalAction}
         action={modalAction}
       >
-        <p>Are you sure you want to <span className="font-bold">{modalAction}</span> this lead?</p>
+        <p>
+          Are you sure you want to{" "}
+          <span className="font-bold">{modalAction}</span> this lead?
+        </p>
+      </Modal>
+
+      {/* Delete Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={closeModals}
+        onSubmit={handleRmDelete}
+        name={selectedLead?.name}
+        mobile_number={selectedLead?.mobile_number}
+        whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
+        title={"Permanent Delete"}
+        action={"delete"}
+      >
+        <p>
+          This will permanently delete the lead{" "}
+          <span className="font-bold">{selectedLead?.name}</span>. Are you
+          sure?
+        </p>
       </Modal>
     </div>
   );
@@ -174,23 +227,24 @@ const LeadCard = ({
   makeCall,
   openModal,
 }) => {
-  const renderStatus = (status) =>
-    {
-      if (status === "approved") {
-        return <FaCheckCircle className="text-caribbeangreen-400 ml-2 inline " />;
-      } else if (status === "requested") {
-        return <FaClock className="text-yellow-400 ml-2 inline" />;
-      } else if (status === "rejected"){
-            return <FaHeartBroken className="text-pink-400 ml-2 inline" ></FaHeartBroken>
-      } else {
-        return null;
-      }
-    };
-  
+  const renderStatus = (status) => {
+    if (status === "approved") {
+      return <FaCheckCircle className="text-caribbeangreen-500 ml-2 inline" />;
+    } else if (status === "requested") {
+      return <FaClock className="text-yellow-400 ml-2 inline" />;
+    } else if (status === "rejected") {
+      return <FaHeartBroken className="text-pink-400 ml-2 inline" />;
+    } else {
+      return null;
+    }
+  };
+
   return (
     <div className="border rounded-xl shadow p-4 bg-white flex flex-col gap-3">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold text-richblack-800">{lead.name}</h3>
+        <h3 className="text-xl font-semibold text-richblack-800">
+          {lead.name}
+        </h3>
       </div>
 
       <div className="text-sm text-richblack-700">
@@ -216,17 +270,26 @@ const LeadCard = ({
       </div>
 
       <div className="flex flex-wrap gap-2 mt-4">
-        {["under_us", "code_request", "aoma_request", "activation_request", "ms_teams_request", "sip_request"].map(
-          (action) => (
-            <button 
-              key={action} 
-              className={`px-2 text-sm py-1 text-richblack-900 bg-bgUni rounded-md ${lead[`${action}_status`] === "approved" ? "disabled:cursor-not-allowed" : ""}` }
-              onClick={() => openModal(lead, action)}
-            >
-              {action.toUpperCase()} {renderStatus(lead[`${action}_status`])}
-            </button>
-          )
-        )}
+        {[
+          "under_us",
+          "code_request",
+          "aoma_request",
+          "activation_request",
+          "ms_teams_request",
+          "sip_request",
+        ].map((action) => (
+          <button
+            key={action}
+            className={`px-2 text-sm py-1 text-richblack-900 bg-bgUni rounded-md ${
+              lead[`${action}_status`] === "approved"
+                ? "disabled:cursor-not-allowed"
+                : ""
+            }`}
+            onClick={() => openModal(lead, action)}
+          >
+            {action.toUpperCase()} {renderStatus(lead[`${action}_status`])}
+          </button>
+        ))}
         <button
           className="px-3 py-1 bg-pink-500 text-white rounded hover:bg-red-600"
           onClick={() => openModal(lead, "delete")}
@@ -245,13 +308,13 @@ const Pagination = ({ currentPage, totalPages, handleNext, handlePrev }) => (
       disabled={currentPage === 1}
       className={`px-5 py-2 rounded-lg text-white text-base w-36 ${
         currentPage === 1
-          ? "bg-gray-400 cursor-not-allowed"
+          ? "bg-richblack-400 cursor-not-allowed"
           : "bg-blue-600 hover:bg-blue-700"
       }`}
     >
       Previous
     </button>
-    <span className="text-gray-800 font-semibold text-lg text-center">
+    <span className="text-richblack-800 font-semibold text-lg text-center">
       Page {currentPage} of {totalPages}
     </span>
     <button
@@ -259,7 +322,7 @@ const Pagination = ({ currentPage, totalPages, handleNext, handlePrev }) => (
       disabled={currentPage === totalPages}
       className={`px-5 py-2 rounded-lg text-white text-base w-36 ${
         currentPage === totalPages
-          ? "bg-gray-400 cursor-not-allowed"
+          ? "bg-richblack-400 cursor-not-allowed"
           : "bg-blue-600 hover:bg-blue-700"
       }`}
     >

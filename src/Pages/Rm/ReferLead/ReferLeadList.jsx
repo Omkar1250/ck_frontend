@@ -11,6 +11,7 @@ import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
 import { setCurrentPage } from "../../../Slices/referLeadSlice";
+import { permanantDeleteLead } from "../../../operations/adminApi";
 
 const ReferLeadList = () => {
   const dispatch = useDispatch();
@@ -80,7 +81,7 @@ const ReferLeadList = () => {
   // Handle deleting a lead
   const handleRmDelete = async () => {
     try {
-      await deleteLead(token, selectedLead?.id);
+      await permanantDeleteLead(token, selectedLead?.id);
       dispatch(fetchReferLeadList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
       closeModals(); // ⬅ Close modal after action
     } catch (error) {

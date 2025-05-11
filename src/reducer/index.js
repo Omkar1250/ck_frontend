@@ -21,6 +21,7 @@ import usersReducer from "../Slices/adminSlices/userSlice"
 import deleteRequestsReducer from "../Slices/adminSlices/deleteRequestSlice"
 import trailReducer from "../Slices/adminSlices/allLeadSlice"
 import msLeadsReducer from "../Slices/adminSlices/msLeads"
+import starsReducer from "../Slices/starSlice";
 const rootReducer = combineReducers({
     auth: authReducer,
     profile:profileReducer,
@@ -34,6 +35,7 @@ const rootReducer = combineReducers({
     activationApproved: activationApprovedReducer,
     msTeamsApproved: msTeamsApprovedReducer,
     sipApproved: sipApprovedReducer,
+    stars: starsReducer,
 
     //Admin Slices
     underUsRequests:underusReducer,

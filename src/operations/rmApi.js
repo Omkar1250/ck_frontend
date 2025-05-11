@@ -62,7 +62,8 @@ const {
   REQUEST_ACTIVATION_API,
   REQUEST_MS_TEAMS_API,
   REQUET_SIP_API,
-  UNFETCH_LEADS_API
+  UNFETCH_LEADS_API,
+  FETCH_STARS_API
   
   
   
@@ -832,5 +833,33 @@ return response.data.data.unFetchedLeads
   } catch (error) {
     console.error("Error fetching analytics summary:", error);
 
+  }
+};
+
+export const getRmStars = () => async (dispatch, getState) => {
+  try {
+    const { token } = getState().auth;
+
+    const response = await apiConnector(
+      "GET",
+      FETCH_STARS_API,
+      null,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+
+    const { aoma_stars, activation_stars } = response.data;
+
+    dispatch({
+      type: "SET_STARS",
+      payload: {
+        aoma: aoma_stars,
+        activation: activation_stars,
+      },
+    });
+
+  } catch (error) {
+    console.error("Error fetching Stars:", error);
   }
 };

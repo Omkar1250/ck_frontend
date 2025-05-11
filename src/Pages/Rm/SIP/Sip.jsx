@@ -4,14 +4,13 @@ import {
   sipApprovedList,
   deleteLead,
   sipRequest,
-  deleteLeadToAdmin,
+
 
 
  
 } from "../../../operations/rmApi";
 import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
 import Modal from "../../../Components/Modal";
-import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
 import { setCurrentPage } from "../../../Slices/sipApprovedSlice";
@@ -82,7 +81,7 @@ const Sip = () => {
 
   const handleRmDelete = async () => {
     try {
-     await deleteLeadToAdmin(token, selectedLead?.id);
+     await deleteLead(token, selectedLead?.id);
      dispatch(sipApprovedList(currentPage, 5, searchQuery)); // ⬅ Refresh the data
            closeModals(); // ⬅ Close modal after action
     } catch (error) {

@@ -4,10 +4,10 @@ import {
   aomaRequest,
   codedApprovedList,
   deleteLead,
+  getRmStars,
 } from "../../../operations/rmApi";
-import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
+import { FaWhatsapp, FaCopy, FaPhoneAlt, FaStar } from "react-icons/fa";
 import Modal from "../../../Components/Modal";
-import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
 import { setCurrentPage } from "../../../Slices/codedSlice";
@@ -16,13 +16,14 @@ import dayjs from "dayjs"; // Import dayjs for date manipulation
 
 const CodedApproved = () => {
   const dispatch = useDispatch();
- const {user} = useSelector((state) => state.profile)
+
 
   const { token } = useSelector((state) => state.auth);
   const { codedApproved, loading, error, currentPage, totalPages,totalCodedLeads } = useSelector(
     (state) => state.codedApproved
   );
 
+const {aoma_stars} = useSelector((state)=> state.stars)
   const [isUnderModalOpen, setIsUnderModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
@@ -34,6 +35,20 @@ const CodedApproved = () => {
   useEffect(() => {
     dispatch(codedApprovedList(currentPage || 1, 5, searchQuery));
   }, [dispatch, currentPage, searchQuery]);
+
+
+    useEffect(() => {
+      dispatch(getRmStars());
+    }, [dispatch, useStar]);
+
+     useEffect(() => {
+      return () => {
+        if (uploadedScreenshot) {
+          URL.revokeObjectURL(uploadedScreenshot);
+        }
+      };
+    }, [uploadedScreenshot]);
+    
 
  // Pagination handlers
    const handleNext = useCallback(() => {
@@ -66,9 +81,9 @@ const CodedApproved = () => {
   };
 
   const handleCodeRequest = async () => {
-    if (!screenshotFile) {
-      toast.error("Please upload a screenshot before submitting the request.");
-      return;
+    if (!useStar && !screenshotFile) {
+  toast.error("Please upload a screenshot before submitting the request.");
+  return;
     }
   
     try {
@@ -159,7 +174,7 @@ const CodedApproved = () => {
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-        Coded Approved List ({totalCodedLeads})  <p><span>{user.aoma_stars} ⭐</span></p>
+        Coded Approved List ({totalCodedLeads})  <p className="flex flex-row gap-2 justify-center items-center"><span>{aoma_stars} </span><FaStar className="text-yellow-50"/></p>
       </h2>
     
 
@@ -326,6 +341,7 @@ const CodedApproved = () => {
           accept="image/*"
           onChange={handleScreenshotUpload}
           className="hidden"
+           disabled={useStar}
         />
         <p className="text-sm text-gray-500">Supported formats: JPG, PNG</p>
       </div>

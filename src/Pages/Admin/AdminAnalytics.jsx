@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AnalyticsSummary, fetchAllJrms } from '../../operations/adminApi';
+import { unFetchedLeads } from '../../operations/rmApi';
 
 const AdminAnalytics = () => {
   const dispatch = useDispatch();
@@ -10,14 +11,29 @@ const AdminAnalytics = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedUserId, setSelectedUserId] = useState('');
+  const [unFetched, setUnFetch] = useState(0);
 
   useEffect(() => {
     dispatch(fetchAllJrms());
   }, [dispatch]);
 
+
+
   useEffect(() => {
     dispatch(AnalyticsSummary(startDate, endDate, selectedUserId));
   }, [startDate, endDate, selectedUserId, dispatch]);
+   useEffect(() => {
+    const fetchUnassignedLead = async () => {
+      try {
+        const data = await dispatch(unFetchedLeads()); // ✅ dispatch the thunk
+        setUnFetch(data);
+      } catch (err) {
+        console.error("Failed to fetch unfetched leads");
+      }
+    };
+  
+    fetchUnassignedLead();
+  }, [dispatch]);
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen mt-10">
@@ -53,6 +69,7 @@ const AdminAnalytics = () => {
 
       {analytics && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 bg-white p-6 rounded shadow-md">
+          <SummaryCard title="Total Leads" value={unFetched}/>
           <SummaryCard title="Fetched Leads" value={analytics.fetchedLeads} />
           <SummaryCard title="Referred Leads" value={analytics.referredLeads} />
           <SummaryCard title="Under US Approved" value={analytics.underUs} />
@@ -61,6 +78,7 @@ const AdminAnalytics = () => {
           <SummaryCard title="Activation Done" value={analytics.activationDone} />
           <SummaryCard title="MS Teams Login" value={analytics.msTeamsLogin} />
           <SummaryCard title="SIP Setup" value={analytics.sipSetup} />
+
         </div>
       )}
     </div>

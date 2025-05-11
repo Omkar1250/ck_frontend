@@ -57,7 +57,8 @@ const UnderUsRequest = () => {
       await handleUnderUsAction(token, selectedLead?.id, modalAction);
       toast.success(`Request ${modalAction === "approve" ? "approved" : "rejected"} successfully!`);
       setIsModalOpen(false);
-      dispatch(underUsRequestList(currentPage, 5, searchQuery)); // Corrected
+           setSelectedLead(null);
+         dispatch(underUsRequestList(currentPage, 5, searchQuery));
     } catch (error) {
       toast.error(error.message || "Failed to process request.");
     }

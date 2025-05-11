@@ -55,7 +55,8 @@ const {
     GET_ALL_LEADS_API,
     UNIVERSAL_APPROVE_API,
     MS_TEAMS_ID_PASS_API,
-    MS_TEAMS_DETAILS_API
+    MS_TEAMS_DETAILS_API,
+    PERMANANT_DELETE_LEAD_API
     
 
 } = adminEndpoints;
@@ -152,14 +153,14 @@ export const handleUnderUsAction = async (token, leadId, action) => {
     });
   
       if (response.data.success) {
-        alert(response.data.message);
+        console.log(response.data.message);
         // Optionally: refresh the leads list from the server
       } else {
-        alert('Action failed: ' + response.data.message);
+        console.log('Action failed: ' + response.data.message);
       }
     } catch (error) {
       console.error(error);
-      alert('Something went wrong.');
+      console.log('Something went wrong.');
     }
   };
 
@@ -177,14 +178,14 @@ export const handleUnderUsAction = async (token, leadId, action) => {
     });
   
       if (response.data.success) {
-        alert(response.data.message);
+        console.log(response.data.message);
         // Optionally: refresh the leads list from the server
       } else {
-        alert('Action failed: ' + response.data.message);
+        console.log('Action failed: ' + response.data.message);
       }
     } catch (error) {
       console.error(error);
-      alert('Something went wrong.');
+     
     }
   };
 
@@ -202,14 +203,14 @@ export const handleUnderUsAction = async (token, leadId, action) => {
     });
   
       if (response.data.success) {
-        alert(response.data.message);
+console.log(response.data.message);
         // Optionally: refresh the leads list from the server
       } else {
-        alert('Action failed: ' + response.data.message);
+        console.log('Action failed: ' + response.data.message);
       }
     } catch (error) {
       console.error(error);
-      alert('Something went wrong.');
+      console.log('Something went wrong.');
     }
   };
 
@@ -226,14 +227,14 @@ export const handleUnderUsAction = async (token, leadId, action) => {
     });
   
       if (response.data.success) {
-        alert(response.data.message);
+        console.log(response.data.message);
         // Optionally: refresh the leads list from the server
       } else {
-        alert('Action failed: ' + response.data.message);
+        console.log('Action failed: ' + response.data.message);
       }
     } catch (error) {
       console.error(error);
-      alert('Something went wrong.');
+   
     }
   };
 
@@ -276,14 +277,14 @@ export const handleUnderUsAction = async (token, leadId, action) => {
     });
   
       if (response.data.success) {
-        alert(response.data.message);
+        console.log(response.data.message);
         // Optionally: refresh the leads list from the server
       } else {
-        alert('Action failed: ' + response.data.message);
+        console.log('Action failed: ' + response.data.message);
       }
     } catch (error) {
       console.error(error);
-      alert('Something went wrong.');
+    
     }
   };
 
@@ -302,8 +303,7 @@ export const handleUnderUsAction = async (token, leadId, action) => {
       }
       const query = new URLSearchParams(queryParams).toString();
   
-      // Debug: API request URL
-      console.log("Coded API Request:", `${CODE_REQUEST_API}?${query}`);
+   
   
       // Make the GET API call
       const response = await apiConnector(
@@ -315,8 +315,7 @@ export const handleUnderUsAction = async (token, leadId, action) => {
         }
       );
   
-      // Debug: API Response
-      console.log("Coded API Response:", response);
+ 
   
       // Check response and dispatch success or error
       if (response?.data?.success) {
@@ -354,8 +353,7 @@ export const handleUnderUsAction = async (token, leadId, action) => {
     }
     const query = new URLSearchParams(queryParams).toString();
 
-    // Debug: API request URL
-    console.log("AOMA API Request:", `${GET_AOMA_REQUEST_LIST_API}?${query}`);
+
 
     // Make the GET API call
     const response = await apiConnector(
@@ -367,8 +365,6 @@ export const handleUnderUsAction = async (token, leadId, action) => {
       }
     );
 
-    // Debug: API Response
-    console.log("AOMA API Response:", response);
 
     // Check response and dispatch success or error
     if (response?.data?.success) {
@@ -406,8 +402,7 @@ export const handleUnderUsAction = async (token, leadId, action) => {
       }
       const query = new URLSearchParams(queryParams).toString();
   
-      // Debug: API request URL
-      console.log("Activation API Request:", `${GET_ACTIVATION_REQUEST_LIST_API}?${query}`);
+      
   
       // Make the GET API call
       const response = await apiConnector(
@@ -419,8 +414,7 @@ export const handleUnderUsAction = async (token, leadId, action) => {
         }
       );
   
-      // Debug: API Response
-      console.log("Activation API Response:", response);
+
   
       // Check response and dispatch success or error
       if (response?.data?.success) {
@@ -459,8 +453,6 @@ export const handleUnderUsAction = async (token, leadId, action) => {
       }
       const query = new URLSearchParams(queryParams).toString();
   
-      // Debug: API request URL
-      console.log("MS Teams API Request:", `${MS_TEAMS_REQUEST_LIST_API}?${query}`);
   
       // Make the GET API call
       const response = await apiConnector(
@@ -472,8 +464,6 @@ export const handleUnderUsAction = async (token, leadId, action) => {
         }
       );
   
-      // Debug: API Response
-      console.log("MS Teams API Response:", response);
   
       // Check response and dispatch success or error
       if (response?.data?.success) {
@@ -510,8 +500,7 @@ export const handleUnderUsAction = async (token, leadId, action) => {
       }
       const query = new URLSearchParams(queryParams).toString();
   
-      // Debug: API request URL
-      console.log("SIP API Request:", `${GET_SIP_REQUESTS_API}?${query}`);
+    
   
       // Make the GET API call
       const response = await apiConnector(
@@ -568,7 +557,6 @@ export const AnalyticsSummary = (startDate = '', endDate = '', jrmId= '') => asy
       }
     );
 
-    console.log("Analytics API Data:", response.data.data);
     dispatch(setAnalyticsData(response.data.data)); // ✅ fix: only set data portion
 
   } catch (error) {
@@ -607,8 +595,7 @@ export const getAllPayoutList = async (token) => {
       throw new Error(response?.data?.message || "Something went wrong");
     }
 
-    // Logging for debugging purposes (can be removed in production)
-    console.debug("Fetched RM payouts:", response.data.jrms);
+
 
     return response.data.jrms || [];
   } catch (error) {
@@ -623,14 +610,14 @@ export const getAllPayoutList = async (token) => {
 
 export const getTotalPointsOfAllJRMs = async (token, rmId) => {
   try {
-    console.log("Entering API Call for Total Points...");
+   
 
     const response = await apiConnector("GET", `${RM_TOTAL_POINTS}/${rmId}`, null, {
       Authorization: `Bearer ${token}`,
     });
 
 
-    console.log("Total Points of Rm::::", response.data)
+  
     // Return the total points or 0 as fallback
     return response?.data.totalPoints || 0;
   } catch (error) {
@@ -660,14 +647,14 @@ export const rmPaymentDeduct = async (token, rmId, amountInRupees,pointsToDeduct
   });
 
     if (response.data.success) {
-      alert(response.data.message);
+      console.log(response.data.message);
       // Optionally: refresh the leads list from the server
     } else {
-      alert('Action failed: ' + response.data.message);
+      console.log('Action failed: ' + response.data.message);
     }
   } catch (error) {
     console.error(error);
-    alert('Something went wrong.');
+   
   }
 };
 
@@ -738,8 +725,7 @@ export const fetchDeleteRequests = (page = 1, limit = 10, search = "") => async 
     }
     const query = new URLSearchParams(queryParams).toString();
 
-    // Debugging: Log the API request URL
-    console.log("API Request:", `${GET_DELETE_REQUEST_LIST_API}?${query}`);
+ 
 
     // Make the API call using the apiConnector
     const response = await apiConnector(
@@ -759,7 +745,7 @@ export const fetchDeleteRequests = (page = 1, limit = 10, search = "") => async 
       dispatch(setDeleteSuccess(response.data));
     } else {
       const errorMessage = response?.data?.message || "Failed to fetch delete requests";
-      console.warn("API Response Error:", errorMessage);
+     
       dispatch(setDeleteError(errorMessage));
     }
   } catch (error) {
@@ -833,7 +819,7 @@ export const approveLeadAction = (token,leadId, action) => async (dispatch) => {
 export const getAllMsLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
   try {
     dispatch(setMsLoading());
-    console.log("API called with page:", page, "limit:", limit, "search:", search);
+  
     const { token } = getState().auth;
 
     // Construct query parameters
@@ -883,5 +869,28 @@ export const msDetailsAction = async (token, leadId, action) => {
   } catch (error) {
     console.error("msDetailsAction error:", error);
     throw error;
+  }
+};
+
+
+export const permanantDeleteLead = async (token, leadId) => {
+  try {
+    const response = await apiConnector(
+      "DELETE",                     // HTTP method
+      `${PERMANANT_DELETE_LEAD_API}/${leadId}`, // 🧠 Pass ID in URL like /api/leads/:id
+      null,                         // No body for DELETE
+      {
+        Authorization: `Bearer ${token}`, // Headers
+      }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response?.data?.message || "Failed to delete lead");
+    }
+
+    toast.success("Lead deleted successfully");
+    return response;
+  } catch (error) {
+    toast.error(error?.response?.data?.message || error.message);
   }
 };

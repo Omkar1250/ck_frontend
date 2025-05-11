@@ -4,10 +4,10 @@ import {
   activationRequest,
   aomaApprovedList,
   deleteLead,
+  getRmStars,
 } from "../../../operations/rmApi";
-import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
+import { FaWhatsapp, FaCopy, FaPhoneAlt, FaStar } from "react-icons/fa";
 import Modal from "../../../Components/Modal";
-import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
 import { setCurrentPage } from "../../../Slices/aomaSlice";
@@ -17,12 +17,12 @@ import dayjs from "dayjs";
 const AomaApproved = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
-  const {user} = useSelector((state) => state.profile)
 
-console.log("user", user)
 
   const { aomaApproved, loading, error, currentPage, totalPages,totalAomaLeads } =
     useSelector((state) => state.aomaApproved);
+
+    const {activation_stars} = useSelector((state)=> state.stars)
 
   const [isUnderModalOpen, setIsUnderModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -39,6 +39,20 @@ console.log("user", user)
   useEffect(() => {
     dispatch(aomaApprovedList(currentPage || 1, 5, searchQuery));
   }, [dispatch, currentPage, searchQuery]);
+
+
+  useEffect(() => {
+    dispatch(getRmStars());
+  }, [dispatch, useStar]);
+  
+  useEffect(() => {
+  return () => {
+    if (uploadedScreenshot) {
+      URL.revokeObjectURL(uploadedScreenshot);
+    }
+  };
+}, [uploadedScreenshot]);
+
 
    const handleNext = useCallback(() => {
      if (currentPage < totalPages) {
@@ -70,10 +84,11 @@ console.log("user", user)
   };
 
   const handleActivationReq = async () => {
-    if (!screenshotFile) {
-      toast.error("Please upload a screenshot before submitting the request.");
-      return;
-    }
+  if (!useStar && !screenshotFile) {
+  toast.error("Please upload a screenshot before submitting the request.");
+  return;
+}
+
 
     try {
       const formData = new FormData();
@@ -162,7 +177,7 @@ console.log("user", user)
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-        AOMA Approved List ({totalAomaLeads})  <p><span>{user.activation_stars} ⭐</span></p>
+        AOMA Approved List ({totalAomaLeads})  <p className="flex flex-row gap-2 justify-center items-center"><span>{activation_stars} </span><FaStar className="text-yellow-50"/></p>
       </h2>
      
 
@@ -332,6 +347,7 @@ console.log("user", user)
                     accept="image/*"
                     onChange={handleScreenshotUpload}
                     className="hidden"
+                     disabled={useStar}
                   />
                   <p className="text-sm text-richblack-500">
                     Supported formats: JPG, PNG
