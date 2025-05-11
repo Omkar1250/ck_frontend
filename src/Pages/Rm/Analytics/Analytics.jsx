@@ -71,6 +71,7 @@ const Analytics = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { label: "Fetched Leads", value: analytics.fetchedLeads },
+          
               { label: "Referred Leads", value: analytics.referredLeads },
               { label: "Under US Approved", value: analytics.underUsApproved },
               { label: "Code Approved", value: analytics.codeApproved },
@@ -78,7 +79,7 @@ const Analytics = () => {
               { label: "Activation Done", value: analytics.activationDone },
               { label: "MS Teams Login", value: analytics.msTeamsLogin },
               { label: "SIP Setup", value: analytics.sipSetup },
-              { label: "Unfetched Leads", value: unFetched }, // Adding Unfetched Leads to the list
+              { label: "Unfetch Leads", value: unFetched }, // Adding Unfetched Leads to the list
             ].map((item, index) => (
               <div
                 key={index}
