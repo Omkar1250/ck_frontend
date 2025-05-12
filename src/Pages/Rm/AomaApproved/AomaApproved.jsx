@@ -106,7 +106,7 @@ const AomaApproved = () => {
   const calculateRemainingDays = (date) => {
       const approvedDate = dayjs(date);
       const currentDate = dayjs();
-      const difference = 20 - currentDate.diff(approvedDate, "day"); // Calculate remaining days
+      const difference = 14 - currentDate.diff(approvedDate, "day"); // Calculate remaining days
       return difference;
     };
 

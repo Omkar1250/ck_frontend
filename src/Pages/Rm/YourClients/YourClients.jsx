@@ -65,7 +65,7 @@ const YourClients = () => {
 
     const activationDateObj = new Date(activationDate);
     const expiryDate = new Date(activationDateObj);
-    expiryDate.setDate(expiryDate.getDate() + 30);
+    expiryDate.setDate(expiryDate.getDate() + 14);
 
     const timeDiff = expiryDate - now;  // ✅ compare with `now` state
     const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
@@ -117,7 +117,7 @@ const YourClients = () => {
         <>
           <div className="grid gap-6">
             {filteredLeads.map((lead) => {
-              const daysLeft = calculateDaysLeft(lead.activation_approved_at);
+              const daysLeft = calculateDaysLeft(lead.code_approved_at);
 
               return (
                 <div
@@ -128,7 +128,7 @@ const YourClients = () => {
                     <h3 className="text-xl font-semibold text-gray-800">
                       {lead.name}
                     </h3>
-                    <span className={daysLeft <= 5 ? "text-bg-delBtn" : "text-richblack-900"}>
+                    <span className={daysLeft <= 5 ? "text-pink-200" : "text-richblack-900"}>
   Time left: {daysLeft} {daysLeft <= 1 ? "day" : "days"} left
 </span>
                   </div>

@@ -7,7 +7,7 @@ import {
 } from "../../../operations/rmApi";
 import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
 import Modal from "../../../Components/Modal";
-import { format } from "timeago.js";
+
 import toast from "react-hot-toast";
 import SearchInput from "../../../Components/SearchInput";
 import { setCurrentPage } from "../../../Slices/msTeamsApprovedSlice";
@@ -86,7 +86,7 @@ const handleNext = useCallback(() => {
    const calculateRemainingDays = (date) => {
         const approvedDate = dayjs(date);
         const currentDate = dayjs();
-        const difference = 15 - currentDate.diff(approvedDate, "day"); // Calculate remaining days
+        const difference = 14 - currentDate.diff(approvedDate, "day"); // Calculate remaining days
         return difference;
       };
   
