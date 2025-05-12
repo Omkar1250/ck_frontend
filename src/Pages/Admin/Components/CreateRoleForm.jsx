@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
-import { createRm, updateRm } from "../../../operations/adminApi";
+import { createRm, deleteRm, updateRm } from "../../../operations/adminApi";
 import { toast } from "react-hot-toast";
 
 export default function CreateRoleForm({ closeModal, rm }) {
@@ -19,8 +19,8 @@ export default function CreateRoleForm({ closeModal, rm }) {
       setValue("ck_number", rm.ck_number || "");
       setValue("userid", rm.userid || "");
       setValue("upi_id", rm.upi_id || "");
-      setValue("password", rm.password || ""); // Pre-fill with existing password (if available)
-      setValue("confirmPassword", rm.password || ""); // Optionally pre-fill confirm password
+      setValue("password", rm.password || "");
+      setValue("confirmPassword", rm.password || "");
     }
   }, [rm, setValue]);
 
@@ -37,7 +37,6 @@ export default function CreateRoleForm({ closeModal, rm }) {
     formData.append("userid", data.userid);
     formData.append("upi_id", data.upi_id || "");
 
-    // Append password only if provided
     if (data.password) {
       formData.append("password", data.password);
     }
@@ -59,6 +58,19 @@ export default function CreateRoleForm({ closeModal, rm }) {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+      await deleteRm(token, rm.id);
+      toast.success("RM deleted successfully");
+      closeModal();
+    } catch (error) {
+      toast.error(error.message || "Failed to delete RM");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex justify-center items-center">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-lg space-y-4">
@@ -71,14 +83,13 @@ export default function CreateRoleForm({ closeModal, rm }) {
         <InputField label="CyberKing Number" name="ck_number" type="number" register={register} errors={errors} required />
         <InputField label="User ID" name="userid" register={register} errors={errors} required />
 
-        {/* Password Fields for both Create and Update */}
         <InputField
           label="Password"
           name="password"
           type={showPassword ? "text" : "password"}
           register={register}
           errors={errors}
-          required={!isEdit} // Required only in create mode
+          required={!isEdit}
         />
         <InputField
           label="Confirm Password"
@@ -86,10 +97,9 @@ export default function CreateRoleForm({ closeModal, rm }) {
           type={showPassword ? "text" : "password"}
           register={register}
           errors={errors}
-          required={!isEdit} // Required only in create mode
+          required={!isEdit}
         />
 
-        {/* Toggle Password Visibility */}
         <div className="flex items-center">
           <input
             type="checkbox"
@@ -113,6 +123,22 @@ export default function CreateRoleForm({ closeModal, rm }) {
           >
             {loading ? (isEdit ? "Updating..." : "Creating...") : isEdit ? "Update" : "Create"}
           </button>
+
+          {isEdit && (
+            <button
+              type="button"
+              onClick={async () => {
+                const confirmDelete = window.confirm("Are you sure you want to delete this RM?");
+                if (confirmDelete) {
+                  await handleDelete();
+                }
+              }}
+              className="w-full bg-pink-300 text-white py-3 rounded-sm font-semibold transition duration-200 hover:bg-pink-400"
+            >
+              Delete
+            </button>
+          )}
+
           <button
             type="button"
             onClick={closeModal}

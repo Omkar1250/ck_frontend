@@ -34,7 +34,7 @@ const UniversalApprove = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [modalAction, setModalAction] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
+const [batch_code, setBatchCode] = useState("");
   useEffect(() => {
     dispatch(getAllLeads(currentPage || 1, 5, searchQuery));
   }, [dispatch, currentPage, searchQuery]);
@@ -91,9 +91,10 @@ const UniversalApprove = () => {
     try {
       if (selectedLead) {
         await dispatch(
-          approveLeadAction(token, selectedLead.id, modalAction)
+          approveLeadAction(token, selectedLead.id, modalAction, batch_code)
         );
         closeModals();
+        setBatchCode("")
         dispatch(getAllLeads(currentPage, 5, searchQuery));
       }
     } catch (error) {
@@ -173,6 +174,15 @@ const UniversalApprove = () => {
         action={modalAction}
       >
         <p>
+           {modalAction === "code_request" && (
+          <input
+            type="text"
+            placeholder="Enter Batch Code"
+            value={batch_code}
+            onChange={(e) => setBatchCode(e.target.value)}
+            className="w-full border border-gray-300 p-2 rounded-lg mb-4"
+          />
+        )}
           Are you sure you want to{" "}
           <span className="font-bold">{modalAction}</span> this lead?
         </p>

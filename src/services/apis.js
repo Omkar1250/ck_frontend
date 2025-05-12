@@ -46,7 +46,7 @@ export const adminEndpoints = {
     CREATE_RM_API: BASE_URL + "/rm/signup",
     GET_ALL_RMS_API: BASE_URL + "/get/all-rms",
     GET_RM_BY_ID_API: BASE_URL + "/rm",
-    DELETE_RM_API : BASE_URL + "delete/rm",
+    DELETE_RM_API : BASE_URL + "/delete/rm",
     UPDATE_RM_DETAILS: BASE_URL + "/update/rm",
     UNDER_US_REQUEST_LEADS: BASE_URL + "/get-underus-requests",
     UNDER_US_APPROVE_API: BASE_URL + "/under-us-approval",
@@ -72,6 +72,8 @@ export const adminEndpoints = {
     UNIVERSAL_APPROVE_API: BASE_URL + "/lead/approve",
     MS_TEAMS_ID_PASS_API: BASE_URL + "/get-list-msteams-login",
     MS_TEAMS_DETAILS_API: BASE_URL + "/ms-teams-details",
-    PERMANANT_DELETE_LEAD_API: BASE_URL + "/admin/delete-lead"
+    PERMANANT_DELETE_LEAD_API: BASE_URL + "/admin/delete-lead",
+    DELETE_LEAD_FROM_DELETE_LIST: BASE_URL + "/delete/lead-delete-from-list",
+    
 }
 

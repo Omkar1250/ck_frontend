@@ -3,8 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { FaSearch } from "react-icons/fa";
 import Modal from "../../Components/Modal";
 import toast from "react-hot-toast";
-import { fetchDeleteRequests } from "../../operations/adminApi";
-import { deleteLead } from "../../operations/rmApi";
+import { fetchDeleteRequests, listRequestPermanentDeleteLead } from "../../operations/adminApi";
 import debounce from "lodash.debounce";
 import LeadGrid from "../../Components/LeadGrid";
 import Pagination from "../../Components/Pagination";
@@ -61,10 +60,9 @@ const DeleteRequest = () => {
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      await deleteLead(token, selectedLead?.id);
+      await listRequestPermanentDeleteLead(token, selectedLead?.lead_id);
       setIsModalOpen(false);
       dispatch(fetchDeleteRequests(currentPage, 10, searchQuery));
-      toast.success("Lead deleted successfully.");
     } catch (error) {
       toast.error(error.message || "Failed to process request.");
     } finally {

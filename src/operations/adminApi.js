@@ -56,7 +56,9 @@ const {
     UNIVERSAL_APPROVE_API,
     MS_TEAMS_ID_PASS_API,
     MS_TEAMS_DETAILS_API,
-    PERMANANT_DELETE_LEAD_API
+    PERMANANT_DELETE_LEAD_API,
+    DELETE_LEAD_FROM_DELETE_LIST,
+    DELETE_RM_API
     
 
 } = adminEndpoints;
@@ -799,11 +801,14 @@ export const getAllLeads = (page = 1, limit = 5, search = "") => async (dispatch
 };
 
 
-export const approveLeadAction = (token,leadId, action) => async (dispatch) => {
+export const approveLeadAction = (token,leadId, action, batch_code) => async (dispatch) => {
   try {
+    console.log(batch_code)
     const res = await apiConnector("POST", `${UNIVERSAL_APPROVE_API}/${leadId}`,
     {
       action,
+      batch_code
+
     },
     {
       Authorization: `Bearer ${token}`,
@@ -889,6 +894,53 @@ export const permanantDeleteLead = async (token, leadId) => {
     }
 
     toast.success("Lead deleted successfully");
+    return response;
+  } catch (error) {
+    toast.error(error?.response?.data?.message || error.message);
+  }
+};
+
+
+
+export const listRequestPermanentDeleteLead = async (token, leadId) => {
+  try {
+    const response = await apiConnector(
+      "DELETE",                     // HTTP method
+      `${DELETE_LEAD_FROM_DELETE_LIST}/${leadId}`, // 🧠 Pass ID in URL like /api/leads/:id
+      null,                         // No body for DELETE
+      {
+        Authorization: `Bearer ${token}`, // Headers
+      }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response?.data?.message || "Failed to delete lead");
+    }
+
+    toast.success(response.data.message);
+    return response;
+  } catch (error) {
+    toast.error(error?.response?.data?.message || error.message);
+  }
+};
+
+
+export const deleteRm = async (token, rmId) => {
+  try {
+    const response = await apiConnector(
+      "DELETE",                     // HTTP method
+      `${DELETE_RM_API}/${rmId}`, // 🧠 Pass ID in URL like /api/leads/:id
+      null,                         // No body for DELETE
+      {
+        Authorization: `Bearer ${token}`, // Headers
+      }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response?.data?.message || "Failed to delete RM");
+    }
+
+    toast.success(response.data.message);
     return response;
   } catch (error) {
     toast.error(error?.response?.data?.message || error.message);
