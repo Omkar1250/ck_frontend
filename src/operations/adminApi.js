@@ -767,7 +767,6 @@ export const fetchDeleteRequests = (page = 1, limit = 10, search = "") => async 
 export const getAllLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
   try {
     dispatch(setTrailLoading());
-    console.log("API called with page:", page, "limit:", limit, "search:", search);
     const { token } = getState().auth;
 
     // Construct query parameters
@@ -803,8 +802,7 @@ export const getAllLeads = (page = 1, limit = 5, search = "") => async (dispatch
 
 export const approveLeadAction = (token,leadId, action, batch_code) => async (dispatch) => {
   try {
-    console.log(batch_code)
-    const res = await apiConnector("POST", `${UNIVERSAL_APPROVE_API}/${leadId}`,
+    const response = await apiConnector("POST", `${UNIVERSAL_APPROVE_API}/${leadId}`,
     {
       action,
       batch_code
@@ -812,12 +810,15 @@ export const approveLeadAction = (token,leadId, action, batch_code) => async (di
     },
     {
       Authorization: `Bearer ${token}`,
-  });   
+  }); 
+  if(!response.data.success) {
+    toast.error(response.data.message)
+  }
     toast.success(`${action} approved successfully`);
     dispatch(getAllLeads()); // 🔁 Refresh leads
   } catch (error) {
-    toast.error("Approval failed", error.message);
-    console.error(error);
+    toast.error( error.response.data.message);
+    console.error(error.response.data.message);
   }
 };
 

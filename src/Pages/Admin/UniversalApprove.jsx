@@ -98,7 +98,7 @@ const [batch_code, setBatchCode] = useState("");
         dispatch(getAllLeads(currentPage, 5, searchQuery));
       }
     } catch (error) {
-      toast.error("Approval failed");
+      toast.error(error.response.data.message);
       console.error(error);
     }
   };
