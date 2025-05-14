@@ -88,8 +88,7 @@ export const getAllRms = async (token) => {
       throw new Error("Something went wrong");
     }
 
-    toast.success("Team fetched successfully");
-    console.log(response.data.rms)
+   
     return response.data.rms;
   } catch (error) {
     console.error("Error getting RMs:", error?.message || error);
@@ -121,12 +120,22 @@ export const underUsRequestList = (page = 1, limit = 5, search = "") => async (d
 
     const { token } = getState().auth;
 
-    // Construct query parameters
-    const queryParams = { page, limit, ...(search.trim() && { search }) };
-
-    const response = await apiConnector("GET", UNDER_US_REQUEST_LEADS, queryParams, {
-      Authorization: `Bearer ${token}`,
-    });
+     // Construct query string
+      const queryParams = { page, limit };
+      if (search.trim()) {
+        queryParams.search = search;
+      }
+      const query = new URLSearchParams(queryParams).toString();
+  
+  // Make the GET API call
+      const response = await apiConnector(
+        "GET",
+        `${UNDER_US_REQUEST_LEADS}?${query}`,
+        null,
+        {
+          Authorization: `Bearer ${token}`,
+        }
+      );
 
     if (response?.data?.success) {
       dispatch(setUnderUsSuccess(response?.data));

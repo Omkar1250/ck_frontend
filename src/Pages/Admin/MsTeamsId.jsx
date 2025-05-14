@@ -14,7 +14,7 @@ import { setCurrentPage } from "../../Slices/adminSlices/msLeads";
 const MsTeamsId = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
-  const { msLeads = [], loading, error, currentPage, totalPages } = useSelector(
+  const { msLeads = [], loading, error, currentPage, totalPages,totalMsLeads } = useSelector(
     (state) => state.msLeads
   );
 
@@ -83,7 +83,7 @@ const MsTeamsId = () => {
   return (
     <div className="max-w-7xl mx-auto mt-20 px-4 sm:px-6 lg:px-8">
       <h2 className="text-4xl font-bold mb-6 text-center text-gray-800">
-        MS Teams ID Pass
+        MS Teams ID Pass ({totalMsLeads})
       </h2>
 
       <div className="mb-8">

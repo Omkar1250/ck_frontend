@@ -16,6 +16,7 @@ const CodedRequest = () => {
     error,
     currentPage,
     totalPages,
+    totalCodedRequests
   } = useSelector((state) => state.codedRequests);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,7 +86,7 @@ const CodedRequest = () => {
 
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Coded Requests</h2>
+      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Coded Requests ({totalCodedRequests})</h2>
 
       <SearchInput
         value={searchQuery}
@@ -98,7 +99,7 @@ const CodedRequest = () => {
         <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>
       ) : error ? (
         <div className="text-center mt-16">
-          <p className="text-red-500 text-lg">{error}</p>
+          <p className="text-red-500 text-lg">Request not found</p>
           <button
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             onClick={() => dispatch(codedRequestList(currentPage, 5, searchQuery))}

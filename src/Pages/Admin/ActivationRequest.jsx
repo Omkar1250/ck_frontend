@@ -17,6 +17,7 @@ const ActivationRequest = () => {
     error,
     currentPage,
     totalPages,
+    totalActivationRequests
   } = useSelector((state) => state.activationRequests);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,7 +97,7 @@ const ActivationRequest = () => {
   if (error)
     return (
       <div className="text-center mt-16">
-        <p className="text-red-500 text-lg">{error}</p>
+        <p className="text-red-500 text-lg">Request not found</p>
         <button
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           onClick={() => dispatch(activationRequestList(currentPage, 5, searchQuery))}
@@ -109,7 +110,7 @@ const ActivationRequest = () => {
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-        Activation Requests
+        Activation Requests ({totalActivationRequests})
       </h2>
 
       <SearchInput

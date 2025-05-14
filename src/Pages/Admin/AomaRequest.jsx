@@ -21,6 +21,7 @@ const AomaRequest = () => {
     error,
     currentPage,
     totalPages,
+    totalAomaRequests
   } = useSelector((state) => state.aomaRequests);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -99,7 +100,7 @@ const AomaRequest = () => {
   if (error)
     return (
       <div className="text-center mt-6">
-        <p className="text-red-500 text-lg">{error}</p>
+        <p className="text-red-500 text-lg">Request not found</p>
         <button
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           onClick={() => dispatch(aomaRequestList(currentPage))}
@@ -112,7 +113,7 @@ const AomaRequest = () => {
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
-        Aoma Requests
+        Aoma Requests ({totalAomaRequests})
       </h2>
 
       <SearchInput
