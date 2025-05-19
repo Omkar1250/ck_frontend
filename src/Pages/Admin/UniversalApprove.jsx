@@ -277,6 +277,7 @@ const LeadCard = ({
           />
           Copy Number
         </p>
+        <span className="text-pin-500 font-semibold"> JRM: {lead.jrm_name}</span>
       </div>
 
       <div className="flex flex-wrap gap-2 mt-4">
