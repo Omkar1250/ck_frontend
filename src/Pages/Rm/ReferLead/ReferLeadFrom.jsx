@@ -102,12 +102,11 @@ export default function ReferLeadForm({ closeModal }) {
   };
 
   return (
-    <div className="max-w-lg mx-auto my-8 p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4 text-center">Refer Lead</h2>
+    <div className="max-w-lg mx-auto  p-2 bg-white rounded-lg shadow-lg">
+      <h2 className="text-xl font-bold mb-4 text-center">Refer Lead</h2>
       <form onSubmit={handleFormSubmit}>
         {/* Name Input */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-richblack-700">Name</label>
           <input
             type="text"
             name="name"
@@ -123,7 +122,6 @@ export default function ReferLeadForm({ closeModal }) {
 
         {/* Mobile Number Input with Check Button */}
         <div className="mb-4 relative">
-          <label className="block text-sm font-medium text-richblack-700">Mobile Number</label>
           <div className="flex items-center">
             <input
               type="text"
@@ -155,7 +153,6 @@ export default function ReferLeadForm({ closeModal }) {
 
         {/* WhatsApp Number Input */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-richblack-700">WhatsApp Number</label>
           <input
             type="text"
             name="whatsapp_mobile_number"
@@ -181,7 +178,7 @@ export default function ReferLeadForm({ closeModal }) {
             className="mr-2 h-4 w-4 text-blue-600 focus:ring-2 focus:ring-blue-500 border-richblack-300 rounded"
             aria-label="Same as Mobile Number"
           />
-          <label className="text-sm text-richblack-700">Same as Mobile Number</label>
+          <label className="text-xs text-richblack-700">Same as Mobile Number</label>
         </div>
 
         {/* Submission Error */}
@@ -192,18 +189,18 @@ export default function ReferLeadForm({ closeModal }) {
           <button
             type="button"
             onClick={closeModal}
-            className="px-6 py-2 bg-delBtn text-white rounded-md hover:bg-btnColor transition"
+            className="px-6 py-2 bg-btnColor text-white rounded-md hover:bg-btnColor transition"
           >
             Cancel
           </button>
           <button
             type="submit"
             className={`px-6 py-2 rounded-md transition ${
-              isSubmitting ? 'bg-richblack-700' : 'bg-greenBtn text-white hover:bg-greenBtn'
+              isSubmitting ? 'bg-richblack-700' : 'bg-btnColor text-white '
             }`}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
+            {isSubmitting ? 'Referring..' : 'Refer'}
           </button>
         </div>
       </form>

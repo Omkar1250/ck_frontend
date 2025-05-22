@@ -4,6 +4,8 @@ import Login from "./Pages/Login";
 import PrivateRoute from "./Components/PrivateRoute";
 import DefaultLayout from "./Layout/DefaultLayout";
 import CreateRole from "./Pages/Admin/CreateRole";
+import { useSelector } from "react-redux";
+import { ACCOUNT_TYPE } from "./utils/constants";
 
 // Lazy-loaded components for code splitting
 const UnderusApproved = lazy(() => import("./Pages/Rm/UnderusApproved/UnderusApproved"));
@@ -34,12 +36,18 @@ const DeleteRequest = lazy(() => import("./Pages/Admin/DeleteRequest"));
 const NotFound = lazy(() => import("./Pages/NotFound")); // 404 Page
 
 function App() {
+  const {user} = useSelector((state)=>state.profile)
+
+  console.log("Userr", user)
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <Routes>
         <Route path="/" element={<Login />} />
 
-        {/* RM Routes */}
+      {
+        user?.role === ACCOUNT_TYPE.USER && (
+          <>
+            {/* RM Routes */}
         <Route element={<PrivateRoute><DefaultLayout /></PrivateRoute>}>
           <Route path="/dashboard/rm" element={<ReferLead />} />
           <Route path="/dashboard/refer-lead-list" element={<ReferLeadList />} />
@@ -53,8 +61,14 @@ function App() {
           <Route path="/dashboard/rm/analytics" element={<Analytics />} />
           <Route path="/dashboard/your/payment" element={<RmPayments />} />
         </Route>
+          </>
+        )
+      }
 
-        {/* Admin Routes */}
+      {
+        user?.role === ACCOUNT_TYPE.ADMIN && (
+          <>
+            {/* Admin Routes */}
         <Route element={<PrivateRoute><DefaultLayout /></PrivateRoute>}>
           <Route path="/dashboard/view-team-profile" element={<TeamProfile />} />
           <Route path="/dashboard/admin" element={<CreateRole />} />
@@ -71,6 +85,10 @@ function App() {
           <Route path="/dashboard/admin/payments" element={<Payment />} />
           <Route path="/dashboard/conversion/points" element={<ConversionPoint />} />
         </Route>
+          
+          </>
+        )
+      }
 
         {/* Catch-All Route for 404 */}
         <Route path="*" element={<NotFound />} />

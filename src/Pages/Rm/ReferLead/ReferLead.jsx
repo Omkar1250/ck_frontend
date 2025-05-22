@@ -6,9 +6,6 @@ import { useSelector } from 'react-redux';
 export default function ReferLead() {
     const [isFormModalOpen, setFormModalOpen] = useState(false);
     const {user} =useSelector((state)=> state.profile)
-
-    console.log(user)
-    // Handle opening and closing of the modal
     const openModal = () => setFormModalOpen(true);
     const closeModal = () => setFormModalOpen(false);
 
