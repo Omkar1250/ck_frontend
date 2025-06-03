@@ -86,7 +86,7 @@ const handleNext = useCallback(() => {
    const calculateRemainingDays = (date) => {
         const approvedDate = dayjs(date);
         const currentDate = dayjs();
-        const difference = 14 - currentDate.diff(approvedDate, "day"); // Calculate remaining days
+        const difference = 99 - currentDate.diff(approvedDate, "day"); // Calculate remaining days
         return difference;
       };
   
