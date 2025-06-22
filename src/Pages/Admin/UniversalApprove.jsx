@@ -15,6 +15,7 @@ import {
   getAllLeads,
   permanantDeleteLead,
   approveLeadAction,
+  getAllMainRms,
 } from "../../operations/adminApi";
 import { setCurrentPage } from "../../Slices/adminSlices/allLeadSlice";
 
@@ -35,9 +36,24 @@ const UniversalApprove = () => {
   const [modalAction, setModalAction] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 const [batch_code, setBatchCode] = useState("");
+const [rmList , setRmList] = useState([]);
+  const [selectedRm, setSelectedRm] = useState(null)
   useEffect(() => {
     dispatch(getAllLeads(currentPage || 1, 5, searchQuery));
   }, [dispatch, currentPage, searchQuery]);
+
+    useEffect(() => {
+        const fetchRms = async () => {
+          try {
+            const data = await getAllMainRms(token); // fixed line
+            const normalizedData = Array.isArray(data) ? data : [data];
+            setRmList(normalizedData);
+          } catch (err) {
+            toast.error("Failed to fetch RM");
+          } 
+        };
+        fetchRms();
+      }, [token]);
 
   const handleNext = () => {
     if (currentPage < totalPages) {
@@ -91,7 +107,7 @@ const [batch_code, setBatchCode] = useState("");
     try {
       if (selectedLead) {
         await dispatch(
-          approveLeadAction(token, selectedLead.id, modalAction, batch_code)
+          approveLeadAction(token, selectedLead.id, modalAction, batch_code, selectedRm)
         );
         closeModals();
         setBatchCode("")
@@ -175,13 +191,31 @@ const [batch_code, setBatchCode] = useState("");
       >
         <p>
            {modalAction === "code_request" && (
-          <input
+            <>
+             <input
             type="text"
             placeholder="Enter Batch Code"
             value={batch_code}
             onChange={(e) => setBatchCode(e.target.value)}
             className="w-full border border-gray-300 p-2 rounded-lg mb-4"
           />
+            
+            {/* RM Dropdown */}
+      <select
+        value={selectedRm}
+        onChange={(e) => setSelectedRm(e.target.value)}
+        className="w-full border border-gray-300 p-2 rounded-lg mb-4"
+      >
+        <option value="">Select RM</option>
+        {rmList.map((rm) => (
+          <option key={rm.id} value={rm.id}>
+            {rm.name}
+          </option>
+        ))}
+      </select>
+            </>
+         
+          
         )}
           Are you sure you want to{" "}
           <span className="font-bold">{modalAction}</span> this lead?

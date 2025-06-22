@@ -857,12 +857,13 @@ export const getAllLeads = (page = 1, limit = 5, search = "") => async (dispatch
 };
 
 
-export const approveLeadAction = (token,leadId, action, batch_code) => async (dispatch) => {
+export const approveLeadAction = (token,leadId, action, batch_code, rmId) => async (dispatch) => {
   try {
     const response = await apiConnector("POST", `${UNIVERSAL_APPROVE_API}/${leadId}`,
     {
       action,
-      batch_code
+      batch_code,
+      rmId
 
     },
     {
