@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
-import Vector from "../../assets/logo/Vector.svg";
+import { HiMenu, HiX } from "react-icons/hi";
 import logo from "../../assets/logo/CYBERKING.png";
 
 const Header = ({ sidebarOpen, setSidebarOpen }) => {
   return (
-    <header className="fixed top-0 left-0 z-[100] h-14 w-full bg-bgSidebar border border-btnColor shadow-2">
-      <div className="relative flex h-full items-center justify-between px-4 md:px-6 2xl:px-11">
-        {/* Hamburger on the left */}
+    <header className="fixed top-0 left-0 z-[100] h-14 w-full bg-bgSidebar border-b border-btnColor shadow-md">
+      <div className="relative flex h-full items-center justify-between px-2 ">
+        {/* Toggle Button (Mobile Only) */}
         <div className="flex items-center gap-4 lg:hidden">
           <button
             aria-controls="sidebar"
@@ -15,16 +15,16 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
               e.stopPropagation();
               setSidebarOpen(!sidebarOpen);
             }}
-            className="block rounded-md p-1.5 shadow-sm"
+            className="block rounded-md  text-btnColor text-3xl focus:outline-none"
           >
-            <img src={Vector} alt="Menu Icon" />
+            {sidebarOpen ? <HiX /> : <HiMenu />}
           </button>
         </div>
 
-        {/* Centered Logo */}
+        {/* Center Logo */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <Link to="/"> {/* Make logo clickable */}
-            <img src={logo} alt="Cyber King Logo" />
+          <Link to="/">
+            <img src={logo} alt="Cyber King Logo" className="h-4" />
           </Link>
         </div>
       </div>

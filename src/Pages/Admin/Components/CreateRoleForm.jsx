@@ -73,9 +73,9 @@ export default function CreateRoleForm({ closeModal, rm }) {
 
   return (
     <div className="flex justify-center items-center">
-      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-lg space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-lg space-y-1">
         <h2 className="text-lg font-semibold text-center text-richblack-700 mb-2">
-          {isEdit ? "Update Role" : "Create Role"}
+          {isEdit ? "Update JRM" : "Create JRM"}
         </h2>
 
         <InputField label="Name" name="name" register={register} errors={errors} required />

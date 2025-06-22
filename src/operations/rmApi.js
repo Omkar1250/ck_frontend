@@ -39,6 +39,59 @@ import {
   setMsTeamsApprovedSuccess,
   setMsTeamsApprovedError,
 } from "../Slices/msTeamsApprovedSlice"
+import {
+  setOldBasicLeadsLoading,
+  setOldBasicLeadsSuccess,
+  setOldBasicLeadsError,
+} from "../Slices/oldBasicLeads"
+
+import {
+   setReferOldLeadsLoading,
+  setReferOldLeadsSuccess,
+  setReferOldLeadsError,
+} from "../Slices/oldReferList"
+
+import {
+  setOldAdvanceBatchLoading,
+  setOldAdvanceBatchSuccess,
+  setOldAdvanceBatchError,
+ 
+} from "../Slices/oldAdvanceCallList"
+
+import {
+  setAllBatchClientsLoading,
+  setAllBatchClientsSuccess,
+  setAllBatchClientsError,
+}  from "../Slices/allOldClientsSlice"
+import {
+  setNewClientForCallLoading,
+  setNewClientForCallSuccess,
+  setNewClientForCallError,
+} from "../Slices/newClientsForCallSlice"
+import {
+   setJrmBasicMsTeamsClientsLoading,
+  setJrmBasicMsTeamsClientsSuccess,
+  setJrmBasicMsTeamsClientsError,
+} from "../Slices/newAllClients"
+
+import {
+  setRmBasicMsTeamsClientsLoading,
+  setRmBasicMsTeamsClientsSuccess,
+  setRmBasicMsTeamsClientsError,
+} from "../Slices/rmBasicClientCallSlice"
+import { setRmAdvanceMsTeamsClientsError, setRmAdvanceMsTeamsClientsLoading, setRmAdvanceMsTeamsClientsSuccess } from "../Slices/rmAdvanceCallSlice";
+
+import {
+  setClientsForRmLoading,
+  setClientsForRmSuccess,
+  setClientsForRmError,
+} from '../Slices/universalSearchSlice'
+
+import {
+   setAdvanceCallDoneLoading,
+  setAdvanceCallDoneSuccess,
+  setAdvanceCallDoneError,
+} from "../Slices/advanceMsleadsCallList"
 
 const { 
   FETCH_RM_LEADS_API,
@@ -64,8 +117,27 @@ const {
   REQUET_SIP_API,
   UNFETCH_LEADS_API,
   FETCH_STARS_API,
-
-  
+  CHECK_OLD_MOBILE_NO_API,
+  REFER_OLD_LEAD_API,
+  GET_OLD_MS_TEAM_LEADS,
+  REFER_OLD_LIST_API,
+  REQUEST_OLD_CLIENT_CODE_APPROVAL,
+  BASIC_OLD_BATCH_MARK_CALL_DONE,
+  OLD_ADVANCE_MS_TEAMS_CALL_LIST_API,
+  ADVANCE_OLD_BATCH_MARK_CALL_DONE,
+  ALL_OLD_BATCH_CLIENTS_LIST,
+  MY_NEW_CLIENTS_FOR_CALL,
+  NEW_CLIENT_CALL_DONE,
+  NEW_ALL_CLIENTS,
+  RM_BASIC_CLIENTS_FOR_CALL,
+  RM_ADVANCE_CLIENTS_FOR_CALL,
+  GET_ALL_LEADS_FOR_RM_API,
+  MARK_CALL_DONE_OF_NEW_BASIC_LEAD,
+  MARK_CALL_DONE_OF_NEW_ADVANCE_LEAD,
+  LIST_FOR_MS_TEAMS_SS_APPROVAL_ADVANCE_BATCH,
+  REQUEST_ADVANCE_MS_TEAMS_APPROVAL,
+  RM_POINTS_HISTORY,
+  JRM_CODED_ALL_LEDAS,
   
   
 } = leadEndpoints;
@@ -677,25 +749,25 @@ export const fetchAnalyticsSummary = (startDate = '', endDate = '') => async (di
 };
 
 //TRANSACTIONS
-export const rmTransactionsSummary = (page = 1, limit = 5) => async (dispatch, getState) => {
-  try {
-    dispatch(setTransactionLoading());
+// export const rmTransactionsSummary = (page = 1, limit = 5) => async (dispatch, getState) => {
+//   try {
+//     dispatch(setTransactionLoading());
     
-    const { token } = getState().auth;
-    const response = await apiConnector(
-      "GET",
-      `${RM_TRANSACTIONS_SUMMARY}?page=${page}&limit=${limit}`,
-      null,
-      { Authorization: `Bearer ${token}` }
-    );
+//     const { token } = getState().auth;
+//     const response = await apiConnector(
+//       "GET",
+//       `${RM_TRANSACTIONS_SUMMARY}?page=${page}&limit=${limit}`,
+//       null,
+//       { Authorization: `Bearer ${token}` }
+//     );
 
-    dispatch(setTransactionSuccess(response.data));
-  } catch (error) {
-    dispatch(
-      setTransactionError(error?.response?.data?.message || "Could not fetch transactions")
-    );
-  }
-};
+//     dispatch(setTransactionSuccess(response.data));
+//   } catch (error) {
+//     dispatch(
+//       setTransactionError(error?.response?.data?.message || "Could not fetch transactions")
+//     );
+//   }
+// };
 
 
 
@@ -864,3 +936,843 @@ export const getRmStars = () => async (dispatch, getState) => {
     console.error("Error fetching Stars:", error);
   }
 };
+
+
+
+//Main RM 
+
+export const checkOldMobileNumber = async (token, mobileNumber) => {
+  try {
+    const response = await apiConnector("POST", CHECK_OLD_MOBILE_NO_API, {
+      mobile_number: mobileNumber,
+    }, 
+    {
+      Authorization: `Bearer ${token}` // Pass token in headers
+    }
+    );
+
+    // Check if the response indicates success
+    if (response.status === 200 && response.data) {
+      return response.data; // Return the data to the caller
+    } else {
+      throw new Error(response.data?.message || 'Unexpected response from the server');
+    }
+  } catch (error) {
+    console.error('Error checking mobile number:', error);
+    throw error; // Rethrow the error to handle it in the caller
+  }
+};
+
+
+export const submitOldReferLead = async (token, formData) => {
+  try {
+    // Log the data being submitted (optional, for debugging)
+    console.debug("Submitting lead with form data:", formData);
+
+    // API call
+    const response = await apiConnector(
+      "POST",
+      REFER_OLD_LEAD_API,
+      formData,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+    // Validate response structure
+    if (!response || !response.data) {
+      throw new Error("Invalid response from server");
+    }
+
+    // Check if the API call was successful
+    if (!response.data.success) {
+      throw new Error(response.data.message || "Failed to submit data");
+    }
+
+    // Return the response data if successful
+    return response.data;
+  } catch (error) {
+    // Log the error with full stack trace for debugging
+    console.error("Error submitting lead:", error);
+
+    // Return a descriptive error message
+    return {
+      error: error.response?.data?.message || error.message || "An unexpected error occurred",
+    };
+  }
+};
+
+export const OldBasicMsTeamsClients = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch(setOldBasicLeadsLoading());
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${GET_OLD_MS_TEAM_LEADS}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+   
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setOldBasicLeadsSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch MS Teams Approved Leads";
+      console.warn("MS Teams Approved API Response Error:", errorMessage);
+      dispatch(setOldBasicLeadsError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("MS Teams Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setOldBasicLeadsError(error?.message || "Error fetching MS Teams Approved Leads"));
+  }
+};
+
+
+export const fetchOldReferLeadList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch(setReferOldLeadsLoading());
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${REFER_OLD_LIST_API}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+    // Debug: API Response
+    console.log("Refer Leads API Response:", response);
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setReferOldLeadsSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Refer Leads";
+      console.warn("Refer Leads API Response Error:", errorMessage);
+      dispatch(setReferOldLeadsError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("Refer Leads API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setReferOldLeadsError(error?.message || "Error fetching Refer Leads"));
+  }
+};
+
+//Coded requeset
+export const OldCodeRequest = async (token, leadId, dispatch) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      REQUEST_OLD_CLIENT_CODE_APPROVAL,
+      { leadId },
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response?.data?.message || "Failed to send coded request");
+    }
+
+ 
+
+    // ✅ Refresh the list
+   
+  } catch (error) {
+    toast.error(error?.response?.data?.message || error.message);
+  }
+};
+
+
+//MARK CALL DONE BASIC OLD BATCH
+export const markCallDoneOldBasicBatch = async (token, leadId, action) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      `${BASIC_OLD_BATCH_MARK_CALL_DONE}/${leadId}`,
+      action,
+      {
+    
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("msDetailsAction error:", error);
+    throw error;
+  }
+};
+
+//MARK CALL DONE ADVANCE OLD BATCH
+export const markCallDoneOldAdvanceBatch = async (token, leadId, action) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      `${ADVANCE_OLD_BATCH_MARK_CALL_DONE}/${leadId}`,
+      action,
+      {
+    
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("msDetailsAction error:", error);
+    throw error;
+  }
+};
+
+//Old Advance Call List
+export const oldAdvanceBatchMsLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch(setOldAdvanceBatchLoading());
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${OLD_ADVANCE_MS_TEAMS_CALL_LIST_API}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+   
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setOldAdvanceBatchSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch MS Teams Approved Leads";
+      console.warn("MS Teams Approved API Response Error:", errorMessage);
+      dispatch(setOldAdvanceBatchError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("MS Teams Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setOldBasicLeadsError(error?.message || "Error fetching MS Teams Approved Leads"));
+  }
+};
+
+//Old ALL Clients
+export const oldBatchAllLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch(setAllBatchClientsLoading());
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${ALL_OLD_BATCH_CLIENTS_LIST}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+   
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setAllBatchClientsSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch MS Teams Approved Leads";
+      console.warn("MS Teams Approved API Response Error:", errorMessage);
+      dispatch(setAllBatchClientsError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("MS Teams Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setOldBasicLeadsError(error?.message || "Error fetching MS Teams Approved Leads"));
+  }
+};
+
+
+//New Clients For Call List
+export const newClientsForCall = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch((setNewClientForCallLoading));
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${MY_NEW_CLIENTS_FOR_CALL}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+   
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setNewClientForCallSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch MS Teams Approved Leads";
+      console.warn("MS Teams Approved API Response Error:", errorMessage);
+      dispatch(setNewClientForCallError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("MS Teams Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setOldBasicLeadsError(error?.message || "Error fetching MS Teams Approved Leads"));
+  }
+};
+
+//MARK CALL DONE NEW CLINET
+export const markCallDoneOfNewClient = async (token, leadId, action) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      `${NEW_CLIENT_CALL_DONE}/${leadId}`,
+      action,
+      {
+    
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("msDetailsAction error:", error);
+    throw error;
+  }
+};
+
+//ALL new clients
+export const newallRmClients = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch(setJrmBasicMsTeamsClientsLoading());
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${NEW_ALL_CLIENTS}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+   
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setJrmBasicMsTeamsClientsSuccess(response?.data));
+      console.log(response?.data)
+    } else {
+      const errorMessage = response?.data?.message || "Failed to all Clients";
+      console.warn("ALL CLIENTS API Error:", errorMessage);
+      dispatch(setOldBasicLeadsError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("MS Teams Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setJrmBasicMsTeamsClientsError(error?.message || "Error All Clients"));
+  }
+};
+
+
+
+//new basic clients for call
+export const newBasicClientsForCall = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch((setRmBasicMsTeamsClientsLoading));
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${RM_BASIC_CLIENTS_FOR_CALL}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+   
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setRmBasicMsTeamsClientsSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch basic clients Approved Leads";
+      console.warn("BASIC CLIENT API Response Error:", errorMessage);
+      dispatch(setRmBasicMsTeamsClientsError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("Basic Client API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setOldBasicLeadsError(error?.message || "Error Basic Clients"));
+  }
+};
+
+//new advance clients for call
+export const newAdvanceClientsForCall = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch((setRmAdvanceMsTeamsClientsLoading));
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${RM_ADVANCE_CLIENTS_FOR_CALL}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+   
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setRmAdvanceMsTeamsClientsSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch basic clients Approved Leads";
+      console.warn("BASIC CLIENT API Response Error:", errorMessage);
+      dispatch(setRmAdvanceMsTeamsClientsError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("Basic Client API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setOldBasicLeadsError(error?.message || "Error Basic Clients"));
+  }
+};
+
+export const rmUniversalSearch = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  if (!search.trim()) {
+    // Don't dispatch or call API if search is empty
+    dispatch(setClientsForRmSuccess({ 
+      ClientsForRm: [], 
+      totalClientsForRmList: 0, 
+      totalPages: 0, 
+      currentPage: 1 
+    }));
+    return;
+  }
+
+  try {
+    dispatch(setClientsForRmLoading());
+    const { token } = getState().auth;
+
+    const queryParams = new URLSearchParams({
+      page,
+      limit,
+      ...(search.trim() && { search }),
+    }).toString();
+
+    const url = `${GET_ALL_LEADS_FOR_RM_API}?${queryParams}`;
+
+    const response = await apiConnector("GET", url, null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    if (response?.data?.success) {
+      dispatch(setClientsForRmSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch leads";
+      dispatch(setClientsForRmError(errorMessage));
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Search Leads API Error:", error);
+    }
+    dispatch(setClientsForRmError(error?.message || "Error fetching leads"));
+  }
+};
+
+//MARK CALL DONE NEW BASIC MS-TEAM CLINET 
+export const markCallDoneOfBasicLead = async (token, leadId, action) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      `${MARK_CALL_DONE_OF_NEW_BASIC_LEAD}/${leadId}`,
+      action,
+      {
+    
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("msDetailsAction error:", error);
+    throw error;
+  }
+};
+
+//MARK CALL DONE NEW ADVANCE MS-TEAM CLINET 
+export const markCallDoneOfAdvanceLead = async (token, leadId, action) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      `${MARK_CALL_DONE_OF_NEW_ADVANCE_LEAD}/${leadId}`,
+      action,
+      {
+    
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("msDetailsAction error:", error);
+    throw error;
+  }
+};
+
+
+//LIST FOR MS TEAMS APPROVAL OF SS
+export const listOFAdvanceBatchMsLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch(setAdvanceCallDoneLoading());
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${LIST_FOR_MS_TEAMS_SS_APPROVAL_ADVANCE_BATCH}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setAdvanceCallDoneSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch MS Teams Approved Leads";
+      console.warn("MS Teams Approved API Response Error:", errorMessage);
+      dispatch(setAdvanceCallDoneError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("MS Teams Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setMsTeamsApprovedError(error?.message || "Error fetching MS Teams Approved Leads"));
+  }
+};
+
+
+//ADVANCE BATCH MS TEAMS REQUEST
+export const advanceMsTeamsRequest = async (token, leadId, formData) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      `${REQUEST_ADVANCE_MS_TEAMS_APPROVAL}/${leadId}`,
+      formData, // Pass the formData directly
+      {
+        "Content-Type": "multipart/form-data", // Required for file uploads
+        Authorization: `Bearer ${token}`,
+      }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response?.data?.message || "Failed to send MS-Teams request");
+    }
+
+    return response;
+  } catch (error) {
+    throw new Error(error?.response?.data?.message || error.message);
+  }
+};
+
+
+//RM TRANSACTIONS
+export const pointCreditHistoryRm = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch(setTransactionLoading());
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${RM_POINTS_HISTORY}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+   
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setTransactionSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Transacction";
+      console.warn("Transaction API Response Error:", errorMessage);
+      dispatch(setTransactionError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("Transaction API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setTransactionError(error?.message || "Error fetching Transactions"));
+  }
+};
+
+//JRM Summary
+export const rmTransactionsSummary = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch(setTransactionLoading());
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${RM_TRANSACTIONS_SUMMARY}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+   
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setTransactionSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Transacction";
+      console.warn("Transaction API Response Error:", errorMessage);
+      dispatch(setTransactionError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("Transaction API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setTransactionError(error?.message || "Error fetching Transactions"));
+  }
+};
+
+
+//jrm CODED LIST
+//ALL new clients
+export const jrmCodedAllLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch(setJrmBasicMsTeamsClientsLoading());
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${JRM_CODED_ALL_LEDAS}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`, // Pass token in headers
+      }
+    );
+
+   
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setJrmBasicMsTeamsClientsSuccess(response?.data));
+      console.log(response?.data)
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Coded Clients";
+      console.warn("ALL CLIENTS API Error:", errorMessage);
+      dispatch(setOldBasicLeadsError(errorMessage));
+    }
+  } catch (error) {
+    // Debug: Full error details
+    console.error("Coded Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setJrmBasicMsTeamsClientsError(error?.message || "Error All Clients"));
+  }
+};
+
+
+

@@ -108,7 +108,7 @@ const Payments = () => {
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold mb-2 text-center text-gray-800">
-        RM Payouts
+        JRM Payouts
       </h2>
 
       <div className="text-center mb-6">

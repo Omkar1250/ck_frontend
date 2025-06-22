@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   underUsRequest,
-  deleteLead,
   fetchReferLeadList,
 } from "../../../operations/rmApi";
 import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";

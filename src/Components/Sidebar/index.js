@@ -63,20 +63,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      {/* SIDEBAR HEADER */}
-      <div className="flex items-center justify-end gap-2 px-6 py-1 lg:py-3">
-        {/* Hamburger Button for Mobile */}
-        <button
-          ref={triggerRef}
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          aria-controls="sidebar"
-          aria-expanded={sidebarOpen ? "true" : "false"}
-          aria-label="Toggle Sidebar"
-          className="block lg:hidden text-textColor font-bold text-2xl"
-        >
-          X
-        </button>
-      </div>
+      
 
       {/* Menu Links */}
       <MenuLinks links={filteredLinks} setSidebarOpen={setSidebarOpen} />

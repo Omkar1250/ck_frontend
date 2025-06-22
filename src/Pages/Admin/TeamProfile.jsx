@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
-import Modal from "../../Components/Modal";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
 import { getAllRms } from "../../operations/adminApi";
@@ -118,8 +117,7 @@ const TeamProfile = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">View Team</h2>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
       <SearchInput
         value={searchQuery}

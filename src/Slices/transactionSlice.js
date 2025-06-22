@@ -9,7 +9,7 @@ const transactionSlice = createSlice({
     totalTransactions: 0,
     totalPages: 0,
     currentPage: 1,
-    totalPoints: 0, // Add this
+    totalPoints: 0,
   },
   reducers: {
     setTransactionLoading: (state) => {
@@ -18,20 +18,29 @@ const transactionSlice = createSlice({
     },
     setTransactionSuccess: (state, action) => {
       state.loading = false;
-      state.transactions = action.payload.transactions;
-      state.totalTransactions = action.payload.totalTransactions;
-      state.totalPages = action.payload.totalPages;
-      state.currentPage = action.payload.currentPage;
-      state.totalPoints = action.payload.totalPoints; // Update here
+      state.transactions = action.payload.transactions || [];
+      state.totalTransactions = action.payload.total || 0;
+      state.totalPages = action.payload.totalPages || 0;
+      state.currentPage = action.payload.currentPage || 1;
+      state.totalPoints = action.payload.totalPoints || 0;
     },
     setTransactionError: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
+    // ✅ ADD THIS
+    setTransactionCurrentPage: (state, action) => {
+      state.currentPage = action.payload;
+    },
   },
 });
 
-export const { setTransactionLoading, setTransactionSuccess, setTransactionError } =
-  transactionSlice.actions;
+// Export actions
+export const {
+  setTransactionLoading,
+  setTransactionSuccess,
+  setTransactionError,
+  setTransactionCurrentPage, // ✅ Export here too
+} = transactionSlice.actions;
 
 export default transactionSlice.reducer;

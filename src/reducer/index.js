@@ -22,6 +22,22 @@ import deleteRequestsReducer from "../Slices/adminSlices/deleteRequestSlice"
 import trailReducer from "../Slices/adminSlices/allLeadSlice"
 import msLeadsReducer from "../Slices/adminSlices/msLeads"
 import starsReducer from "../Slices/starSlice";
+import advanceMsLeadsReducer from "../Slices/adminSlices/advanceMsLeads";
+import advanceCodedRequestsReducer from "../Slices/adminSlices/advanceCodedRequest";
+import oldBasicLeadsReducer from '../Slices/oldBasicLeads';
+import referOldListReducer from "../Slices/oldReferList";
+import oldBasicIdPassReducer from "../Slices/adminSlices/oldBasicMsLeads";
+import oldAdvanceIdPassLeadsReducer from "../Slices/adminSlices/oldMsAdvanceClients";
+import oldAdvanceBatchReducer from "../Slices/oldAdvanceCallList";
+import allBatchClientsReducer from "../Slices/allOldClientsSlice";
+import newClientForCallReducer from "../Slices/newClientsForCallSlice";
+import jrmLeadsAllMyClientsSlice from "../Slices/newAllClients";
+import rmBasicMsTeamsClientsSlice from "../Slices/rmBasicClientCallSlice";
+import rmAdvanceMsTeamsClientsReducer from "../Slices/rmAdvanceCallSlice";
+import ClientsForRmReducer from "../Slices/universalSearchSlice";
+import AdvanceCallDoneReducer from "../Slices/advanceMsleadsCallList"
+import advanceMsTeamsRequestsReducer from "../Slices/adminSlices/advanceMsRequestSlice"
+
 const rootReducer = combineReducers({
     auth: authReducer,
     profile:profileReducer,
@@ -36,6 +52,7 @@ const rootReducer = combineReducers({
     msTeamsApproved: msTeamsApprovedReducer,
     sipApproved: sipApprovedReducer,
     stars: starsReducer,
+    advanceMsTeamsRequests:advanceMsTeamsRequestsReducer,
 
     //Admin Slices
     underUsRequests:underusReducer,
@@ -48,6 +65,24 @@ const rootReducer = combineReducers({
     deleteRequests:deleteRequestsReducer,
     trails:trailReducer,
     msLeads:msLeadsReducer,
+    advanceMsLeads:advanceMsLeadsReducer,
+    advanceCodedRequests:advanceCodedRequestsReducer,
+    oldBasicLeads:oldBasicLeadsReducer,
+    referOldLeads:referOldListReducer,
+    oldBasicIdPassLeads:oldBasicIdPassReducer,
+    oldAdvanceIdPassLeads:oldAdvanceIdPassLeadsReducer,
+    oldAdvanceBatch:oldAdvanceBatchReducer,
+    allBatchClients:allBatchClientsReducer,
+    newClientForCall:newClientForCallReducer,
+    jrmLeadsAllMyClients:jrmLeadsAllMyClientsSlice,
+    rmBasicMsTeamsClients:rmBasicMsTeamsClientsSlice,
+    rmAdvanceMsTeamsClients:rmAdvanceMsTeamsClientsReducer,
+    ClientsForRm:ClientsForRmReducer,
+    AdvanceCallDone:AdvanceCallDoneReducer,
+  
+    
+
+
     
 
     

@@ -21,15 +21,18 @@ function AdminLogin() {
   const [errors, setErrors] = useState({ personal_number: "", password: "" });
 
   // Handle redirect after successful login
-  useEffect(() => {
-    if (token && user) {
-      if (user.role === "rm") {
-        navigate("/dashboard/rm");
-      } else {
-        navigate("/dashboard/admin");
-      }
+ useEffect(() => {
+  if (token && user) {
+    if (user.role === "rm") {
+      navigate("/dashboard/rm");
+    } else if (user.role === "mainRm") {
+      navigate("/dashboard/refer/client/rm");
+    } else if (user.role === "admin") {
+      navigate("/dashboard/admin");
     }
-  }, [token, user, navigate]);
+  }
+}, [token, user, navigate]);
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

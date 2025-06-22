@@ -19,12 +19,42 @@ import {
  import { setAllUsers, setUsersLoading, setUsersError } from "../Slices/adminSlices/userSlice"
  import { setDeleteLoading, setDeleteSuccess, setDeleteError } from "../Slices/adminSlices/deleteRequestSlice"
  import { setTrailLoading, setTrailSuccess, setTrailError } from "../Slices/adminSlices/allLeadSlice"
+ import {  setAdvanceCodedLoading,
+  setAdvanceCodedSuccess,
+  setAdvanceCodedError } from "../Slices/adminSlices/advanceCodedRequest"
  import {
   setMsLoading,
   setMsSuccess,
   setMsError,
-setCurrentPage, // now we have the setCurrentPage reducer
+
 }  from "../Slices/adminSlices/msLeads"
+ 
+import {
+    setAdvanceMsLoading,
+  setAdvanceMsSuccess,
+  setAdvanceMsError,
+} from "../Slices/adminSlices/advanceMsLeads"
+
+import {
+    setMsPassBasicLoading,
+  setMsPassBasicSuccess,
+  setMsPassBasicError,
+} from "../Slices/adminSlices/oldBasicMsLeads"
+
+import {
+  setMsPassAdvanceLoading,
+  setMsPassAdvanceSuccess,
+  setMsPassAdvanceError,
+} from "../Slices/adminSlices/oldMsAdvanceClients"
+
+import {
+   setAdvanceMsTeamsLoading,
+  setAdvanceMsTeamsSuccess,
+  setAdvanceMsTeamsError
+} from "../Slices/adminSlices/advanceMsRequestSlice"
+
+
+
  const { adminEndpoints } = require("../services/apis");
 
 const {
@@ -58,7 +88,24 @@ const {
     MS_TEAMS_DETAILS_API,
     PERMANANT_DELETE_LEAD_API,
     DELETE_LEAD_FROM_DELETE_LIST,
-    DELETE_RM_API
+    DELETE_RM_API,
+    GET_ADVANCE_MSTEAMS_LEADS_LIST_API,
+
+    // MAIN RM 
+    CREATE_MAIN_RM_API,
+    GET_ALL_MAIN_RM_API,
+    UPDATE_MAIN_RM_API,
+    DELETE_MAIN_RM_API,
+    ADVANCE_MS_DETAILS_SENT_API,
+    GET_ADVANCE_CODED_REQUEST,
+    HANDLE_OLD_LEAD_APPROVAL,
+     FETCH_ELIGIBLE_OLD_BASIC_CLIENTS_FOR_MS_TEAMS,
+    FETCH_ELIGIBLE_OLD_ADVANCE_CLIENTS_FOR_MS_TEAMS,
+    SENT_OLD_BASIC_MS_TEAMS_ID_PASS_API,
+    SENT_OLD_ADVANCE_MS_TEAMS_ID_PASS_API,
+    REQUSTS_FOR_ADVANCE_MS_TEAMS_LOGIN,
+    APPROVE_ADVANCE_MS_TEAMS_REQUEST_API
+    
     
 
 } = adminEndpoints;
@@ -176,13 +223,14 @@ export const handleUnderUsAction = async (token, leadId, action) => {
   };
 
   //code approval handler
-  export const handleCodedAction = async (token, leadId, action, batch_code) => {
+  export const handleCodedAction = async (token, leadId, action, batch_code, rm) => {
     try {
       const response = await apiConnector("POST", 
         `${CODE_APPROVE_API}/${leadId}`,
       {
         action,
-        batch_code // "approve" or "reject"
+        batch_code,
+        rm // "approve" or "reject"
       },
     {
         Authorization: `Bearer ${token}`,
@@ -956,3 +1004,420 @@ export const deleteRm = async (token, rmId) => {
     toast.error(error?.response?.data?.message || error.message);
   }
 };
+
+//Create Main RM
+export const createMainRm = async (token, formData) => {
+    try {
+        await apiConnector("POST", CREATE_MAIN_RM_API, formData, {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+        });
+        toast.success("Relationship Manager created successfully!");
+    } catch (error) {
+        console.error("Error creating Relationship Manager:", error);
+        toast.error("Failed to create Relationship Manager.");
+    }
+};
+
+
+
+export const getAllMainRms = async (token) => {
+  try {
+    const response = await apiConnector("GET", GET_ALL_MAIN_RM_API, null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    if (!response?.data?.success) {
+      throw new Error("Something went wrong");
+    }
+
+   
+    return response.data.rms;
+  } catch (error) {
+    console.error("Error getting RMs:", error?.message || error);
+    toast.error("Failed to fetch team");
+    return null;
+  }
+};
+
+export const updateMainRm = async (token, id, formData) => {
+    try {
+        await apiConnector("PUT", 
+            
+            `${UPDATE_MAIN_RM_API}/${id}`,
+             formData, {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+        });
+        toast.success("Relationship Manager updated successfully!");
+    } catch (error) {
+        console.error("Error updating Relationship Manager:", error);
+        toast.error("Failed to update Relationship Manager.");
+    }
+};
+
+export const deleteMainRm = async (token, rmId) => {
+  try {
+    const response = await apiConnector(
+      "DELETE",                     // HTTP method
+      `${DELETE_MAIN_RM_API}/${rmId}`, // 🧠 Pass ID in URL like /api/leads/:id
+      null,                         // No body for DELETE
+      {
+        Authorization: `Bearer ${token}`, // Headers
+      }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response?.data?.message || "Failed to delete RM");
+    }
+
+    toast.success(response.data.message);
+    return response;
+  } catch (error) {
+    toast.error(error?.response?.data?.message || error.message);
+  }
+};
+
+
+export const getAllAdvaceMsLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    dispatch(setAdvanceMsLoading());
+  
+    const { token } = getState().auth;
+
+    // Construct query parameters
+    const queryParams = new URLSearchParams({
+      page,
+      limit,
+      ...(search.trim() && { search }),
+    }).toString();
+
+    // Construct the full URL with query parameters
+    const url = `${GET_ADVANCE_MSTEAMS_LEADS_LIST_API}?${queryParams}`;
+
+    // Send the GET request with the constructed URL and Authorization header
+    const response = await apiConnector("GET", url, null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    // Handle the response
+    if (response?.data?.success) {
+      dispatch(setAdvanceMsSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Ms-Teams leads";
+      dispatch(setAdvanceMsError(errorMessage));
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("M-i-pass API Error:", error);
+    }
+    dispatch(setAdvanceMsError(error?.message || "Error Ms Under Us Requests"));
+  }
+};
+
+export const advanceMsDetailsAction = async (token, leadId, action) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      `${ADVANCE_MS_DETAILS_SENT_API}/${leadId}`,
+      action,
+      {
+    
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("msDetailsAction error:", error);
+    throw error;
+  }
+};
+
+
+ export const advanceCodedRequestList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+    try {
+      // Dispatch loading state
+      dispatch(setAdvanceCodedLoading());
+  
+      // Retrieve token from Redux state
+      const { token } = getState().auth;
+  
+      // Construct query string
+      const queryParams = { page, limit };
+      if (search.trim()) {
+        queryParams.search = search;
+      }
+      const query = new URLSearchParams(queryParams).toString();
+  
+   
+  
+      // Make the GET API call
+      const response = await apiConnector(
+        "GET",
+        `${GET_ADVANCE_CODED_REQUEST}?${query}`,
+        null,
+        {
+          Authorization: `Bearer ${token}`,
+        }
+      );
+  
+ 
+  
+      // Check response and dispatch success or error
+      if (response?.data?.success) {
+        dispatch(setAdvanceCodedSuccess(response?.data));
+      } else {
+        const errorMessage = response?.data?.message || "Failed to fetch Coded Requests";
+        console.warn("Coded API Response Error:", errorMessage);
+        dispatch(setAdvanceCodedError(errorMessage));
+      }
+    } catch (error) {
+      // Debug: Full error details
+      console.error("Coded API Error Details:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response,
+      });
+  
+      dispatch(setAdvanceCodedError(error?.message || "Error fetching Coded Requests"));
+    }
+  };
+
+// export const handleOldLeadApproval = async (token, leadId, action) => {
+//   console.log("leadId0", leadId)
+//     try {
+//       const response = await apiConnector("POST", 
+//         `${HANDLE_OLD_LEAD_APPROVAL}/${leadId}`,
+//       {
+//         action,
+       
+//       },
+//     {
+//         Authorization: `Bearer ${token}`,
+//     });
+  
+//       if (response.data.success) {
+//         console.log(response.data.message);
+//         // Optionally: refresh the leads list from the server
+//       } else {
+//         console.log('Action failed: ' + response.data.message);
+//       }
+//     } catch (error) {
+//       console.error(error);
+     
+//     }
+//   };
+
+ export const handleOldLeadApproval = async (token, leadId, action, batch_code) => {
+    try {
+      const response = await apiConnector("POST", 
+        `${HANDLE_OLD_LEAD_APPROVAL}/${leadId}`,
+      {
+        action,
+        batch_code,
+      
+        
+      },
+    {
+        Authorization: `Bearer ${token}`,
+    });
+  
+      if (response.data.success) {
+        console.log(response.data.message);
+        // Optionally: refresh the leads list from the server
+      } else {
+        console.log('Action failed: ' + response.data.message);
+      }
+    } catch (error) {
+      console.error(error);
+     
+    }
+  };
+
+
+
+  export const fetElgibleOldBasicMsClients = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    dispatch(setMsPassBasicLoading());
+  
+    const { token } = getState().auth;
+
+    // Construct query parameters
+    const queryParams = new URLSearchParams({
+      page,
+      limit,
+      ...(search.trim() && { search }),
+    }).toString();
+
+    // Construct the full URL with query parameters
+    const url = `${FETCH_ELIGIBLE_OLD_BASIC_CLIENTS_FOR_MS_TEAMS}?${queryParams}`;
+
+    // Send the GET request with the constructed URL and Authorization header
+    const response = await apiConnector("GET", url, null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    // Handle the response
+    if (response?.data?.success) {
+      dispatch(setMsPassBasicSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Ms-Teams leads";
+      dispatch(setMsPassBasicError(errorMessage));
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("M-i-pass API Error:", error);
+    }
+    dispatch(setMsPassBasicError(error?.message || "Error Ms Under Us Requests"));
+  }
+};
+
+  export const fetchElgibleOldAdvanceMsClients = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    dispatch(setMsPassAdvanceLoading());
+  
+    const { token } = getState().auth;
+
+    // Construct query parameters
+    const queryParams = new URLSearchParams({
+      page,
+      limit,
+      ...(search.trim() && { search }),
+    }).toString();
+
+    // Construct the full URL with query parameters
+    const url = `${FETCH_ELIGIBLE_OLD_ADVANCE_CLIENTS_FOR_MS_TEAMS}?${queryParams}`;
+
+    // Send the GET request with the constructed URL and Authorization header
+    const response = await apiConnector("GET", url, null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    // Handle the response
+    if (response?.data?.success) {
+      dispatch(setMsPassAdvanceSuccess(response?.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch Ms-Teams leads";
+      dispatch(setMsPassAdvanceError(errorMessage));
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("M-i-pass API Error:", error);
+    }
+    dispatch(setMsPassAdvanceError(error?.message || "Error Ms Under Us Requests"));
+  }
+};
+
+//SENT OLD BASIC MS ID PASS ENDPOINT
+export const oldBasicIdPassSent = async (token, leadId, action) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      `${SENT_OLD_BASIC_MS_TEAMS_ID_PASS_API}/${leadId}`,
+      action,
+      {
+    
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("msDetailsAction error:", error);
+    throw error;
+  }
+};
+
+
+//SENT OLD BASIC MS ID PASS ENDPOINT
+export const oldAdvanceIdPassSent = async (token, leadId, action) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      `${SENT_OLD_ADVANCE_MS_TEAMS_ID_PASS_API}/${leadId}`,
+      action,
+      {
+    
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("msDetailsAction error:", error);
+    throw error;
+  }
+};
+
+
+
+//ADVANCE MS TEAMS REQUEST LIST
+export const advanceBatchmsTeamsRequestList = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+    try {
+      // Dispatch loading state
+      dispatch(setAdvanceMsTeamsLoading());
+  
+      // Retrieve token from Redux state
+      const { token } = getState().auth;
+  
+      // Construct query string
+      const queryParams = { page, limit };
+      if (search.trim()) {
+        queryParams.search = search;
+      }
+      const query = new URLSearchParams(queryParams).toString();
+  
+  
+      // Make the GET API call
+      const response = await apiConnector(
+        "GET",
+        `${REQUSTS_FOR_ADVANCE_MS_TEAMS_LOGIN}?${query}`,
+        null,
+        {
+          Authorization: `Bearer ${token}`,
+        }
+      );
+  
+  
+      // Check response and dispatch success or error
+      if (response?.data?.success) {
+        dispatch(setAdvanceMsTeamsSuccess(response?.data));
+      } else {
+        const errorMessage = response?.data?.message || "Failed to fetch MS Teams Requests";
+        console.warn("MS Teams API Response Error:", errorMessage);
+        dispatch(setAdvanceMsTeamsError(errorMessage));
+      }
+    } catch (error) {
+      // Debug: Full error details
+      console.error("MS Teams API Error Details:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response,
+      });
+  
+      dispatch(setAdvanceMsTeamsError(error?.message || "Error fetching MS Teams Requests"));
+    }
+  };
+
+//ADVANCE MS TEAMS APPROVE REQUEST
+ export const advanceMsTeamsAction = async (token, leadId, action ) => {
+    try {
+      const response = await apiConnector("POST", 
+        `${APPROVE_ADVANCE_MS_TEAMS_REQUEST_API}/${leadId}`,
+      {
+        action
+        
+      },
+    {
+        Authorization: `Bearer ${token}`,
+    });
+  
+      if (response.data.success) {
+        alert(response.data.message);
+        // Optionally: refresh the leads list from the server
+      } else {
+        alert('Action failed: ' + response.data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Something went wrong.');
+    }
+  };

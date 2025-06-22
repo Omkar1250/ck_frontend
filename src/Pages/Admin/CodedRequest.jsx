@@ -5,7 +5,7 @@ import Modal from "../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
-import { handleCodedAction, codedRequestList } from "../../operations/adminApi";
+import { handleCodedAction, codedRequestList, getAllMainRms } from "../../operations/adminApi";
 
 const CodedRequest = () => {
   const dispatch = useDispatch();
@@ -24,10 +24,27 @@ const CodedRequest = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [modalAction, setModalAction] = useState("");
   const [batchCode, setBatchCode] = useState("");
+  const [rmList , setRmList] = useState([]);
+  const [selectedRm, setSelectedRm] = useState(null)
+
 
   useEffect(() => {
     dispatch(codedRequestList(currentPage, 5, searchQuery));
   }, [dispatch, currentPage, searchQuery]);
+
+
+   useEffect(() => {
+      const fetchRms = async () => {
+        try {
+          const data = await getAllMainRms(token); // fixed line
+          const normalizedData = Array.isArray(data) ? data : [data];
+          setRmList(normalizedData);
+        } catch (err) {
+          toast.error("Failed to fetch RM");
+        } 
+      };
+      fetchRms();
+    }, [token]);
 
   const handleNext = () => {
     if (currentPage < totalPages) {
@@ -61,7 +78,7 @@ const CodedRequest = () => {
     }
 
     try {
-      await handleCodedAction(token, selectedLead?.id, modalAction, batchCode.trim());
+      await handleCodedAction(token, selectedLead?.id, modalAction, batchCode.trim(), selectedRm);
       toast.success(`Request ${modalAction === "approve" ? "approved" : "rejected"} successfully!`);
       setIsModalOpen(false);
       setBatchCode("");
@@ -126,27 +143,45 @@ const CodedRequest = () => {
         handlePrev={handlePrev}
       />
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onSubmit={handleCodedActionSubmit}
-        name={selectedLead?.name}
-        mobile_number={selectedLead?.mobile_number}
-        whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
-        title={modalAction === "approve" ? "Approve Request" : "Reject Request"}
-        action={modalAction}
+    <Modal
+  isOpen={isModalOpen}
+  onClose={closeModal}
+  onSubmit={handleCodedActionSubmit}
+  name={selectedLead?.name}
+  mobile_number={selectedLead?.mobile_number}
+  whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
+  title={modalAction === "approve" ? "Approve Request" : "Reject Request"}
+  action={modalAction}
+>
+  {modalAction === "approve" && (
+    <div>
+      {/* Batch Code Input */}
+      <input
+        type="text"
+        placeholder="Enter Batch Code"
+        value={batchCode}
+        onChange={(e) => setBatchCode(e.target.value)}
+        className="w-full border border-gray-300 p-2 rounded-lg mb-4"
+      />
+
+      {/* RM Dropdown */}
+      <select
+        value={selectedRm}
+        onChange={(e) => setSelectedRm(e.target.value)}
+        className="w-full border border-gray-300 p-2 rounded-lg mb-4"
       >
-        {modalAction === "approve" && (
-          <input
-            type="text"
-            placeholder="Enter Batch Code"
-            value={batchCode}
-            onChange={(e) => setBatchCode(e.target.value)}
-            className="w-full border border-gray-300 p-2 rounded-lg mb-4"
-          />
-        )}
-        <p>Are you sure you want to {modalAction} this lead?</p>
-      </Modal>
+        <option value="">Select RM</option>
+        {rmList.map((rm) => (
+          <option key={rm.id} value={rm.id}>
+            {rm.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  )}
+  <p>Are you sure you want to {modalAction} this lead?</p>
+</Modal>
+
     </div>
   );
 };

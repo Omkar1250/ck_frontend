@@ -7,7 +7,6 @@ export default function DefaultLayout() {
   // State for managing the sidebar open/close state
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  console.log("DefaultLayout - Rendering children");
 
   return (
     <div>

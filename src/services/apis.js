@@ -37,6 +37,32 @@ export const leadEndpoints = {
     REQUET_SIP_API: BASE_URL + "/request-sip",
     UNFETCH_LEADS_API : BASE_URL + "/unfetchleads",
     FETCH_STARS_API: BASE_URL + "/stars",
+
+
+    // rm 
+    CHECK_OLD_MOBILE_NO_API: BASE_URL + '/check-old-mobile-number',
+    REFER_OLD_LIST_API: BASE_URL + '/refer-old-lead-list',
+    REFER_OLD_LEAD_API: BASE_URL + '/refer-old-rm',
+    GET_OLD_MS_TEAM_LEADS: BASE_URL + '/get-basic-batch-client-list',
+    REQUEST_OLD_CLIENT_CODE_APPROVAL: BASE_URL + '/request-old-client-code-approval',
+    BASIC_OLD_BATCH_MARK_CALL_DONE: BASE_URL + '/basic-old-batch-call-done',
+    ADVANCE_OLD_BATCH_MARK_CALL_DONE: BASE_URL + '/advance-old-batch-call-done',
+    OLD_ADVANCE_MS_TEAMS_CALL_LIST_API: BASE_URL + '/get-advance-batch-client-list',
+    ALL_OLD_BATCH_CLIENTS_LIST:BASE_URL+ '/get-all-batch-client-list',
+    
+    MY_NEW_CLIENTS_FOR_CALL: BASE_URL + '/new-clients-for-ms-call',
+    NEW_CLIENT_CALL_DONE: BASE_URL + '/new-client-call-done',
+    NEW_ALL_CLIENTS: BASE_URL + '/rm-all-my-clients',
+    RM_BASIC_CLIENTS_FOR_CALL: BASE_URL + '/rm-basic-ms-teams-leads',
+    RM_ADVANCE_CLIENTS_FOR_CALL: BASE_URL + '/rm-advance-ms-teams-leads',
+    GET_ALL_LEADS_FOR_RM_API: BASE_URL + '/get-all-leads-for-rm',
+    MARK_CALL_DONE_OF_NEW_BASIC_LEAD: BASE_URL + '/new-basic-lead-batch-call-done',
+    MARK_CALL_DONE_OF_NEW_ADVANCE_LEAD: BASE_URL + '/new-advance-lead-batch-call-done',
+    LIST_FOR_MS_TEAMS_SS_APPROVAL_ADVANCE_BATCH: BASE_URL + '/get-leads-for-ms-advance-approval',
+    REQUEST_ADVANCE_MS_TEAMS_APPROVAL: BASE_URL + '/request-advance-ms-teams-approval',
+    RM_POINTS_HISTORY:BASE_URL + '/rm-points-history',
+    JRM_CODED_ALL_LEDAS:BASE_URL + '/get-jrm-coded-list',
+     
   };
   
 
@@ -74,6 +100,27 @@ export const adminEndpoints = {
     MS_TEAMS_DETAILS_API: BASE_URL + "/ms-teams-details",
     PERMANANT_DELETE_LEAD_API: BASE_URL + "/admin/delete-lead",
     DELETE_LEAD_FROM_DELETE_LIST: BASE_URL + "/delete/lead-delete-from-list",
+    GET_ADVANCE_MSTEAMS_LEADS_LIST_API: BASE_URL + "/get-adavance-msteams-list",
+    ADVANCE_MS_DETAILS_SENT_API: BASE_URL + "/advance-ms-details_sent",
+    HANDLE_OLD_LEAD_APPROVAL: BASE_URL + "/approve-old-lead",
+
+
+
+
+    // Main Rm 
+    CREATE_MAIN_RM_API: BASE_URL + "/mainrm/signup",
+    GET_ALL_MAIN_RM_API: BASE_URL + "/get/all-mainrms",
+    UPDATE_MAIN_RM_API: BASE_URL + "/update/mainrm",
+    DELETE_MAIN_RM_API: BASE_URL + "/delete/mainrm",
+    GET_ADVANCE_CODED_REQUEST: BASE_URL + '/get-old-refer-leads',
+    FETCH_ELIGIBLE_OLD_BASIC_CLIENTS_FOR_MS_TEAMS: BASE_URL + '/get-eligible-old-basic-ms-leads',
+    FETCH_ELIGIBLE_OLD_ADVANCE_CLIENTS_FOR_MS_TEAMS : BASE_URL + '/get-eligible-old-advance-ms-leads',
+    SENT_OLD_BASIC_MS_TEAMS_ID_PASS_API: BASE_URL + '/sent-old-basic-id-pass',
+    SENT_OLD_ADVANCE_MS_TEAMS_ID_PASS_API: BASE_URL + '/sent-old-advance-id-pass',
+    REQUSTS_FOR_ADVANCE_MS_TEAMS_LOGIN: BASE_URL + '/get-advance-ms-teams-requests',
+    APPROVE_ADVANCE_MS_TEAMS_REQUEST_API: BASE_URL + '/approve-advance-ms-teams-request',
+
+
     
 }
 

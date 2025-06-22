@@ -1,54 +1,56 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { rmTransactionsSummary } from "../../../operations/rmApi";
-import SearchInput from "../../../Components/SearchInput"; // Reusable Search Component
-
+import { setTransactionCurrentPage } from "../../../Slices/transactionSlice";
+import SearchInput from "../../../Components/SearchInput";
 
 const RmPayments = () => {
   const dispatch = useDispatch();
-  const { transactions, loading, error, currentPage, totalPages, totalPoints } = useSelector(
-    (state) => state.transactions
-  );
+  const {
+    transactions,
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    totalPoints,
+  } = useSelector((state) => state.transactions);
 
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch data whenever search or page changes
   useEffect(() => {
-    dispatch(rmTransactionsSummary(1, 5)); // Fetch page 1 initially
-  }, [dispatch]);
+    dispatch(rmTransactionsSummary(currentPage, 5, searchQuery));
+  }, [dispatch, currentPage, searchQuery]);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+    dispatch(setTransactionCurrentPage(1)); // Reset to page 1 on search
   };
-
-  const filteredTransactions = transactions.filter((txn) =>
-    txn.action.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const handlePrev = () => {
     if (currentPage > 1) {
-      dispatch(rmTransactionsSummary(currentPage - 1, 5));
+      dispatch(setTransactionCurrentPage(currentPage - 1));
     }
   };
 
   const handleNext = () => {
     if (currentPage < totalPages) {
-      dispatch(rmTransactionsSummary(currentPage + 1, 5));
+      dispatch(setTransactionCurrentPage(currentPage + 1));
     }
   };
 
-  if (loading) return <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>;
-  if (error) return <p className="text-red-500 text-center mt-6 text-lg">{error}</p>;
-
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center mt-16 text-richblack-800">Payments </h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center mt-16 text-richblack-800">
+        Payments
+      </h1>
 
-      {/* Reusable Search Bar */}
+      {/* Search Bar */}
       <SearchInput
         value={searchQuery}
         onChange={handleSearchChange}
         onClear={() => setSearchQuery("")}
-        placeholder="Search transactions..."
+        placeholder="Search by name or mobile number"
       />
 
       {/* Total Points */}
@@ -62,24 +64,29 @@ const RmPayments = () => {
         </div>
       </div>
 
-      {filteredTransactions.length === 0 ? (
+      {/* Loading/Error */}
+      {loading ? (
+        <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>
+      ) : error ? (
+        <p className="text-red-500 text-center mt-6 text-lg">{error}</p>
+      ) : transactions.length === 0 ? (
         <p className="text-gray-600 text-center text-lg">No transactions found.</p>
       ) : (
         <>
           {/* Transactions List */}
           <div className="space-y-4">
-            {filteredTransactions.map((txn) => (
+            {transactions.map((txn) => (
               <div
                 key={txn.id}
                 className="flex justify-between items-center p-4 border rounded-lg bg-white shadow-lg hover:shadow-2xl transition-all"
               >
-                {/* Left side: Lead Name */}
+                {/* Left side */}
                 <div>
                   <p className="font-semibold capitalize text-gray-800">{txn.lead_name}</p>
-                  <p  className="font-semibold capitalize text-gray-800"> {txn. mobile_number}</p>
+                  <p className="font-semibold text-gray-800">{txn.mobile_number}</p>
                 </div>
 
-                {/* Right side: Points, Date, Action */}
+                {/* Right side */}
                 <div className="text-right">
                   <p
                     className={`text-lg font-bold ${
@@ -88,14 +95,18 @@ const RmPayments = () => {
                   >
                     {txn.points > 0 ? `+${txn.points}` : txn.points}
                   </p>
-                  <p className="text-sm text-gray-500">{new Date(txn.created_at).toLocaleString()}</p>
-                  <p className="font-semibold capitalize text-gray-800">{txn.action.replace(/_/g, " ")}</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(txn.created_at).toLocaleString()}
+                  </p>
+                  <p className="font-semibold capitalize text-gray-800">
+                    {txn.action.replace(/_/g, " ")}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Pagination Controls */}
+          {/* Pagination */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mt-10">
             <button
               onClick={handlePrev}
