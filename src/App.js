@@ -22,6 +22,7 @@ import TeamsScreenshotUpload from "./Pages/mainRm/TeamsScreenshotUpload";
 import AdvanceMsRequests from "./Pages/Admin/AdvanceMsRequests";
 import WalletTransactions from "./Pages/mainRm/WalletTransactions";
 import TokenExpiryWatcher from "./Components/Sidebar/TokenExpiryWatcher";
+import TeamsDashboard from "./Pages/TeamsDashboard";
 
 
 
@@ -118,6 +119,42 @@ function App() {
             <Route path="/dashboard/main/rm/universal/search" element={<UniversalSearch />} />
             <Route path="/dashboard/main/rm/advance/msteams/clients/screenshot/upload" element={<TeamsScreenshotUpload />} />
             <Route path="/dashboard/main/rm/payments" element={<WalletTransactions />} />
+          </Route>
+        )}
+
+        {/* TEAM USER  */}
+
+         {user?.role === ACCOUNT_TYPE.TEAMSUSER && (
+          <Route element={<PrivateRoute><DefaultLayout /></PrivateRoute>}>
+
+              <Route path="/dashboard/teams-user" element={<TeamsDashboard/>} />
+              <Route path="/dashboard/ms-team-id-pass" element={<MsTeamsId />} />
+            <Route path="/dashboard/advance-ms-team-id-pass" element={<AdvanceMsTeamId />} />
+          </Route>
+             
+
+         )}
+
+
+         {/* Manager Route  */}
+         {/* Admin Routes */}
+        {user?.role === ACCOUNT_TYPE.MANAGER && (
+          <Route element={<PrivateRoute><DefaultLayout /></PrivateRoute>}>
+            <Route path="/dashboard/view-team-profile" element={<ProfileTab />} />
+            <Route path="/dashboard/admin" element={<CreateRole />} />
+            <Route path="/dashboard/ms-team-id-pass" element={<MsTeamsId />} />
+            <Route path="/dashboard/advance-ms-team-id-pass" element={<AdvanceMsTeamId />} />
+            <Route path="/dashboard/under-us-request" element={<UnderUsRequest />} />
+            <Route path="/dashboard/coded-requests" element={<CodedRequest />} />
+            <Route path="/dashboard/aoma-requests" element={<AomaRequest />} />
+            <Route path="/dashboard/activation-requests" element={<ActivationRequest />} />
+            <Route path="/dashboard/ms-teams-requests" element={<MsTeamsRequest />} />
+            <Route path="/dashboard/sip-requests" element={<SipRequest />} />
+            <Route path="/dashboard/delete-requests" element={<DeleteRequest />} />
+            <Route path="/dashboard/universal-approve" element={<UniversalApprove />} />
+            <Route path="/dashboard/admin-analytics" element={<AdminAnalytics />} />
+            <Route path="/dashboard/old-coded-requests" element={<AdvanceCodedRequest />} />
+            <Route path="/dashboard/advance-ms-teams-requests" element={<AdvanceMsRequests />} />
           </Route>
         )}
 

@@ -29,6 +29,11 @@ function AdminLogin() {
       navigate("/dashboard/refer/client/rm");
     } else if (user.role === "admin") {
       navigate("/dashboard/admin");
+    } else if (user.role === "teamsUser") {
+      navigate("/dashboard/teams-user");
+    }
+     else if (user.role === "manager") {
+      navigate("/dashboard/admin");
     }
   }
 }, [token, user, navigate]);

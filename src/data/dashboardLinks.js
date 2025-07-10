@@ -239,6 +239,111 @@ export const sidebarLinks = [
     path: "/dashboard/main/rm/payments",
     type: ACCOUNT_TYPE.RM,
   },
+  {
+    id: 39,
+    name: "Basic Ms Team ID Pass",
+    path: "/dashboard/ms-team-id-pass",
+    type: ACCOUNT_TYPE.TEAMSUSER,
+  },
+  {
+    id: 40,
+     name: "Advance Ms Team ID Pass",
+    path: "/dashboard/advance-ms-team-id-pass",
+    type: ACCOUNT_TYPE.TEAMSUSER,
+  },
+  {
+    id: 41,
+    name: "Create Role",
+    path: "/dashboard/admin",
+    type: ACCOUNT_TYPE.MANAGER,
+    
+  },
+  {
+    id: 42,
+    name: "View Team Profile",
+    path: "/dashboard/view-team-profile",
+    type: ACCOUNT_TYPE.MANAGER,
+    
+  },
+  {
+    id: 43,
+    name: "Basic Ms Team ID Pass",
+    path: "/dashboard/ms-team-id-pass",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  {
+    id: 44,
+    name: "Advance Ms Team ID Pass",
+    path: "/dashboard/advance-ms-team-id-pass",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  {
+    id: 45,
+    name: "Under Us Request",
+    path: "/dashboard/under-us-request",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  {
+    id: 46,
+    name: "Coded Request",
+    path: "/dashboard/coded-requests",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  {
+    id: 47,
+    name: "Old Coded Request",
+    path: "/dashboard/old-coded-requests",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  {
+    id: 48,
+    name: "AOMA Request",
+    path: "/dashboard/aoma-requests",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  {
+    id: 49,
+    name: "Activation Requests",
+    path: "/dashboard/activation-requests",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  {
+    id: 50,
+    name: "MS Teams Requests",
+    path: "/dashboard/ms-teams-requests",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  {
+    id: 51,
+    name: "Advance MS Teams Requests",
+    path: "/dashboard/advance-ms-teams-requests",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  {
+    id: 52 ,
+    name: "SIP Requests",
+    path: "/dashboard/sip-requests",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  {
+    id: 53,
+    name: "Delete Requests",
+    path: "/dashboard/delete-requests",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  {
+    id: 54,
+    name: "Universal Approve",
+    path: "/dashboard/universal-approve",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  {
+    id: 55,
+    name: "Analytics",
+    path: "/dashboard/admin-analytics",
+    type: ACCOUNT_TYPE.MANAGER,
+  },
+  
   
  
   
