@@ -181,7 +181,7 @@ const handleNext = useCallback(() => {
                 lead.ms_teams_request_status === "requested";
 
                   const remainingDays = calculateRemainingDays(
-                lead.code_approved_at
+                lead.basic_ms_teams_details_send_at
               );
               const timeRemainingClass =
                 remainingDays <= 5
