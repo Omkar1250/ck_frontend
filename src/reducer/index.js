@@ -37,6 +37,7 @@ import rmAdvanceMsTeamsClientsReducer from "../Slices/rmAdvanceCallSlice";
 import ClientsForRmReducer from "../Slices/universalSearchSlice";
 import AdvanceCallDoneReducer from "../Slices/advanceMsleadsCallList"
 import advanceMsTeamsRequestsReducer from "../Slices/adminSlices/advanceMsRequestSlice"
+import mfClientsReducer from "../Slices/mfSlice"
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -79,6 +80,8 @@ const rootReducer = combineReducers({
     rmAdvanceMsTeamsClients:rmAdvanceMsTeamsClientsReducer,
     ClientsForRm:ClientsForRmReducer,
     AdvanceCallDone:AdvanceCallDoneReducer,
+    mfClients:mfClientsReducer,
+
   
     
 

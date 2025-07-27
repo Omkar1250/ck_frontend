@@ -23,6 +23,7 @@ import AdvanceMsRequests from "./Pages/Admin/AdvanceMsRequests";
 import WalletTransactions from "./Pages/mainRm/WalletTransactions";
 import TokenExpiryWatcher from "./Components/Sidebar/TokenExpiryWatcher";
 import TeamsDashboard from "./Pages/TeamsDashboard";
+import MfClients from "./Pages/mainRm/MfClients";
 
 
 
@@ -119,6 +120,7 @@ function App() {
             <Route path="/dashboard/main/rm/universal/search" element={<UniversalSearch />} />
             <Route path="/dashboard/main/rm/advance/msteams/clients/screenshot/upload" element={<TeamsScreenshotUpload />} />
             <Route path="/dashboard/main/rm/payments" element={<WalletTransactions />} />
+            <Route path="/dashboard/mf/clients/for/call" element={<MfClients/>} />
           </Route>
         )}
 

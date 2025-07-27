@@ -197,12 +197,19 @@ export const sidebarLinks = [
     path: "/dashboard/old/my/clients",
     type: ACCOUNT_TYPE.RM,
   },
+   {
+    id: 88,
+    name: "MF Clients",
+    path: "/dashboard/mf/clients/for/call",
+    type: ACCOUNT_TYPE.RM,
+  },
   {
     id: 32,
     name: "My New Clients for Call",
     path: "/dashboard/my/new/clients/for/call",
     type: ACCOUNT_TYPE.RM,
   },
+ 
   {
     id: 33,
     name: "Basic Ms Teams Clients",

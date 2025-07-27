@@ -62,6 +62,8 @@ export const leadEndpoints = {
     REQUEST_ADVANCE_MS_TEAMS_APPROVAL: BASE_URL + '/request-advance-ms-teams-approval',
     RM_POINTS_HISTORY:BASE_URL + '/rm-points-history',
     JRM_CODED_ALL_LEDAS:BASE_URL + '/get-jrm-coded-list',
+      MF_CLIENTS_CALL_API: BASE_URL + '/get-all-mf-clients',
+    MF_CALL_DONE_API: BASE_URL + '/mark-mf-call-done',
      
   };
   
@@ -119,6 +121,7 @@ export const adminEndpoints = {
     SENT_OLD_ADVANCE_MS_TEAMS_ID_PASS_API: BASE_URL + '/sent-old-advance-id-pass',
     REQUSTS_FOR_ADVANCE_MS_TEAMS_LOGIN: BASE_URL + '/get-advance-ms-teams-requests',
     APPROVE_ADVANCE_MS_TEAMS_REQUEST_API: BASE_URL + '/approve-advance-ms-teams-request',
+  
 
 
     

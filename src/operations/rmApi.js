@@ -91,7 +91,13 @@ import {
    setAdvanceCallDoneLoading,
   setAdvanceCallDoneSuccess,
   setAdvanceCallDoneError,
-} from "../Slices/advanceMsleadsCallList"
+} from "../Slices/advanceMsleadsCallList";
+import {
+  setMfClientsLoading,
+  setMfClientsSuccess,
+  setMfClientsError,
+  setMfClientsPage,
+} from "../Slices/mfSlice"
 
 const { 
   FETCH_RM_LEADS_API,
@@ -138,6 +144,8 @@ const {
   REQUEST_ADVANCE_MS_TEAMS_APPROVAL,
   RM_POINTS_HISTORY,
   JRM_CODED_ALL_LEDAS,
+  MF_CLIENTS_CALL_API,
+  MF_CALL_DONE_API
   
   
 } = leadEndpoints;
@@ -1775,4 +1783,69 @@ export const jrmCodedAllLeads = (page = 1, limit = 5, search = "") => async (dis
 };
 
 
+//MF CLIENTS CALL LIST
+export const mFClientsForCall = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  try {
+    // Dispatch loading state
+    dispatch(setMfClientsLoading());
+
+    // Retrieve token from Redux state
+    const { token } = getState().auth;
+
+    // Construct query string
+    const queryParams = { page, limit };
+    if (search.trim()) {
+      queryParams.search = search;
+    }
+    const query = new URLSearchParams(queryParams).toString();
+
+    // Make the GET API call
+    const response = await apiConnector(
+      "GET",
+      `${MF_CLIENTS_CALL_API}?${query}`,
+      null,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+
+    // Check response and dispatch success or error
+    if (response?.data?.success) {
+      dispatch(setMfClientsSuccess(response.data));
+    } else {
+      const errorMessage = response?.data?.message || "Failed to fetch MF Approved Leads";
+      console.warn("MF Clients API Response Error:", errorMessage);
+      dispatch(setMfClientsError(errorMessage));
+    }
+  } catch (error) {
+    console.error("MF Approved API Error Details:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response,
+    });
+
+    dispatch(setMfClientsError(error?.message || "Error fetching MF Approved Leads"));
+  }
+};
+
+
+
+//MARK CALL DONE NEW BASIC MS-TEAM CLINET 
+export const mFMarkCallDone = async (token, leadId, action) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      `${MF_CALL_DONE_API}/${leadId}`,
+      action,
+      {
+    
+        Authorization: `Bearer ${token}`,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("msDetailsAction error:", error);
+    throw error;
+  }
+};
 
