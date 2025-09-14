@@ -12,6 +12,9 @@ const ConversionPoint = () => {
     sip_approved: "",
     activation_approved: "",
     advance_ms_teams_approved: "",
+    dhan_code_approved:"",
+    dhan_ms_teams_approved:"",
+    dhan_advance_ms_teams_approved:""
   });
 
   const [originalPoints, setOriginalPoints] = useState({});
@@ -31,7 +34,12 @@ const ConversionPoint = () => {
             ms_teams_approved: res.data.ms_teams_approved,
             sip_approved: res.data.sip_approved,
             activation_approved: res.data.activation_approved,
-            advance_ms_teams_approved:res.data.advance_ms_teams_approved
+            advance_ms_teams_approved:res.data.advance_ms_teams_approved,
+            dhan_code_approved:res.data.dhan_code_approved,
+            dhan_ms_teams_approved:res.data.dhan_ms_teams_approved,
+            dhan_advance_ms_teams_approved:res.data.dhan_advance_ms_teams_approved,
+
+
           };
           console.log("Mapped Points:", mapped);
 
@@ -82,6 +90,9 @@ const ConversionPoint = () => {
         { label: "SIP Approved", field: "sip_approved" },
         { label: "Activation Approved", field: "activation_approved" },
         { label: "Advance Ms Teams Approved", field: "advance_ms_teams_approved" },
+        { label: "Dhan Code Approved", field: "dhan_code_approved" },
+        { label: "Dhan Ms Teams Approved", field: "dhan_ms_teams_approved" },
+        { label: "Dhan Adavnce Ms Teams Approved", field: "dhan_advance_ms_teams_approved" },
       ].map(({ label, field }) => (
         <div key={field} className="flex justify-between items-center">
           <label className="font-medium">{label}:</label>

@@ -63,12 +63,12 @@ export const sidebarLinks = [
     path: "/dashboard/rm/analytics",
     type: ACCOUNT_TYPE.USER,
   },
-  {
-    id: 10,
-    name: "Payments",
-    path: "/dashboard/your/payment",
-    type: ACCOUNT_TYPE.USER,
-  },
+  // {
+  //   id: 10,
+  //   name: "Payments",
+  //   path: "/dashboard/your/payment",
+  //   type: ACCOUNT_TYPE.USER,
+  // },
   {
     id: 11,
     name: "Create Role",
@@ -240,12 +240,12 @@ export const sidebarLinks = [
     path: "/dashboard/main/rm/universal/search",
     type: ACCOUNT_TYPE.RM,
   },
-  {
-    id: 38,
-    name: "Payments",
-    path: "/dashboard/main/rm/payments",
-    type: ACCOUNT_TYPE.RM,
-  },
+  // {
+  //   id: 38,
+  //   name: "Payments",
+  //   path: "/dashboard/main/rm/payments",
+  //   type: ACCOUNT_TYPE.RM,
+  // },
   {
     id: 39,
     name: "Basic Ms Team ID Pass",
