@@ -5,7 +5,13 @@ import Modal from "../../Components/Modal";
 import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
-import { handleCodedAction, codedRequestList, getAllMainRms } from "../../operations/adminApi";
+import Select from "react-select";
+import {
+  handleCodedAction,
+  codedRequestList,
+  getAllMainRms,
+  getAllBatchCodes,
+} from "../../operations/adminApi";
 
 const CodedRequest = () => {
   const dispatch = useDispatch();
@@ -16,7 +22,7 @@ const CodedRequest = () => {
     error,
     currentPage,
     totalPages,
-    totalCodedRequests
+    totalCodedRequests,
   } = useSelector((state) => state.codedRequests);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,27 +30,37 @@ const CodedRequest = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [modalAction, setModalAction] = useState("");
   const [batchCode, setBatchCode] = useState("");
-  const [rmList , setRmList] = useState([]);
-  const [selectedRm, setSelectedRm] = useState(null)
-
+  const [allbatches, setAllBatches] = useState([]);
+  const [rmList, setRmList] = useState([]);
+  const [selectedRm, setSelectedRm] = useState(null);
 
   useEffect(() => {
     dispatch(codedRequestList(currentPage, 5, searchQuery));
   }, [dispatch, currentPage, searchQuery]);
 
+  useEffect(() => {
+    const fetchRms = async () => {
+      try {
+        const data = await getAllMainRms(token);
+        setRmList(Array.isArray(data) ? data : [data]);
+      } catch {
+        toast.error("Failed to fetch RM list.");
+      }
+    };
+    fetchRms();
+  }, [token]);
 
-   useEffect(() => {
-      const fetchRms = async () => {
-        try {
-          const data = await getAllMainRms(token); // fixed line
-          const normalizedData = Array.isArray(data) ? data : [data];
-          setRmList(normalizedData);
-        } catch (err) {
-          toast.error("Failed to fetch RM");
-        } 
-      };
-      fetchRms();
-    }, [token]);
+  useEffect(() => {
+    const fetchBatches = async () => {
+      try {
+        const data = await getAllBatchCodes(token);
+        setAllBatches(data.data || []);
+      } catch {
+        toast.error("Failed to fetch Batch list.");
+      }
+    };
+    fetchBatches();
+  }, [token]);
 
   const handleNext = () => {
     if (currentPage < totalPages) {
@@ -60,28 +76,23 @@ const CodedRequest = () => {
 
   const copyToClipboard = (number) => {
     navigator.clipboard.writeText(number);
-    toast.success("Phone number copied!");
+    toast.success("Copied!");
   };
 
-  const openWhatsApp = (number) => {
-    window.open(`https://wa.me/${number}`, "_blank");
-  };
-
-  const makeCall = (number) => {
-    window.location.href = `tel:${number}`;
-  };
+  const openWhatsApp = (number) => window.open(`https://wa.me/${number}`, "_blank");
+  const makeCall = (number) => (window.location.href = `tel:${number}`);
 
   const handleCodedActionSubmit = async () => {
-    if (modalAction === "approve" && (!batchCode || batchCode.trim().length < 3)) {
-      toast.error("Batch code must be at least 3 characters.");
+    if (modalAction === "approve" && (!batchCode || !selectedRm)) {
+      toast.error("Please select both Batch Code and RM.");
       return;
     }
-
     try {
-      await handleCodedAction(token, selectedLead?.id, modalAction, batchCode.trim(), selectedRm);
-      toast.success(`Request ${modalAction === "approve" ? "approved" : "rejected"} successfully!`);
+      await handleCodedAction(token, selectedLead?.id, modalAction, batchCode, selectedRm);
+      toast.success(`Request ${modalAction === "approve" ? "approved" : "rejected"}!`);
       setIsModalOpen(false);
       setBatchCode("");
+      setSelectedRm(null);
       dispatch(codedRequestList(currentPage, 5, searchQuery));
     } catch (error) {
       toast.error(error.message || "Failed to process request.");
@@ -99,11 +110,14 @@ const CodedRequest = () => {
     setSelectedLead(null);
     setModalAction("");
     setBatchCode("");
+    setSelectedRm(null);
   };
 
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Coded Requests ({totalCodedRequests})</h2>
+      <h2 className="text-3xl font-extrabold mb-4 text-center text-gray-800">
+        Coded Requests <span className="text-btnColor">({totalCodedRequests})</span>
+      </h2>
 
       <SearchInput
         value={searchQuery}
@@ -115,15 +129,7 @@ const CodedRequest = () => {
       {loading ? (
         <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>
       ) : error ? (
-        <div className="text-center mt-16">
-          <p className="text-red-500 text-lg">Request not found</p>
-          <button
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            onClick={() => dispatch(codedRequestList(currentPage, 5, searchQuery))}
-          >
-            Retry
-          </button>
-        </div>
+        <ErrorState retry={() => dispatch(codedRequestList(currentPage, 5, searchQuery))} />
       ) : codedRequests.length === 0 ? (
         <p className="text-gray-600 text-center text-lg">No leads found.</p>
       ) : (
@@ -136,135 +142,102 @@ const CodedRequest = () => {
         />
       )}
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        handleNext={handleNext}
-        handlePrev={handlePrev}
-      />
+      <Pagination currentPage={currentPage} totalPages={totalPages} handleNext={handleNext} handlePrev={handlePrev} />
 
-    <Modal
-  isOpen={isModalOpen}
-  onClose={closeModal}
-  onSubmit={handleCodedActionSubmit}
-  name={selectedLead?.name}
-  mobile_number={selectedLead?.mobile_number}
-  whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
-  title={modalAction === "approve" ? "Approve Request" : "Reject Request"}
-  action={modalAction}
->
-  {modalAction === "approve" && (
-    <div>
-      {/* Batch Code Input */}
-      <input
-        type="text"
-        placeholder="Enter Batch Code"
-        value={batchCode}
-        onChange={(e) => setBatchCode(e.target.value)}
-        className="w-full border border-gray-300 p-2 rounded-lg mb-4"
-      />
-
-      {/* RM Dropdown */}
-      <select
-        value={selectedRm}
-        onChange={(e) => setSelectedRm(e.target.value)}
-        className="w-full border border-gray-300 p-2 rounded-lg mb-4"
+      {/* ✅ Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onSubmit={handleCodedActionSubmit}
+        name={selectedLead?.name}
+        mobile_number={selectedLead?.mobile_number}
+        whatsapp_mobile_number={selectedLead?.whatsapp_mobile_number}
+        title={modalAction === "approve" ? "Approve Request" : "Reject Request"}
+        action={modalAction}
       >
-        <option value="">Select RM</option>
-        {rmList.map((rm) => (
-          <option key={rm.id} value={rm.id}>
-            {rm.name}
-          </option>
-        ))}
-      </select>
-    </div>
-  )}
-  <p>Are you sure you want to {modalAction} this lead?</p>
-</Modal>
+        {modalAction === "approve" && (
+          <div>
+            <label className="text-sm font-semibold text-gray-600 mb-1 block">Select Batch Code</label>
+            <Select
+              options={allbatches.map((batch) => ({ value: batch.batch_code, label: batch.batch_code }))}
+              onChange={(opt) => setBatchCode(opt?.value || "")}
+              value={batchCode ? { value: batchCode, label: batchCode } : null}
+              isSearchable
+              className="mb-4"
+            />
 
+            <label className="text-sm font-semibold text-gray-600 mb-1 block">Assign RM</label>
+            <Select
+              options={rmList.map((rm) => ({ value: rm.id, label: rm.name }))}
+              onChange={(opt) => setSelectedRm(opt?.value || null)}
+              value={selectedRm ? rmList.map((rm) => ({ value: rm.id, label: rm.name })).find((r) => r.value === selectedRm) : null}
+              isSearchable
+              className="mb-4"
+            />
+          </div>
+        )}
+        <p className="text-center mt-3 text-gray-600">Are you sure?</p>
+      </Modal>
     </div>
   );
 };
 
+/* ✅ Lead Grid */
 const LeadGrid = ({ leads, copyToClipboard, openWhatsApp, makeCall, openModal }) => (
-  <div className="grid gap-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
     {leads.map((lead) => (
-      <LeadCard
-        key={lead.id}
-        lead={lead}
-        copyToClipboard={copyToClipboard}
-        openWhatsApp={openWhatsApp}
-        makeCall={makeCall}
-        openModal={openModal}
-      />
+      <LeadCard key={lead.id} lead={lead} copyToClipboard={copyToClipboard} openWhatsApp={openWhatsApp} makeCall={makeCall} openModal={openModal} />
     ))}
   </div>
 );
 
+/* ✅ Lead Card */
 const LeadCard = ({ lead, copyToClipboard, openWhatsApp, makeCall, openModal }) => (
-  <div className="border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl">
-    <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
-      <h3 className="text-xl font-semibold text-gray-800">{lead.name}</h3>
-      <p className="text-sm text-gray-500">Lead fetched: {format(lead.fetched_at)}</p>
+  <div className="bg-white border p-5 shadow-md rounded-2xl hover:shadow-xl transition-all duration-300">
+    <div className="flex justify-between mb-2">
+      <h3 className="text-lg font-semibold text-gray-800">{lead.name}</h3>
+      <p className="text-xs text-gray-500">{format(lead.fetched_at)}</p>
     </div>
 
-    <div className="flex flex-col gap-3 text-base text-gray-700">
-      <div className="flex flex-wrap sm:items-center gap-3">
-        <span>{lead.mobile_number}</span>
-        <FaWhatsapp onClick={() => openWhatsApp(lead.mobile_number)} className="text-greenBtn text-xl cursor-pointer" />
-        <FaCopy onClick={() => copyToClipboard(lead.mobile_number)} className="text-richblack-200 text-xl cursor-pointer" />
-        <FaPhoneAlt onClick={() => makeCall(lead.mobile_number)} className="text-blue-600 text-xl cursor-pointer" />
-      </div>
+    <div className="text-sm text-gray-700 space-y-2">
+      <PhoneRow label={lead.mobile_number} onCopy={copyToClipboard} onCall={makeCall} onWhatsapp={openWhatsApp} />
+      <PhoneRow label={lead.whatsapp_mobile_number} onCopy={copyToClipboard} onWhatsapp={openWhatsApp} />
+    </div>
 
-      <div className="flex flex-wrap justify-between gap-3">
-        <div className="flex gap-3 items-center">
-          <span>{lead.whatsapp_mobile_number}</span>
-          <FaWhatsapp onClick={() => openWhatsApp(lead.whatsapp_mobile_number)} className="text-greenBtn text-xl cursor-pointer" />
-          <FaCopy onClick={() => copyToClipboard(lead.whatsapp_mobile_number)} className="text-richblack-200 text-xl cursor-pointer" />
-        </div>
-
-        <div className="flex gap-2 mt-2 sm:mt-0">
-          <button
-            onClick={() => openModal(lead, "approve")}
-            className="px-4 py-1 rounded-lg text-sm shadow text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Approve
-          </button>
-          <button
-            onClick={() => openModal(lead, "reject")}
-            className="px-4 py-1 rounded-lg text-sm shadow text-white bg-pink-600 hover:bg-red-700"
-          >
-            Reject
-          </button>
-        </div>
-      </div>
+    <div className="flex gap-3 justify-end mt-4">
+      <button onClick={() => openModal(lead, "approve")} className="px-4 py-1 rounded-md text-xs text-white bg-btnColor hover:opacity-90">Approve</button>
+      <button onClick={() => openModal(lead, "reject")} className="px-4 py-1 rounded-md text-xs text-white bg-delBtn hover:opacity-90">Reject</button>
     </div>
   </div>
 );
 
+const PhoneRow = ({ label, onCopy, onCall, onWhatsapp }) => (
+  <div className="flex justify-between items-center">
+    <div className="flex items-center gap-2 cursor-pointer" onClick={() => onWhatsapp?.(label)}>
+      <FaWhatsapp className="text-greenBtn text-lg" />
+      <span>{label}</span>
+    </div>
+    <div className="flex gap-2">
+      {onCall && <FaPhoneAlt onClick={() => onCall(label)} className="text-blue-600 text-lg cursor-pointer" />}
+      <FaCopy onClick={() => onCopy(label)} className="text-gray-400 hover:text-gray-600 cursor-pointer" />
+    </div>
+  </div>
+);
+
+/* ✅ Pagination */
 const Pagination = ({ currentPage, totalPages, handleNext, handlePrev }) => (
-  <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mt-10">
-    <button
-      onClick={handlePrev}
-      disabled={currentPage === 1}
-      className={`px-5 py-2 rounded-lg text-white text-base w-36 ${
-        currentPage === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-      }`}
-    >
-      Previous
-    </button>
-    <span className="text-gray-800 font-semibold text-lg text-center">
-      Page {currentPage} of {totalPages}
-    </span>
-    <button
-      onClick={handleNext}
-      disabled={currentPage === totalPages}
-      className={`px-5 py-2 rounded-lg text-white text-base w-36 ${
-        currentPage === totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-      }`}
-    >
-      Next
-    </button>
+  <div className="flex justify-center items-center gap-6 mt-10">
+    <button onClick={handlePrev} disabled={currentPage === 1} className={`px-6 py-2 rounded-full text-white w-36 ${currentPage === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-btnColor hover:opacity-90"}`}>Previous</button>
+    <span className="text-gray-700 font-semibold">Page {currentPage} of {totalPages}</span>
+    <button onClick={handleNext} disabled={currentPage === totalPages} className={`px-6 py-2 rounded-full text-white w-36 ${currentPage === totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-btnColor hover:opacity-90"}`}>Next</button>
+  </div>
+);
+
+/* ✅ Error Component */
+const ErrorState = ({ retry }) => (
+  <div className="text-center mt-16">
+    <p className="text-red-500 text-lg">Something went wrong</p>
+    <button className="mt-4 px-4 py-2 bg-btnColor text-white rounded-lg" onClick={retry}>Retry</button>
   </div>
 );
 

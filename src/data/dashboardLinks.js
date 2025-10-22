@@ -71,7 +71,7 @@ export const sidebarLinks = [
   // },
   {
     id: 11,
-    name: "Create Role",
+    name: "Admin Controls",
     path: "/dashboard/admin",
     type: ACCOUNT_TYPE.ADMIN,
     
@@ -143,6 +143,30 @@ export const sidebarLinks = [
     path: "/dashboard/sip-requests",
     type: ACCOUNT_TYPE.ADMIN,
   },
+   {
+    id: 78,
+    name: "New Client Call Requests",
+    path: "/dashboard/new-client-call-requests",
+    type: ACCOUNT_TYPE.ADMIN,
+  },
+   {
+    id: 79,
+    name: "Basic Ms-Teams Requests",
+    path: "/dashboard/basic-ms-teams-requests",
+    type: ACCOUNT_TYPE.ADMIN,
+  },
+  {
+    id: 80,
+    name: "Converted Requests",
+    path: "/dashboard/sip-converted-requests",
+    type: ACCOUNT_TYPE.ADMIN,
+  },
+    {
+    id: 81,
+    name: "Converted Leads",
+    path: "/dashboard/sip-converted-leads",
+    type: ACCOUNT_TYPE.ADMIN,
+  },
   {
     id: 23,
     name: "Delete Requests",
@@ -173,6 +197,7 @@ export const sidebarLinks = [
     path: "/dashboard/conversion/points",
     type: ACCOUNT_TYPE.ADMIN,
   },
+  
    {
     id: 28,
     name: "Refer Old Client List",

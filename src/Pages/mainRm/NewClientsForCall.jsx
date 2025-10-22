@@ -4,111 +4,241 @@ import {
   FaWhatsapp,
   FaCopy,
   FaPhoneAlt,
+  FaUpload,
+  FaUndo,
 } from "react-icons/fa";
 import FormModal from "../../Components/FormModal";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
 import { setCurrentPage } from "../../Slices/adminSlices/msLeads";
-import { markCallDoneOfNewClient,  newClientsForCall } from "../../operations/rmApi";
+import {
+  newClientsForCall,
+  submitLeadUpdateForApproval,
+} from "../../operations/rmApi";
+import { getAllBatchCodes } from "../../operations/adminApi";
 
 const NewClientsForCall = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
-  const { newClientForCall = [], loading, error, currentPage, totalPages,totalNewClientForCall } = useSelector(
-    (state) => state.newClientForCall
-  );
+  const {
+    newClientForCall = [],
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    totalNewClientForCall,
+  } = useSelector((state) => state.newClientForCall);
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("pending");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [screenshot, setScreenshot] = useState(null);
+  const [batches, setBatches] = useState([]);
+  const [selectedBatch, setSelectedBatch] = useState("");
 
-
+  // Fetch all batches
   useEffect(() => {
-    dispatch(newClientsForCall(currentPage || 1, 5, searchQuery));
-  }, [dispatch, currentPage, searchQuery]);
-
-    const handleNext = () => {
-      if (currentPage < totalPages) {
-        const newPage = currentPage + 1;
-        dispatch(setCurrentPage(newPage)); // Dispatch the action
-        dispatch(newClientsForCall(newPage, 5, searchQuery)); // Fetch leads for new page
+    const fetchBatches = async () => {
+      try {
+        const data = await getAllBatchCodes(token);
+        setBatches(data?.data || []);
+      } catch {
+        toast.error("Failed to fetch Batch list.");
       }
     };
-  
-    const handlePrev = () => {
-      if (currentPage > 1) {
-        const newPage = currentPage - 1;
-        dispatch(setCurrentPage(newPage)); // Dispatch the action
-        dispatch(newClientsForCall(newPage, 5, searchQuery)); // Fetch leads for new page
-      }
-    };
-   
+    fetchBatches();
+  }, [token]);
 
-  const copyToClipboard = (number) => {
-    navigator.clipboard.writeText(number);
-    toast.success("Phone number copied!");
+  // Fetch page data
+  useEffect(() => {
+    dispatch(
+      newClientsForCall(
+        currentPage || 1,
+        6,
+        searchQuery,
+        activeTab,
+        selectedBatch
+      )
+    );
+  }, [dispatch, currentPage, searchQuery, activeTab, selectedBatch]);
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      const newPage = currentPage + 1;
+      dispatch(setCurrentPage(newPage));
+      dispatch(newClientsForCall(newPage, 6, searchQuery, activeTab, selectedBatch));
+    }
   };
 
-  const openWhatsApp = (number) => {
-    window.open(`https://wa.me/${number}`, "_blank");
+  const handlePrev = () => {
+    if (currentPage > 1) {
+      const newPage = currentPage - 1;
+      dispatch(setCurrentPage(newPage));
+      dispatch(newClientsForCall(newPage, 6, searchQuery, activeTab, selectedBatch));
+    }
   };
 
-  const makeCall = (number) => {
-    window.location.href = `tel:${number}`;
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Copied!");
   };
+
+  const openWhatsApp = (number) => window.open(`https://wa.me/${number}`, "_blank");
+  const makeCall = (number) => (window.location.href = `tel:${number}`);
 
   const openModal = (lead) => {
     setSelectedLead(lead);
     setIsFormModalOpen(true);
+    setSelectedStatus("");
+    setScreenshot(null);
   };
 
   const closeFormModal = () => {
     setIsFormModalOpen(false);
     setSelectedLead(null);
+    setSelectedStatus("");
+    setScreenshot(null);
   };
 
-  const handleSendMsDetails = async () => {
-    if (!selectedLead) return;
-  
+  // Reset Filters
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSelectedBatch("");
+    setActiveTab("pending");
+    dispatch(newClientsForCall(1, 6, "", "pending", ""));
+    toast.success("Filters reset successfully!");
+  };
+
+  const handleSubmitUpdate = async () => {
+    if (!selectedStatus) return toast.error("Please select a call status.");
+    if (!screenshot) return toast.error("Please upload a screenshot.");
+
+    const formData = new FormData();
+    formData.append("leadId", selectedLead.id);
+    formData.append("call_status", selectedStatus);
+    formData.append("screenshot", screenshot);
+
     try {
-    const res=  await markCallDoneOfNewClient(token,selectedLead.id, {action: 'approve'});
-      toast.success("Marked As Saved!");
-      dispatch(newClientsForCall(currentPage, 5, searchQuery));
+      await dispatch(submitLeadUpdateForApproval(formData));
+      toast.success("Call update submitted for admin approval!");
+      dispatch(
+        newClientsForCall(
+          currentPage || 1,
+          6,
+          searchQuery,
+          activeTab,
+          selectedBatch
+        )
+      );
       closeFormModal();
     } catch (error) {
-      toast.error("Failed!");
-      console.error(error)
+      toast.error("Failed to submit update.");
+      console.error(error);
     }
   };
+
+  // Box Tab button (Style C)
+  const TabButton = ({ label, value }) => {
+    const isActive = activeTab === value;
+    return (
+      <button
+        onClick={() => setActiveTab(value)}
+        className={`px-4 sm:px-5 py-2 rounded-md font-semibold text-sm sm:text-base transition-all duration-200
+          border ${
+            isActive
+              ? "bg-btnColor text-white border-btnColor shadow"
+              : "bg-white text-gray-700 hover:bg-gray-50 border-gray-200"
+          }`}
+      >
+        {label}
+      </button>
+    );
+  };
+
   return (
-    <div className="max-w-7xl mx-auto mt-20  px-4 sm:px-6 lg:px-8">
-    <p className="text-center text-2xl font-bold font-mono ">My New Clients For Call  <span className="text-btnColor">{totalNewClientForCall}</span></p>
-      <div className="mb-4">
-        <SearchInput
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onClear={() => setSearchQuery("")}
-          placeholder="Search by name or mobile number..."
-          className="w-full md:w-1/2 mx-auto"
-        />
+    <div className="max-w-7xl mx-auto mt-16 px-4 sm:px-6 lg:px-8">
+      {/* Header */}
+      <p className="text-center text-2xl sm:text-3xl font-extrabold mb-6 text-gray-800">
+        📞 My New Clients For Call{" "}
+        <span className="text-btnColor">
+          ({totalNewClientForCall || 0})
+        </span>
+      </p>
+
+      {/* Tabs */}
+      <div className="flex justify-center gap-2 sm:gap-3 mb-6 flex-wrap">
+        <TabButton label="Action Pending" value="pending" />
+        <TabButton label="Actionable" value="rejected" />
+        <TabButton label="Req Sent" value="sent" />
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 flex-wrap">
+        {/* Batch Filter */}
+        <div className="w-full sm:w-1/3">
+          <select
+            value={selectedBatch}
+            onChange={(e) => setSelectedBatch(e.target.value)}
+            className="w-full border border-gray-300 rounded-md p-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
+          >
+            <option value="">All Batches</option>
+            {Array.isArray(batches) &&
+              batches.map((batch) => (
+                <option key={batch.batch_code} value={batch.batch_code}>
+                  {batch.batch_code}
+                </option>
+              ))}
+          </select>
+        </div>
+
+        {/* Search */}
+        <div className="w-full sm:w-1/3">
+          <SearchInput
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onClear={() => setSearchQuery("")}
+            placeholder="🔍 Search by name or mobile number..."
+          />
+        </div>
+
+        {/* Reset Filters */}
+        <button
+          onClick={handleResetFilters}
+          className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
+        >
+          <FaUndo /> Reset Filters
+        </button>
+      </div>
+
+      {/* Content */}
       {loading ? (
-        <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>
+        <SkeletonLoader />
       ) : error ? (
         <div className="text-center mt-16">
           <p className="text-red-500 text-lg">{error}</p>
           <button
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-5 py-2 bg-btnColor text-white rounded-md hover:bg-opacity-90 transition"
             onClick={() =>
-              dispatch(newClientsForCall(currentPage || 1, 5, searchQuery))
+              dispatch(
+                newClientsForCall(
+                  currentPage || 1,
+                  6,
+                  searchQuery,
+                  activeTab,
+                  selectedBatch
+                )
+              )
             }
           >
             Retry
           </button>
         </div>
       ) : newClientForCall.length === 0 ? (
-        <p className="text-gray-600 text-center text-lg">No leads found.</p>
+        <p className="text-gray-600 text-center text-lg">
+          No leads found for this category.
+        </p>
       ) : (
         <LeadGrid
           leads={newClientForCall}
@@ -116,69 +246,104 @@ const NewClientsForCall = () => {
           openWhatsApp={openWhatsApp}
           makeCall={makeCall}
           openModal={openModal}
+          activeTab={activeTab}
         />
       )}
 
+      {/* Pagination */}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
         handleNext={handleNext}
         handlePrev={handlePrev}
       />
-   <FormModal isFormModalOpen={isFormModalOpen} closeModal={closeFormModal}>
-  <div className="p-4">
-    <h3 className="text-xl font-semibold text-gray-800 mb-4">
-      Change status Save
-    </h3>
-    <p className="text-gray-700 ">
-      Are you sure you want to change status to Save?
-    </p>
 
-    <div className="bg-gray-100   mb-4">
-      <p className="text-gray-800 flex items-center gap-2 text-sm">
-        <span className="text-sm">Name:</span> {selectedLead?.name}
-        <FaCopy
-          className="text-gray-500 cursor-pointer"
-          onClick={() => copyToClipboard(selectedLead?.name)}
-        />
-      </p>
-      <p className="text-gray-800 flex items-center gap-2 text-sm">
-        <span className="text-sm">Mobile:</span> {selectedLead?.mobile_number}
-        <FaCopy
-          className="text-gray-500 cursor-pointer"
-          onClick={() => copyToClipboard(selectedLead?.mobile_number)}
-        />
-      </p>
-    </div>
+      {/* Modal */}
+      <FormModal isFormModalOpen={isFormModalOpen} closeModal={closeFormModal}>
+        <div className="p-4 sm:p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">
+            Update Lead Call Status
+          </h3>
 
-    <div className="flex items-center justify-center gap-4">
-  <button
-    onClick={handleSendMsDetails}
-    className="px-3 py-2 bg-btnColor text-white rounded-md text-sm "
-  >
-    Yes
-  </button>
-  <button
-    onClick={closeFormModal}
-    className="px-3 py-2 bg-btnColor text-white rounded-md text-sm"
-  >
-    Cancel
-  </button>
-</div>
-  </div>
-</FormModal>
+          <p className="text-gray-700 mb-4 text-center">
+            Lead: <strong>{selectedLead?.name}</strong>
+          </p>
 
-     
+          <label className="block text-sm font-semibold mb-1 text-gray-700">
+            Select Call Status
+          </label>
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="w-full border border-gray-300 rounded-md p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-gray-300"
+          >
+            <option value="">-- Choose Call Status --</option>
+            <option value="call_done">Call Done</option>
+            <option value="call_not_connect">Call Not Connect</option>
+            <option value="switch_off">Switch Off</option>
+            <option value="call_back">Call Back</option>
+          </select>
+
+          <label className="block text-sm font-semibold mb-1 text-gray-700">
+            Upload Screenshot
+          </label>
+          <div className="border border-dashed border-gray-400 rounded-md p-3 mb-4 flex items-center justify-between hover:bg-gray-50">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setScreenshot(e.target.files[0])}
+              className="text-sm text-gray-600"
+            />
+            <FaUpload className="text-gray-500 text-lg" />
+          </div>
+
+          {screenshot && (
+            <div className="mb-4 text-center">
+              <img
+                src={URL.createObjectURL(screenshot)}
+                alt="Preview"
+                className="rounded-md w-52 h-52 object-cover border mx-auto shadow"
+              />
+            </div>
+          )}
+
+          <div className="flex justify-center gap-3 sm:gap-4">
+            <button
+              onClick={handleSubmitUpdate}
+              className="px-6 py-2 bg-btnColor text-white rounded-md hover:bg-opacity-90 transition"
+            >
+              Submit
+            </button>
+            <button
+              onClick={closeFormModal}
+              className="px-6 py-2 border rounded-md hover:bg-gray-50 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </FormModal>
     </div>
   );
 };
 
+/* 🌀 Shimmer Skeleton Loader */
+const SkeletonLoader = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <div key={i} className="bg-gray-200 rounded-2xl h-48"></div>
+    ))}
+  </div>
+);
+
+/* Lead Grid */
 const LeadGrid = ({
   leads,
   copyToClipboard,
   openWhatsApp,
   makeCall,
   openModal,
+  activeTab,
 }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {leads.map((lead) => (
@@ -188,83 +353,115 @@ const LeadGrid = ({
         copyToClipboard={copyToClipboard}
         openWhatsApp={openWhatsApp}
         makeCall={makeCall}
-        openModal={openModal} 
+        openModal={openModal}
+        activeTab={activeTab}
       />
     ))}
   </div>
 );
 
+/* Lead Card */
 const LeadCard = ({
   lead,
   copyToClipboard,
   openWhatsApp,
   makeCall,
   openModal,
+  activeTab,
 }) => (
-  
-  <div className="bg-white inset-0 shadow-md rounded-xl p-3 flex flex-col justify-between h-full">
+  <div className="bg-white shadow-lg rounded-2xl p-4 flex flex-col justify-between border border-gray-100 hover:shadow-xl transition-all duration-300">
     <div>
       <h3 className="text-lg font-semibold text-gray-800">{lead.name}</h3>
-      <div className="mt-2 space-y-2">
-        <div className="flex items-center space-x-2">
-          <FaWhatsapp onClick={()=>openWhatsApp(lead.whatsapp_mobile_number)} className="text-caribbeangreen-600" />
-          <span onClick={()=>openWhatsApp(lead.whatsapp_mobile_number)}>{lead.whatsapp_mobile_number} </span>
+
+      <div className="mt-3 space-y-2 text-sm">
+        <div className="flex items-center justify-between">
+          <button
+            className="flex items-center gap-2"
+            onClick={() => openWhatsApp(lead.whatsapp_mobile_number)}
+            title="Open WhatsApp"
+          >
+            <FaWhatsapp className="text-green-500 text-lg" />
+            <span className="text-gray-700">{lead.whatsapp_mobile_number}</span>
+          </button>
           <FaCopy
             onClick={() => copyToClipboard(lead.whatsapp_mobile_number)}
-            className="text-gray-500 cursor-pointer"
+            className="text-gray-400 hover:text-gray-600 cursor-pointer"
+            title="Copy WhatsApp number"
           />
         </div>
-        <div className="flex items-center space-x-2">
-          <FaPhoneAlt onClick={() =>  makeCall(lead.mobile_number)} className="text-blue-600" />
-          <span onClick={() =>  makeCall(lead.mobile_number)}>{lead.mobile_number}</span>
+
+        <div className="flex items-center justify-between">
+          <button
+            className="flex items-center gap-2"
+            onClick={() => makeCall(lead.mobile_number)}
+            title="Call"
+          >
+            <FaPhoneAlt className="text-blue-500 text-lg" />
+            <span className="text-gray-700">{lead.mobile_number}</span>
+          </button>
           <FaCopy
             onClick={() => copyToClipboard(lead.mobile_number)}
-            className="text-gray-500 cursor-pointer"
+            className="text-gray-400 hover:text-gray-600 cursor-pointer"
+            title="Copy phone number"
           />
         </div>
       </div>
     </div>
 
-    <div className="mt-4 text-sm text-richblack-500">
-      
-      <p className="text-pink-300">Batch Code : {lead.batch_code}</p>
-       <p className="text-pink-300">Batch Type : {lead.batch_type}</p>
+    <div className="mt-4 text-xs text-gray-500">
+      <p>
+        <span className="font-medium text-gray-700">Batch:</span>{" "}
+        {lead.batch_code || "—"}
+      </p>
+      <p className="mt-0.5">
+        <span className="font-medium text-gray-700">Status:</span>{" "}
+        {lead.new_client_call_status
+          ? lead.new_client_call_status.replaceAll("_", " ")
+          : "—"}
+      </p>
     </div>
 
-    <div className="mt-4 ">
+    {activeTab === "sent" ? (
+      <p className="mt-4 text-center text-gray-400 italic">
+        Request already sent
+      </p>
+    ) : (
       <button
         onClick={() => openModal(lead)}
-        className="w-full bg-btnColor text-white py-2 rounded-md hover:bg-green-700"
+        className="mt-4 w-full bg-btnColor text-white py-2 rounded-md hover:bg-opacity-90 transition"
       >
-        Save
+        Update Call Status
       </button>
-    </div>
+    )}
   </div>
 );
 
+/* Pagination */
 const Pagination = ({ currentPage, totalPages, handleNext, handlePrev }) => (
   <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mt-10">
     <button
       onClick={handlePrev}
       disabled={currentPage === 1}
-      className={`px-5 py-2 rounded-lg text-white text-base w-36 ${
+      className={`px-6 py-2 rounded-md text-white text-base w-36 transition ${
         currentPage === 1
           ? "bg-gray-400 cursor-not-allowed"
-          : "bg-blue-600 hover:bg-blue-700"
+          : "bg-btnColor hover:bg-opacity-90"
       }`}
     >
       Previous
     </button>
-    <span className="text-gray-800 font-semibold text-lg text-center">
+
+    <span className="text-gray-700 font-semibold text-lg text-center">
       Page {currentPage} of {totalPages}
     </span>
+
     <button
       onClick={handleNext}
       disabled={currentPage === totalPages}
-      className={`px-5 py-2 rounded-lg text-white text-base w-36 ${
+      className={`px-6 py-2 rounded-md text-white text-base w-36 transition ${
         currentPage === totalPages
           ? "bg-gray-400 cursor-not-allowed"
-          : "bg-blue-600 hover:bg-blue-700"
+          : "bg-btnColor hover:bg-opacity-90"
       }`}
     >
       Next

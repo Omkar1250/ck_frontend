@@ -24,6 +24,10 @@ import WalletTransactions from "./Pages/mainRm/WalletTransactions";
 import TokenExpiryWatcher from "./Components/Sidebar/TokenExpiryWatcher";
 import TeamsDashboard from "./Pages/TeamsDashboard";
 import MfClients from "./Pages/mainRm/MfClients";
+import AdminPendingNewClientRequests from "./Pages/Admin/AdminPendingNewClientRequests";
+import AdminPendingBasicMsRequests from "./Pages/Admin/AdminPendingBasicMsRequests";
+import AdminPendingSipRequests from "./Pages/Admin/AdminPendingSipRequests";
+import AdminApprovedSipRequests from "./Pages/Admin/AdminApprovedSipRequests";
 
 
 
@@ -102,7 +106,12 @@ function App() {
             <Route path="/dashboard/conversion/points" element={<ConversionPoint />} />
             <Route path="/dashboard/old-coded-requests" element={<AdvanceCodedRequest />} />
             <Route path="/dashboard/advance-ms-teams-requests" element={<AdvanceMsRequests />} />
-          </Route>
+            <Route path="/dashboard/new-client-call-requests" element={<AdminPendingNewClientRequests/>} />
+            <Route path="/dashboard/basic-ms-teams-requests" element={<AdminPendingBasicMsRequests/>} />
+            <Route path="/dashboard/sip-converted-requests" element={<AdminPendingSipRequests/>} />
+            <Route path="/dashboard/sip-converted-leads" element={<AdminApprovedSipRequests/>} />
+
+          </Route> 
         )}
 
         {/* Main RM Routes */}

@@ -1,9 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { HiMenu, HiX, HiChevronDown } from "react-icons/hi";
 import logo from "../../assets/logo/CYBERKING.png";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../../operations/authApi";
 import { BROKERS } from "../../data/brokers";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const Header = ({
   sidebarOpen,
@@ -13,24 +14,44 @@ const Header = ({
   onClearBroker,
 }) => {
   const { token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.profile);
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const handleSelect = (id) => {
     onSelectBroker?.(id);
     setOpen(false);
-     if (id === "angel") {
-      navigate("/"); // internal route
-    } else {
-      window.location.href = "https://www.dhan.cyberkingcapitals.com/"; // external redirect
-    }
+
+    if (id === "angel") navigate("/");
+    else window.location.href = "https://www.dhan.cyberkingcapitals.com/";
+  };
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, []);
+
+  // Logout Handler
+  const handleLogout = () => {
+    setOpen(false);
+    dispatch(logout(navigate));
   };
 
   return (
     <header className="fixed top-0 left-0 z-[100] h-14 w-full bg-bgSidebar border-b border-btnColor/60 shadow-md backdrop-blur-sm">
       <div className="grid grid-cols-3 items-center h-full px-2 sm:px-4">
         
-        {/* Left: Sidebar toggle */}
+        {/* Left: Sidebar toggle (Mobile only) */}
         <div className="flex items-center">
           <button
             aria-label="Toggle Sidebar"
@@ -42,11 +63,7 @@ const Header = ({
                        focus:outline-none focus:ring-2 focus:ring-btnColor/30 
                        transition-all duration-200 active:scale-95"
           >
-            {sidebarOpen ? (
-              <HiX className="w-5 h-5" />
-            ) : (
-              <HiMenu className="w-5 h-5" />
-            )}
+            {sidebarOpen ? <HiX className="w-5 h-5" /> : <HiMenu className="w-5 h-5" />}
           </button>
         </div>
 
@@ -54,7 +71,7 @@ const Header = ({
         <div className="justify-self-center">
           <Link
             to="/"
-            className="inline-flex items-center hover:opacity-80 transition-opacity duration-200"
+            className="inline-flex items-center hover:opacity-75 transition-opacity duration-200"
           >
             <img
               src={logo}
@@ -65,60 +82,68 @@ const Header = ({
           </Link>
         </div>
 
-        {/* Right: Hard-coded Broker Name + Icon */}
-        <div className="justify-self-end">
+        {/* Right: Broker + Profile */}
+        <div className="justify-self-end relative flex items-center gap-3" ref={dropdownRef}>
           {token && (
-            <div className="flex items-center gap-2 sm:gap-3 relative">
-              {/* Hardcoded broker name */}
-              <span className="xs:inline text-sm font-semibold text-pink-200">
-                Angle One
+            <>
+              {/* Broker Name */}
+              <span className="hidden sm:block text-sm font-semibold text-pink-200">
+                Angel One
               </span>
 
-              {/* Dropdown trigger (kept for future use) */}
+              {/* Dropdown Button */}
               <button
                 onClick={() => setOpen(!open)}
-                className="h-9 w-9 rounded-full bg-btnColor/10 
-                           border border-btnColor/30 flex items-center justify-center 
-                           hover:bg-btnColor/20 hover:shadow-md active:scale-95 
-                           transition-all duration-200 relative"
+                className="h-9 w-9 rounded-full bg-btnColor/10 border border-btnColor/30 
+                           flex items-center justify-center hover:bg-btnColor/20 hover:shadow-md 
+                           active:scale-95 transition-all duration-200"
               >
                 <HiChevronDown className="text-btnColor w-5 h-5" />
               </button>
 
-              {/* Dropdown menu (currently placeholder) */}
+              {/* Dropdown Menu */}
               {open && (
                 <div
-                  className="absolute right-0 top-12 min-w-[10rem] 
-                             bg-white shadow-lg rounded-xl border border-gray-200 
-                             overflow-hidden z-50 animate-fadeIn"
+                  className="absolute right-0 top-12 min-w-[12rem] bg-white shadow-xl rounded-xl 
+                             border border-gray-200 overflow-hidden z-50 animate-fadeIn"
                 >
                   {BROKERS.map((b) => (
                     <button
                       key={b.id}
                       onClick={() => handleSelect(b.id)}
-                      className="flex items-center gap-3 w-full px-4 py-2 
-                                 text-sm text-gray-700 hover:bg-gray-100 
-                                 transition-all duration-150"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 
+                                 hover:bg-gray-100 transition-all duration-150"
                     >
                       <span>{b.label}</span>
                     </button>
                   ))}
+
                   {selectedBroker && (
                     <button
                       onClick={() => {
                         onClearBroker?.();
                         setOpen(false);
                       }}
-                      className="w-full px-4 py-2 text-sm text-red-500 
-                                 hover:bg-red-50 border-t border-gray-100 
-                                 flex justify-center font-medium"
+                      className="w-full px-4 py-2 text-sm text-red-500 hover:bg-red-50 
+                                 border-t border-gray-100 flex justify-center font-medium"
                     >
                       Clear Selection
                     </button>
                   )}
+
+                  {/* Divider */}
+                  <div className="border-t border-gray-200"></div>
+
+                  {/* Logout */}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium"
+                  >
+                    Logout
+                  </button>
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>

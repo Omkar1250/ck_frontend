@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
-import PaymentModal from "../../Components/PaymentModal"; // New Payment Modal
+import PaymentModal from "../../Components/PaymentModal";
 import { getAllPayoutList, getTotalPointsOfAllJRMs, rmPaymentDeduct } from "../../operations/adminApi";
 
 const Payments = () => {
@@ -12,87 +12,76 @@ const Payments = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [rms, setRms] = useState([]);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false); // New Payment Modal state
-  const [selectedLead, setSelectedLead] = useState(null); // Selected Lead state
-  const [totalPoints, setTotalPoints] = useState(0); // Total points for the selected lead
-  const [deductPoints, setDeductPoints] = useState(0); // Deduction amount
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState(null);
+  const [totalPoints, setTotalPoints] = useState(0);
+  const [deductPoints, setDeductPoints] = useState(0);
 
+  /* Helpers */
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard!");
+    toast.success("Copied!");
   };
 
-  const openWhatsApp = (number) => {
-    window.open(`https://wa.me/${number}`, "_blank");
-  };
+  const openWhatsApp = (num) => window.open(`https://wa.me/${num}`, "_blank");
+  const makeCall = (num) => (window.location.href = `tel:${num}`);
 
-  const makeCall = (number) => {
-    window.location.href = `tel:${number}`;
-  };
-
+  /* Fetchers */
   const fetchRMs = async () => {
     try {
       const res = await getAllPayoutList(token);
       setRms(res);
     } catch (error) {
-      toast.error(error.message || "Failed to fetch RMs.");
+      toast.error("Failed to fetch JRMs.");
     }
   };
+
   const fetchTotalPoints = async () => {
     try {
       if (selectedLead?.id) {
-        console.log("Fetching total points for lead ID:", selectedLead?.id); // Debugging Log
         const res = await getTotalPointsOfAllJRMs(token, selectedLead.id);
-        setTotalPoints(res || 0); // Fallback to 0 if undefined
-        console.log("Fetched total points:", res); // Debugging Log
-      } 
-    } catch (error) {
-    
-      toast.error(error.message || "Failed to fetch total points.");
+        setTotalPoints(res || 0);
+      }
+    } catch {
+      toast.error("Failed to fetch total points.");
     }
   };
-  
+
   useEffect(() => {
-    console.log("Selected Lead Changed:", selectedLead); // Debugging Log
     fetchTotalPoints();
-  }, [selectedLead]); // Ensure this dependency list is correct
+  }, [selectedLead]);
+
+  useEffect(() => {
+    fetchRMs();
+  }, []);
 
   const handleDeductPoints = async () => {
     try {
       if (selectedLead?.id && deductPoints > 0) {
-        const res = await rmPaymentDeduct(
-          token,
-          selectedLead.id,
-          deductPoints, // amountInRupees and pointsToDeduct are the same
-          deductPoints
-        );
-        setTotalPoints(res || 0); // Update total points after deduction
+        const res = await rmPaymentDeduct(token, selectedLead.id, deductPoints, deductPoints);
+        setTotalPoints(res || 0);
         toast.success("Points deducted successfully!");
-        setDeductPoints(0); // Reset deduction input
-        closePaymentModal(); // Close the payment modal
-        fetchRMs(); // Refresh RM list
+        setDeductPoints(0);
+        closePaymentModal();
+        fetchRMs();
       } else {
-        toast.error("Please enter a valid deduction amount.");
+        toast.error("Enter valid amount.");
       }
-    } catch (error) {
-      toast.error(error.message || "Failed to deduct points.");
+    } catch {
+      toast.error("Failed to deduct points.");
     }
   };
 
   const openPaymentModal = (lead) => {
-    setSelectedLead(lead); // Let useEffect handle fetching
+    setSelectedLead(lead);
     setIsPaymentModalOpen(true);
   };
 
   const closePaymentModal = () => {
     setIsPaymentModalOpen(false);
     setSelectedLead(null);
-    setDeductPoints(0); // Reset deduction input
+    setDeductPoints(0);
   };
-
-  useEffect(() => {
-    fetchRMs();
-  }, []);
 
   const filteredLeads = useMemo(
     () =>
@@ -107,30 +96,37 @@ const Payments = () => {
 
   return (
     <div className="max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-3xl font-bold mb-2 text-center text-gray-800">
-        JRM Payouts
-      </h2>
 
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-extrabold text-gray-900">💰 JRM Payouts</h2>
+        <div className="mt-2 h-1.5 w-24 bg-btnColor rounded-full mx-auto" />
+      </div>
+
+      {/* Refresh */}
       <div className="text-center mb-6">
         <button
-          onClick={() => {
-            fetchRMs();
-          }}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          onClick={fetchRMs}
+          className="px-5 py-2.5 bg-btnColor text-white rounded-full shadow hover:bg-opacity-90 transition"
         >
           Refresh
         </button>
       </div>
 
-      <SearchInput
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        onClear={() => setSearchQuery("")}
-        placeholder="Search by name, mobile number, or CK number..."
-      />
+      {/* Search */}
+      <div className="mb-6">
+        <SearchInput
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onClear={() => setSearchQuery("")}
+          placeholder="Search by name, mobile, or CK number..."
+          className="w-full md:w-3/4 mx-auto"
+        />
+      </div>
 
+      {/* Cards */}
       {filteredLeads.length === 0 ? (
-        <p className="text-gray-600 text-center text-lg">No leads found.</p>
+        <p className="text-gray-500 text-center text-lg">No JRMs found.</p>
       ) : (
         <LeadGrid
           leads={filteredLeads}
@@ -141,7 +137,7 @@ const Payments = () => {
         />
       )}
 
-      {/* New Payment Modal */}
+      {/* Modal */}
       {isPaymentModalOpen && (
         <PaymentModal
           isOpen={isPaymentModalOpen}
@@ -151,22 +147,17 @@ const Payments = () => {
           totalPoints={totalPoints}
           deductPoints={deductPoints}
           setDeductPoints={setDeductPoints}
-          copyToClipboard={copyToClipboard} // To handle UPI ID copying
-          fetchTotalPoints={fetchTotalPoints} 
+          copyToClipboard={copyToClipboard}
+          fetchTotalPoints={fetchTotalPoints}
         />
       )}
     </div>
   );
 };
 
-const LeadGrid = ({
-  leads,
-  copyToClipboard,
-  openWhatsApp,
-  makeCall,
-  openPaymentModal,
-}) => (
-  <div className="grid gap-6">
+/* Grid */
+const LeadGrid = ({ leads, copyToClipboard, openWhatsApp, makeCall, openPaymentModal }) => (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
     {leads.map((lead) => (
       <LeadCard
         key={lead.id}
@@ -180,51 +171,33 @@ const LeadGrid = ({
   </div>
 );
 
-const LeadCard = ({
-  lead,
-  copyToClipboard,
-  openWhatsApp,
-  makeCall,
-  openPaymentModal,
-}) => (
-  <div className="border p-5 shadow-lg rounded-xl transition-all duration-200 hover:shadow-2xl">
-    <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
-      <h3 className="text-xl font-semibold text-gray-800">{lead.name}</h3>
-    </div>
+/* Single Card */
+const LeadCard = ({ lead, copyToClipboard, openWhatsApp, makeCall, openPaymentModal }) => (
+  <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_8px_25px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)] transition">
+    <h3 className="text-xl font-semibold text-gray-900 mb-2">{lead.name}</h3>
 
-    <div className="flex flex-col gap-3 text-base text-gray-700">
-      <div className="flex flex-wrap sm:items-center gap-3">
+    <div className="text-gray-700 text-sm space-y-3">
+      {/* Mobile */}
+      <div className="flex flex-wrap items-center gap-3">
         <span>{lead.personal_number}</span>
-        <FaWhatsapp
-          onClick={() => openWhatsApp(lead.personal_number)}
-          className="text-green-600 text-xl cursor-pointer"
-        />
-        <FaCopy
-          onClick={() => copyToClipboard(lead.personal_number)}
-          className="text-gray-500 text-xl cursor-pointer"
-        />
-        <FaPhoneAlt
-          onClick={() => makeCall(lead.personal_number)}
-          className="text-blue-600 text-xl cursor-pointer"
-        />
+        <FaWhatsapp onClick={() => openWhatsApp(lead.personal_number)} className="text-green-600 text-lg cursor-pointer" />
+        <FaCopy onClick={() => copyToClipboard(lead.personal_number)} className="text-gray-500 text-lg cursor-pointer" />
+        <FaPhoneAlt onClick={() => makeCall(lead.personal_number)} className="text-blue-600 text-lg cursor-pointer" />
       </div>
 
-      <div className="flex flex-wrap justify-between gap-3 mt-3">
-        <div>
-          <span className="font-medium">CK Number:</span> {lead.ck_number}
-        </div>
-        <div className="flex items-center gap-3 mt-2">
-          <span className="font-medium">UPI ID:</span>
-          <span>{lead.upi_id}</span>
-          <FaCopy
-            onClick={() => copyToClipboard(lead.upi_id)}
-            className="text-gray-500 text-xl cursor-pointer"
-          />
-        </div>
+      {/* CK + UPI */}
+      <div className="flex flex-col gap-2">
+        <p><span className="font-medium">CK Number:</span> {lead.ck_number}</p>
+        <p className="flex items-center gap-2">
+          <span className="font-medium">UPI:</span> {lead.upi_id}
+          <FaCopy onClick={() => copyToClipboard(lead.upi_id)} className="text-gray-500 text-lg cursor-pointer" />
+        </p>
       </div>
+
+      {/* Pay Button */}
       <button
         onClick={() => openPaymentModal(lead)}
-        className="px-4 py-2 mt-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        className="w-full mt-3 py-2.5 bg-btnColor text-white rounded-full shadow hover:bg-opacity-90 transition"
       >
         Pay
       </button>

@@ -1,39 +1,47 @@
-
 import { matchPath, useLocation } from "react-router";
 import { NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function SidebarLink({ link, setSidebarOpen }) {
   const location = useLocation();
- 
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
-  const matchRoute = (route) => {
-    return matchPath({ path: route }, location.pathname);
-  };
+  // Detect screen size -> only close sidebar on mobile
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
+  const matchRoute = (route) => matchPath({ path: route }, location.pathname);
   const isActive = matchRoute(link.path);
 
   const handleClick = () => {
-    // Close the sidebar on link click
-    setSidebarOpen(false);
+    if (!isDesktop) setSidebarOpen(false); // Close only on small screens
   };
 
   return (
     <NavLink
       to={link.path}
-      className={`relative flex items-center px-8 py-2 text-sm font-medium transition-all duration-200 ${
-        isActive ? "bg-btnColor text-textColor font-semibold" : "bg-opacity-0 font-semibold text-textColor"
-      }`}
-      onClick={handleClick} // Call handleClick when the link is clicked
+      onClick={handleClick}
+      className={`relative flex items-center gap-3 px-6 py-3 text-sm font-medium rounded-md transition-all duration-300
+      ${isActive ? "text-white bg-btnColor shadow-md" : "text-gray-300 hover:bg-white/10 hover:text-white"}`}
     >
-      {/* Active route indicator */}
+      {/* Active route indicator bar */}
       <span
-        className={`absolute left-0 top-0 h-full w-[0.15rem] bg-blue-700 transition-opacity duration-200 ${
-          isActive ? "opacity-100" : "opacity-0"
-        }`}
+        className={`absolute left-0 top-0 h-full w-[3px] bg-white rounded-r-full transition-all duration-300
+        ${isActive ? "opacity-100" : "opacity-0"}`}
       ></span>
 
-      {/* Display link name */}
-      {link.name}
+      {/* Icon (if provided) */}
+      {link.icon && (
+        <span className={`text-lg ${isActive ? "text-white" : "text-gray-300"}`}>
+          {link.icon}
+        </span>
+      )}
+
+      {/* Name */}
+      <span className="truncate">{link.name}</span>
     </NavLink>
   );
 }

@@ -11,11 +11,13 @@ import {
 import Modal from "../../Components/Modal";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
+import Select from "react-select"; // ✅ IMPORTANT import
 import {
   getAllLeads,
   permanantDeleteLead,
   approveLeadAction,
   getAllMainRms,
+  getAllBatchCodes,
 } from "../../operations/adminApi";
 import { setCurrentPage } from "../../Slices/adminSlices/allLeadSlice";
 
@@ -35,25 +37,41 @@ const UniversalApprove = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [modalAction, setModalAction] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-const [batch_code, setBatchCode] = useState("");
-const [rmList , setRmList] = useState([]);
-  const [selectedRm, setSelectedRm] = useState(null)
+
+  const [batch_code, setBatchCode] = useState("");
+  const [allbatches, setAllBatches] = useState([]);
+
+  const [rmList, setRmList] = useState([]);
+  const [selectedRm, setSelectedRm] = useState("");
+
   useEffect(() => {
     dispatch(getAllLeads(currentPage || 1, 5, searchQuery));
   }, [dispatch, currentPage, searchQuery]);
 
-    useEffect(() => {
-        const fetchRms = async () => {
-          try {
-            const data = await getAllMainRms(token); // fixed line
-            const normalizedData = Array.isArray(data) ? data : [data];
-            setRmList(normalizedData);
-          } catch (err) {
-            toast.error("Failed to fetch RM");
-          } 
-        };
-        fetchRms();
-      }, [token]);
+  useEffect(() => {
+    const fetchRms = async () => {
+      try {
+        const data = await getAllMainRms(token);
+        const normalizedData = Array.isArray(data) ? data : [data];
+        setRmList(normalizedData);
+      } catch (err) {
+        toast.error("Failed to fetch RM");
+      }
+    };
+    fetchRms();
+  }, [token]);
+
+  useEffect(() => {
+    const fetchBatches = async () => {
+      try {
+        const data = await getAllBatchCodes(token);
+        setAllBatches(data?.data || []);
+      } catch {
+        toast.error("Failed to fetch Batch list.");
+      }
+    };
+    fetchBatches();
+  }, [token]);
 
   const handleNext = () => {
     if (currentPage < totalPages) {
@@ -101,6 +119,8 @@ const [rmList , setRmList] = useState([]);
     setIsDeleteModalOpen(false);
     setSelectedLead(null);
     setModalAction("");
+    setBatchCode("");
+    setSelectedRm("");
   };
 
   const handleApproval = async () => {
@@ -110,12 +130,10 @@ const [rmList , setRmList] = useState([]);
           approveLeadAction(token, selectedLead.id, modalAction, batch_code, selectedRm)
         );
         closeModals();
-        setBatchCode("")
         dispatch(getAllLeads(currentPage, 5, searchQuery));
       }
     } catch (error) {
-      toast.error(error.response.data.message);
-      console.error(error);
+      toast.error(error.response?.data?.message || "Approval failed");
     }
   };
 
@@ -178,7 +196,7 @@ const [rmList , setRmList] = useState([]);
         handlePrev={handlePrev}
       />
 
-      {/* Approval Modal */}
+      {/* ✅ Approval Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={closeModals}
@@ -189,40 +207,46 @@ const [rmList , setRmList] = useState([]);
         title={modalAction}
         action={modalAction}
       >
-        <p>
-           {modalAction === "code_request" && (
-            <>
-             <input
-            type="text"
-            placeholder="Enter Batch Code"
-            value={batch_code}
-            onChange={(e) => setBatchCode(e.target.value)}
-            className="w-full border border-gray-300 p-2 rounded-lg mb-4"
-          />
-            
-            {/* RM Dropdown */}
-      <select
-        value={selectedRm}
-        onChange={(e) => setSelectedRm(e.target.value)}
-        className="w-full border border-gray-300 p-2 rounded-lg mb-4"
-      >
-        <option value="">Select RM</option>
-        {rmList.map((rm) => (
-          <option key={rm.id} value={rm.id}>
-            {rm.name}
-          </option>
-        ))}
-      </select>
-            </>
-         
-          
+        {modalAction === "code_request" && (
+          <>
+            {/* ✅ Batch Dropdown */}
+            <label className="text-sm font-semibold text-gray-600 mb-1 block">
+              Select Batch Code
+            </label>
+            <Select
+              options={allbatches.map((batch) => ({
+                value: batch.batch_code,
+                label: batch.batch_code,
+              }))}
+              onChange={(opt) => setBatchCode(opt?.value || "")}
+              value={batch_code ? { value: batch_code, label: batch_code } : null}
+              isSearchable
+              className="mb-4"
+            />
+
+            {/* ✅ RM Dropdown */}
+            <select
+              value={selectedRm}
+              onChange={(e) => setSelectedRm(e.target.value)}
+              className="w-full border border-gray-300 p-2 rounded-lg mb-4"
+            >
+              <option value="">Select RM</option>
+              {rmList.map((rm) => (
+                <option key={rm.id} value={rm.id}>
+                  {rm.name}
+                </option>
+              ))}
+            </select>
+          </>
         )}
+
+        <p>
           Are you sure you want to{" "}
           <span className="font-bold">{modalAction}</span> this lead?
         </p>
       </Modal>
 
-      {/* Delete Modal */}
+      {/* ✅ Delete Modal */}
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={closeModals}
@@ -235,21 +259,14 @@ const [rmList , setRmList] = useState([]);
       >
         <p>
           This will permanently delete the lead{" "}
-          <span className="font-bold">{selectedLead?.name}</span>. Are you
-          sure?
+          <span className="font-bold">{selectedLead?.name}</span>. Are you sure?
         </p>
       </Modal>
     </div>
   );
 };
 
-const LeadGrid = ({
-  leads,
-  copyToClipboard,
-  openWhatsApp,
-  makeCall,
-  openModal,
-}) => (
+const LeadGrid = ({ leads, copyToClipboard, openWhatsApp, makeCall, openModal }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
     {leads.map((lead) => (
       <LeadCard
@@ -264,13 +281,7 @@ const LeadGrid = ({
   </div>
 );
 
-const LeadCard = ({
-  lead,
-  copyToClipboard,
-  openWhatsApp,
-  makeCall,
-  openModal,
-}) => {
+const LeadCard = ({ lead, copyToClipboard, openWhatsApp, makeCall, openModal }) => {
   const renderStatus = (status) => {
     if (status === "approved") {
       return <FaCheckCircle className="text-caribbeangreen-500 ml-2 inline" />;
@@ -311,7 +322,7 @@ const LeadCard = ({
           />
           Copy Number
         </p>
-        <span className="text-pin-500 font-semibold"> JRM: {lead.jrm_name}</span>
+        <span className="text-pin-500 font-semibold">JRM: {lead.jrm_name}</span>
       </div>
 
       <div className="flex flex-wrap gap-2 mt-4">

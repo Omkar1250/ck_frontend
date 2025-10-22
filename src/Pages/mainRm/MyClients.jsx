@@ -1,186 +1,103 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  FaWhatsapp,
-  FaCopy,
-  FaPhoneAlt,
-} from "react-icons/fa";
-// import FormModal from "../../Components/FormModal";
+import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
 import { setCurrentPage } from "../../Slices/adminSlices/msLeads";
-import {  newallRmClients } from "../../operations/rmApi";
+import { newallRmClients } from "../../operations/rmApi";
 
+// ✅ MAIN COMPONENT
 const MyClients = () => {
   const dispatch = useDispatch();
-  // const { token } = useSelector((state) => state.auth);
-  const { jrmLeadsAllMyClients = [], loading, error, currentPage, totalPages,totalJrmLeadsAllMyClients } = useSelector(
-    (state) => state.jrmLeadsAllMyClients
-  );
+  const {
+    jrmLeadsAllMyClients = [],
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    totalJrmLeadsAllMyClients,
+  } = useSelector((state) => state.jrmLeadsAllMyClients);
 
-   console.log("From Page", jrmLeadsAllMyClients)
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [selectedLead, setSelectedLead] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-
 
   useEffect(() => {
     dispatch(newallRmClients(currentPage || 1, 5, searchQuery));
   }, [dispatch, currentPage, searchQuery]);
 
-    const handleNext = () => {
-      if (currentPage < totalPages) {
-        const newPage = currentPage + 1;
-        dispatch(setCurrentPage(newPage)); // Dispatch the action
-        dispatch(newallRmClients(newPage, 5, searchQuery)); // Fetch leads for new page
-      }
-    };
-  
-    const handlePrev = () => {
-      if (currentPage > 1) {
-        const newPage = currentPage - 1;
-        dispatch(setCurrentPage(newPage)); // Dispatch the action
-        dispatch(newallRmClients(newPage, 5, searchQuery)); // Fetch leads for new page
-      }
-    };
-   
-
-  const copyToClipboard = (number) => {
-    navigator.clipboard.writeText(number);
-    toast.success("Phone number copied!");
+  // ✅ Pagination
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      const newPage = currentPage + 1;
+      dispatch(setCurrentPage(newPage));
+      dispatch(newallRmClients(newPage, 5, searchQuery));
+    }
   };
 
-  const openWhatsApp = (number) => {
-    window.open(`https://wa.me/${number}`, "_blank");
+  const handlePrev = () => {
+    if (currentPage > 1) {
+      const newPage = currentPage - 1;
+      dispatch(setCurrentPage(newPage));
+      dispatch(newallRmClients(newPage, 5, searchQuery));
+    }
   };
 
-  const makeCall = (number) => {
-    window.location.href = `tel:${number}`;
+  // ✅ Utilities
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Copied!");
   };
 
-  const openModal = (lead) => {
-    setSelectedLead(lead);
-    setIsFormModalOpen(true);
-  };
+  const openWhatsApp = (number) => window.open(`https://wa.me/${number}`, "_blank");
+  const makeCall = (number) => (window.location.href = `tel:${number}`);
 
-  const closeFormModal = () => {
-    setIsFormModalOpen(false);
-    setSelectedLead(null);
-  };
-
-  // const handleSendMsDetails = async () => {
-  //   if (!selectedLead) return;
-  
-  //   try {
-  //   const res=  await markCallDoneOldAdvanceBatch(token,selectedLead.id, {action: 'approve'});
-  //     toast.success("Marked As Call Done!");
-  //     dispatch(oldAdvanceBatchMsLeads(currentPage, 5, searchQuery));
-  //     closeFormModal();
-  //   } catch (error) {
-  //     toast.error("Failed!");
-  //     console.error(error)
-  //   }
-  // };
   return (
-    <div className="max-w-7xl mx-auto mt-20  px-4 sm:px-6 lg:px-8">
-    <p className="text-center text-2xl font-bold font-mono ">All My Clients  <span className="text-btnColor">{totalJrmLeadsAllMyClients}</span></p>
-      <div className="mb-4">
+    <div className="max-w-7xl mx-auto mt-20 px-4 sm:px-6 lg:px-8">
+      {/* ✅ HEADER */}
+      <p className="text-center text-2xl sm:text-3xl font-extrabold mb-6 text-gray-800">
+        📌 All My Clients{" "}
+        <span className="text-btnColor">({totalJrmLeadsAllMyClients || 0})</span>
+      </p>
+
+      {/* ✅ SEARCH */}
+      <div className="mb-6">
         <SearchInput
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onClear={() => setSearchQuery("")}
-          placeholder="Search by name or mobile number..."
+          placeholder="🔍 Search by name or mobile number..."
           className="w-full md:w-1/2 mx-auto"
         />
       </div>
 
+      {/* ✅ CONTENT */}
       {loading ? (
-        <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>
+        <SkeletonLoader />
       ) : error ? (
-        <div className="text-center mt-16">
-          <p className="text-red-500 text-lg">{error}</p>
-          <button
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            onClick={() =>
-              dispatch(newallRmClients(currentPage || 1, 5, searchQuery))
-            }
-          >
-            Retry
-          </button>
-        </div>
+        <ErrorSection error={error} retry={() => dispatch(newallRmClients(1, 5, searchQuery))} />
       ) : jrmLeadsAllMyClients.length === 0 ? (
-        <p className="text-gray-600 text-center text-lg">No leads found.</p>
+        <p className="text-gray-600 text-center text-lg">No clients found.</p>
       ) : (
         <LeadGrid
           leads={jrmLeadsAllMyClients}
           copyToClipboard={copyToClipboard}
           openWhatsApp={openWhatsApp}
           makeCall={makeCall}
-          openModal={openModal}
         />
       )}
 
+      {/* ✅ PAGINATION */}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
         handleNext={handleNext}
         handlePrev={handlePrev}
       />
-   {/* <FormModal isFormModalOpen={isFormModalOpen} closeModal={closeFormModal}>
-  <div className="p-4">
-    <h3 className="text-xl font-semibold text-gray-800 mb-4">
-      Change status to call done
-    </h3>
-    <p className="text-gray-700 ">
-      Are you sure you want to change status to call done?
-    </p>
-
-    <div className="bg-gray-100   mb-4">
-      <p className="text-gray-800 flex items-center gap-2 text-sm">
-        <span className="text-sm">Name:</span> {selectedLead?.name}
-        <FaCopy
-          className="text-gray-500 cursor-pointer"
-          onClick={() => copyToClipboard(selectedLead?.name)}
-        />
-      </p>
-      <p className="text-gray-800 flex items-center gap-2 text-sm">
-        <span className="text-sm">Mobile:</span> {selectedLead?.mobile_number}
-        <FaCopy
-          className="text-gray-500 cursor-pointer"
-          onClick={() => copyToClipboard(selectedLead?.mobile_number)}
-        />
-      </p>
-    </div>
-
-    <div className="flex items-center justify-center gap-4">
-  <button
-    onClick={handleSendMsDetails}
-    className="px-3 py-2 bg-btnColor text-white rounded-md text-sm "
-  >
-    Yes
-  </button>
-  <button
-    onClick={closeFormModal}
-    className="px-3 py-2 bg-btnColor text-white rounded-md text-sm"
-  >
-    Cancel
-  </button>
-</div>
-  </div>
-</FormModal> */}
-
-     
     </div>
   );
 };
 
-const LeadGrid = ({
-  leads,
-  copyToClipboard,
-  openWhatsApp,
-  makeCall,
-  openModal,
-}) => (
+// ✅ GRID WRAPPER
+const LeadGrid = ({ leads, copyToClipboard, openWhatsApp, makeCall }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {leads.map((lead) => (
       <LeadCard
@@ -189,86 +106,96 @@ const LeadGrid = ({
         copyToClipboard={copyToClipboard}
         openWhatsApp={openWhatsApp}
         makeCall={makeCall}
-        openModal={openModal} 
       />
     ))}
   </div>
 );
 
-const LeadCard = ({
-  lead,
-  copyToClipboard,
-  openWhatsApp,
-  makeCall,
-  openModal,
-}) => (
-  
-  <div className="bg-white inset-0 shadow-md rounded-xl p-3 flex flex-col justify-between h-full">
-    <div>
-      <h3 className="text-lg font-semibold text-gray-800">{lead.name}</h3>
-      <div className="mt-2 space-y-2">
-        <div className="flex items-center space-x-2">
-          <FaWhatsapp onClick={()=>openWhatsApp(lead.whatsapp_mobile_number)} className="text-caribbeangreen-600" />
-          <span onClick={()=>openWhatsApp(lead.whatsapp_mobile_number)}>{lead.whatsapp_mobile_number} </span>
-          <FaCopy
-            onClick={() => copyToClipboard(lead.whatsapp_mobile_number)}
-            className="text-gray-500 cursor-pointer"
-          />
-        </div>
-        <div className="flex items-center space-x-2">
-          <FaPhoneAlt onClick={() =>  makeCall(lead.mobile_number)} className="text-blue-600" />
-          <span onClick={() =>  makeCall(lead.mobile_number)}>{lead.mobile_number}</span>
-          <FaCopy
-            onClick={() => copyToClipboard(lead.mobile_number)}
-            className="text-gray-500 cursor-pointer"
-          />
-        </div>
-      </div>
+// ✅ CARD
+const LeadCard = ({ lead, copyToClipboard, openWhatsApp, makeCall }) => (
+  <div className="bg-white shadow-lg rounded-xl p-4 border border-gray-100 hover:shadow-2xl transition-all duration-300">
+    <h3 className="text-lg font-semibold text-gray-800">{lead.name}</h3>
+
+    <div className="mt-3 space-y-2 text-sm">
+      <ContactRow
+        icon={<FaWhatsapp className="text-green-500 text-lg" />}
+        value={lead.whatsapp_mobile_number}
+        onClick={() => openWhatsApp(lead.whatsapp_mobile_number)}
+        onCopy={() => copyToClipboard(lead.whatsapp_mobile_number)}
+      />
+      <ContactRow
+        icon={<FaPhoneAlt className="text-btnColor text-lg" />}
+        value={lead.mobile_number}
+        onClick={() => makeCall(lead.mobile_number)}
+        onCopy={() => copyToClipboard(lead.mobile_number)}
+      />
     </div>
 
-    <div className="mt-4 text-sm text-richblack-500">
-      
-      <p className="text-pink-300">Batch Code : {lead.batch_code}</p>
-       <p className="text-pink-300">Batch Type : {lead.batch_type}</p>
+    <div className="mt-4 text-xs text-gray-500">
+      <p><span className="font-medium text-gray-700">Batch:</span> {lead.batch_code || "—"}</p>
+      <p className="mt-1"><span className="font-medium text-gray-700">Batch Type:</span> {lead.batch_type || "—"}</p>
     </div>
-
-    {/* <div className="mt-4 ">
-      <button
-        onClick={() => openModal(lead)}
-        className="w-full bg-btnColor text-white py-2 rounded-md hover:bg-green-700"
-      >
-        Mark Call Done
-      </button>
-    </div> */}
   </div>
 );
 
+// ✅ CONTACT ROW (Reusable)
+const ContactRow = ({ icon, value, onClick, onCopy }) => (
+  <div className="flex items-center justify-between">
+    <button className="flex items-center gap-2" onClick={onClick}>
+      {icon}
+      <span className="text-gray-700">{value}</span>
+    </button>
+    <FaCopy onClick={onCopy} className="text-gray-400 hover:text-gray-600 cursor-pointer" />
+  </div>
+);
+
+// ✅ PAGINATION
 const Pagination = ({ currentPage, totalPages, handleNext, handlePrev }) => (
   <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mt-10">
     <button
       onClick={handlePrev}
       disabled={currentPage === 1}
-      className={`px-5 py-2 rounded-lg text-white text-base w-36 ${
-        currentPage === 1
-          ? "bg-gray-400 cursor-not-allowed"
-          : "bg-blue-600 hover:bg-blue-700"
+      className={`px-6 py-2 rounded-md text-white w-36 transition ${
+        currentPage === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-btnColor hover:bg-opacity-90"
       }`}
     >
       Previous
     </button>
-    <span className="text-gray-800 font-semibold text-lg text-center">
+
+    <span className="text-gray-700 font-semibold text-lg">
       Page {currentPage} of {totalPages}
     </span>
+
     <button
       onClick={handleNext}
       disabled={currentPage === totalPages}
-      className={`px-5 py-2 rounded-lg text-white text-base w-36 ${
-        currentPage === totalPages
-          ? "bg-gray-400 cursor-not-allowed"
-          : "bg-blue-600 hover:bg-blue-700"
+      className={`px-6 py-2 rounded-md text-white w-36 transition ${
+        currentPage === totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-btnColor hover:bg-opacity-90"
       }`}
     >
       Next
+    </button>
+  </div>
+);
+
+// ✅ SKELETON LOADER
+const SkeletonLoader = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <div key={i} className="bg-gray-200 rounded-xl h-44"></div>
+    ))}
+  </div>
+);
+
+// ✅ ERROR STATE
+const ErrorSection = ({ error, retry }) => (
+  <div className="text-center mt-16">
+    <p className="text-red-500 text-lg">{error}</p>
+    <button
+      className="mt-4 px-6 py-2 bg-btnColor text-white rounded-md hover:bg-opacity-90 transition"
+      onClick={retry}
+    >
+      Retry
     </button>
   </div>
 );

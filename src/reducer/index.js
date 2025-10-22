@@ -38,6 +38,10 @@ import ClientsForRmReducer from "../Slices/universalSearchSlice";
 import AdvanceCallDoneReducer from "../Slices/advanceMsleadsCallList"
 import advanceMsTeamsRequestsReducer from "../Slices/adminSlices/advanceMsRequestSlice"
 import mfClientsReducer from "../Slices/mfSlice"
+import adminCallRequestsReducer from "../Slices/adminSlices/adminCallRequestSlice"
+import adminBasicMsRequestReducer from "../Slices/adminSlices/adminBasinMsSlice"
+import adminSipRequestsReducer from "../Slices/adminSlices/adminSipRequestsSlice"
+import adminApprovedSipRequestsReducer from "../Slices/adminSlices/adminApprovedSipRequestsSlice"
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -81,6 +85,10 @@ const rootReducer = combineReducers({
     ClientsForRm:ClientsForRmReducer,
     AdvanceCallDone:AdvanceCallDoneReducer,
     mfClients:mfClientsReducer,
+    adminCallRequests:adminCallRequestsReducer,
+    adminBasicMsRequests:adminBasicMsRequestReducer,
+    adminSipRequests:adminSipRequestsReducer,
+    adminApprovedSipRequests:adminApprovedSipRequestsReducer,
 
   
     

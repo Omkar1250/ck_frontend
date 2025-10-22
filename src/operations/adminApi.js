@@ -51,7 +51,31 @@ import {
    setAdvanceMsTeamsLoading,
   setAdvanceMsTeamsSuccess,
   setAdvanceMsTeamsError
-} from "../Slices/adminSlices/advanceMsRequestSlice"
+} from "../Slices/adminSlices/advanceMsRequestSlice";
+import {
+   setAdminCallRequestsLoading,
+  setAdminCallRequestsSuccess,
+  setAdminCallRequestsError,
+} from "../Slices/adminSlices/adminCallRequestSlice";
+import {
+  setAdminBasicMsRequestsLoading,
+  setAdminBasicMsRequestsSuccess,
+  setAdminBasicMsRequestsError,
+} from "../Slices/adminSlices/adminBasinMsSlice";
+import {
+  setAdminSipRequestsLoading,
+  setAdminSipRequestsSuccess,
+  setAdminSipRequestsError,
+  setAdminSipRequestsPage,
+} from "../Slices/adminSlices/adminSipRequestsSlice";
+import {
+  setAdminApprovedSipLoading,
+  setAdminApprovedSipSuccess,
+  setAdminApprovedSipError,
+  setAdminApprovedSipPage,
+  setAdminApprovedSipStats,
+  setAdminApprovedSipBatches,
+} from "../Slices/adminSlices/adminApprovedSipRequestsSlice";
 
 
 
@@ -104,8 +128,22 @@ const {
     SENT_OLD_BASIC_MS_TEAMS_ID_PASS_API,
     SENT_OLD_ADVANCE_MS_TEAMS_ID_PASS_API,
     REQUSTS_FOR_ADVANCE_MS_TEAMS_LOGIN,
-    APPROVE_ADVANCE_MS_TEAMS_REQUEST_API
-    
+    APPROVE_ADVANCE_MS_TEAMS_REQUEST_API,
+    APPROVE_OR_REJECT_BASIC_MS_REQUEST,
+
+    GET_ALL_BATCH_CODES,
+    CREATE_BATCH,
+    UPDATE_BATCH,
+    DELETE_BATCH,
+    ALL_BATCHES,
+    GET_PENDING_NEW_CLIENT_CALL_REQUESTS,
+    APPROVE_OR_REJECT_NEW_CALL_REQUEST,
+    GET_PENDING_BASIC_MS_REQUESTS,
+    GET_PENDING_SIP_REQUESTS_API,
+    APPROVE_CONVERTED_SIP_REQUEST,
+    GET_APPROVED_SIP_REQUESTS_API,
+    GET_APPROVED_SIP_STATS_API,
+    GET_APPROVED_SIP_BATCHES_API,
     
 
 } = adminEndpoints;
@@ -1422,3 +1460,384 @@ export const advanceBatchmsTeamsRequestList = (page = 1, limit = 5, search = "")
       alert('Something went wrong.');
     }
   };
+
+
+
+//GET ALL BATCHES
+export const getAllBatchCodes = async (token) => {
+  try {
+    const response = await apiConnector("GET", GET_ALL_BATCH_CODES, null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    if (!response?.data?.success) {
+      throw new Error("Failed to fetch batch codes");
+    }
+
+    // ✅ Return only array, not the whole object
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching batch codes:", error?.message || error);
+    toast.error("Failed to fetch batches");
+    return [];
+  }
+};
+
+export const createBatch = async (token, formData) => {
+  try {
+    const response = await apiConnector("POST", CREATE_BATCH, formData, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    if (!response?.data?.success) {
+      throw new Error("Failed to create batch");
+    }
+
+    toast.success("Batch created successfully");
+    return response.data;
+  } catch (error) {
+    console.error("Error creating batch:", error?.response?.data?.message || error.message);
+    toast.error(error?.response?.data?.message || "Failed to create batch");
+    return null;
+  }
+};
+
+export const getAllBatches = async (token) => {
+  try {
+    const res = await apiConnector("GET", ALL_BATCHES, null, {
+      Authorization: `Bearer ${token}`,
+    });
+    return res?.data?.batches || [];
+  } catch (error) {
+    console.error("Error fetching batches:", error);
+    toast.error("Failed to fetch batches");
+    return [];
+  }
+};
+
+// UPDATE (by id)
+export const updateBatch = async (token, id, payload) => {
+  try {
+    const res = await apiConnector("PUT", UPDATE_BATCH(id), payload, {
+      Authorization: `Bearer ${token}`,
+    });
+    if (!res?.data?.success) throw new Error("Failed to update batch");
+    toast.success("Batch updated");
+    return res.data;
+  } catch (error) {
+    console.error("Error updating batch:", error);
+    toast.error(error?.response?.data?.message || "Failed to update batch");
+    return null;
+  }
+};
+
+// DELETE (by id)
+export const deleteBatch = async (token, id) => {
+  try {
+    const res = await apiConnector("DELETE", DELETE_BATCH(id), null, {
+      Authorization: `Bearer ${token}`,
+    });
+    if (!res?.data?.success) throw new Error("Failed to delete batch");
+    toast.success("Batch deleted");
+    return res.data;
+  } catch (error) {
+    console.error("Error deleting batch:", error);
+    toast.error(error?.response?.data?.message || "Failed to delete batch");
+    return null;
+  }
+};
+
+
+
+export const getPendingNewClientRequests =
+  (page = 1, limit = 6, search = "", batch = "") =>
+  async (dispatch, getState) => {
+    try {
+      dispatch(setAdminCallRequestsLoading());
+      const { token } = getState().auth;
+
+      const queryParams = new URLSearchParams({
+        page,
+        limit,
+        ...(search && { search }),
+        ...(batch && { batch }),
+      }).toString();
+
+      const response = await apiConnector(
+        "GET",
+        `${GET_PENDING_NEW_CLIENT_CALL_REQUESTS}?${queryParams}`,
+        null,
+        {
+          Authorization: `Bearer ${token}`,
+        }
+      );
+
+      if (response?.data?.success) {
+        dispatch(
+          setAdminCallRequestsSuccess({
+            requests: response.data.data,
+            totalRequests: response.data.total,
+            totalPages: response.data.totalPages,
+            currentPage: response.data.currentPage,
+          })
+        );
+      } else {
+        dispatch(
+          setAdminCallRequestsError(
+            response?.data?.message || "Failed to fetch call requests"
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching admin call requests:", error);
+      dispatch(
+        setAdminCallRequestsError(
+          error?.response?.data?.message ||
+            "Server error while fetching call requests"
+        )
+      );
+    }
+  };
+
+  //APPROVE OR REJECT LEAD NEW_CLIENT_CALL_REQUEST
+export const approveOrRejectNewCallRequest = async (token, leadId, action) => {
+  try {
+    const response = await apiConnector(
+      "POST",
+      `${APPROVE_OR_REJECT_NEW_CALL_REQUEST}/${leadId}`,
+      { action },
+      {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+    );
+
+    if (response?.data?.success) {
+      toast.success(response.data.message || "Request processed successfully.");
+      return response.data;
+    } else {
+      const msg = response?.data?.message || "Failed to process request.";
+      toast.error(msg);
+      throw new Error(msg);
+    }
+  } catch (error) {
+    console.error("❌ Error approving/rejecting call request:", error);
+    const errMsg =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Something went wrong.";
+    toast.error(errMsg);
+    throw new Error(errMsg);
+  }
+};
+
+
+
+export const getPendingBasicMsRequests =
+  (page = 1, limit = 6, search = "", batch = "") =>
+  async (dispatch, getState) => {
+    try {
+      dispatch(setAdminBasicMsRequestsLoading());
+      const { token } = getState().auth;
+
+      const queryParams = new URLSearchParams({
+        page,
+        limit,
+        ...(search && { search }),
+        ...(batch && { batch }),
+      }).toString();
+
+      const response = await apiConnector(
+        "GET",
+        `${GET_PENDING_BASIC_MS_REQUESTS}?${queryParams}`,
+        null,
+        {
+          Authorization: `Bearer ${token}`,
+        }
+      );
+
+      if (response?.data?.success) {
+        dispatch(
+          setAdminBasicMsRequestsSuccess({
+            data: response.data.data,
+            total: response.data.total,
+            totalPages: response.data.totalPages,
+            currentPage: response.data.currentPage,
+          })
+        );
+      } else {
+        dispatch(
+          setAdminBasicMsRequestsError(
+            response?.data?.message || "Failed to fetch MS Teams requests"
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching MS Teams requests:", error);
+      dispatch(
+        setAdminBasicMsRequestsError(
+          error?.response?.data?.message ||
+            "Server error while fetching MS Teams requests"
+        )
+      );
+    }
+  };
+
+  // ✅ Approve/Reject one request
+export const approveOrRejectBasicMsRequest =
+  (token, leadId, action) => async (dispatch, getState) => {
+    try {
+      
+
+      const response = await apiConnector(
+      "POST",
+      `${APPROVE_OR_REJECT_BASIC_MS_REQUEST}/${leadId}`,
+      { action }, // { action: "approve" | "reject" }
+      {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+    );
+  console.log(response.data)
+    return response?.data;
+  } catch (error) {
+    throw new Error(
+      error?.response?.data?.message || "Failed to process the request"
+    );
+  }
+};
+
+export const getPendingSipRequests = (page = 1, limit = 10) => async (dispatch, getState) => {
+  try {
+    dispatch(setAdminSipRequestsLoading());
+
+    // Get auth token from Redux
+    const { token } = getState().auth;
+
+    // Build query string
+    const query = new URLSearchParams({ page, limit }).toString();
+
+    // API Call
+    const response = await apiConnector(
+      "GET",
+      `${GET_PENDING_SIP_REQUESTS_API}?${query}`,
+      null,
+      { Authorization: `Bearer ${token}` }
+    );
+
+    // Success
+    if (response?.data?.success) {
+      dispatch(setAdminSipRequestsSuccess(response.data));
+      dispatch(setAdminSipRequestsPage(page));
+    } else {
+      const msg = response?.data?.message || "Failed to fetch pending SIP requests";
+      dispatch(setAdminSipRequestsError(msg));
+    }
+
+  } catch (error) {
+    console.error("Pending SIP Requests API Error:", error);
+    dispatch(setAdminSipRequestsError(error?.message || "Error fetching SIP requests"));
+  }
+};
+
+
+export const approveOrRejectSipStageRequest = async (token, leadId, payload) => {
+  try {
+    // payload = { stage: "session4", action: "approve" }
+
+    const response = await apiConnector(
+      "POST",
+      `${APPROVE_CONVERTED_SIP_REQUEST}/${leadId}`,
+      payload,
+      {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+    );
+
+    if (response?.data?.success) {
+      toast.success(response.data.message || "Request processed successfully.");
+      return response.data;
+    } else {
+      const msg = response?.data?.message || "Failed to process request.";
+      toast.error(msg);
+      return Promise.reject(msg);
+    }
+  } catch (error) {
+    console.error("Approve/Reject SIP Stage API ERROR:", error);
+    const errMsg =
+      error?.response?.data?.message || "Server error while processing request.";
+    toast.error(errMsg);
+    throw new Error(errMsg);
+  }
+};
+
+export const getApprovedSipRequests =
+  (page = 1, limit = 10, { search = "", batch_code = "", rm_id = "" } = {}) =>
+  async (dispatch, getState) => {
+    try {
+      dispatch(setAdminApprovedSipLoading());
+      const { token } = getState().auth;
+
+      const qp = new URLSearchParams({ page, limit });
+      if (search) qp.append("search", search);
+      if (batch_code) qp.append("batch_code", batch_code);
+      if (rm_id) qp.append("rm_id", rm_id);
+
+      const res = await apiConnector(
+        "GET",
+        `${GET_APPROVED_SIP_REQUESTS_API}?${qp.toString()}`,
+        null,
+        { Authorization: `Bearer ${token}` }
+      );
+
+      if (res?.data?.success) {
+        dispatch(setAdminApprovedSipSuccess(res.data));
+        dispatch(setAdminApprovedSipPage(page));
+      } else {
+        dispatch(setAdminApprovedSipError(res?.data?.message || "Failed to fetch approved SIPs"));
+      }
+    } catch (err) {
+      dispatch(setAdminApprovedSipError(err?.message || "Error fetching approved SIPs"));
+    }
+  };
+
+// RM-wise stats (optional batch filter)
+export const getApprovedSipStats = (batch_code = "") => async (dispatch, getState) => {
+  try {
+    const { token } = getState().auth;
+    const qp = new URLSearchParams({});
+    if (batch_code) qp.append("batch_code", batch_code);
+
+    const res = await apiConnector(
+      "GET",
+      `${GET_APPROVED_SIP_STATS_API}?${qp.toString()}`,
+      null,
+      { Authorization: `Bearer ${token}` }
+    );
+
+    if (res?.data?.success) {
+      dispatch(setAdminApprovedSipStats(res.data));
+    }
+  } catch (err) {
+    // non-fatal
+  }
+};
+
+// Distinct batches for dropdown
+export const getApprovedSipBatches = () => async (dispatch, getState) => {
+  try {
+    const { token } = getState().auth;
+    const res = await apiConnector(
+      "GET",
+      GET_APPROVED_SIP_BATCHES_API,
+      null,
+      { Authorization: `Bearer ${token}` }
+    );
+    if (res?.data?.success) {
+      dispatch(setAdminApprovedSipBatches(res.data));
+    }
+  } catch (err) {
+    // non-fatal
+  }
+};

@@ -4,72 +4,78 @@ import { useDispatch, useSelector } from "react-redux";
 import SidebarLink from "../SidebarLinks";
 import { logout } from "../../operations/authApi";
 import { sidebarLinks } from "../../data/dashboardLinks";
+import { FiUser } from "react-icons/fi";
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
-  const user = useSelector((state) => state.profile.user); // Get user details
-  const token = useSelector((state) => state.auth.token); // Get authentication token
+  const user = useSelector((state) => state.profile.user);
+  const token = useSelector((state) => state.auth.token);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const triggerRef = useRef(null);
   const sidebarRef = useRef(null);
 
-  // Sidebar expanded state
+  // Sidebar expanded preference (not collapse/expand for now, but kept for future)
   const storedSidebarExpanded = localStorage.getItem("sidebar-expanded");
   const [sidebarExpanded] = useState(storedSidebarExpanded === "true");
 
-  // Effect: Update localStorage and body class on sidebarExpanded state changes
+  // Save expand state (in case you enable expand/collapse feature someday)
   useEffect(() => {
     localStorage.setItem("sidebar-expanded", sidebarExpanded.toString());
     document.body.classList.toggle("sidebar-expanded", sidebarExpanded);
   }, [sidebarExpanded]);
 
-  // Effect: Handle clicks outside the sidebar to close it
+  // Close sidebar on outside click (only on mobile/tablet)
   const clickHandler = useCallback(
     ({ target }) => {
       if (!sidebarRef.current || !triggerRef.current) return;
       if (
         !sidebarOpen ||
         sidebarRef.current.contains(target) ||
-        triggerRef.current.contains(target)
+        triggerRef.current?.contains?.(target)
       )
         return;
-
-      setSidebarOpen(false); // Close the sidebar
+      setSidebarOpen(false);
     },
     [sidebarOpen, setSidebarOpen]
   );
 
   useEffect(() => {
     document.addEventListener("click", clickHandler);
-    return () => {
-      document.removeEventListener("click", clickHandler);
-    };
+    return () => document.removeEventListener("click", clickHandler);
   }, [clickHandler]);
 
-  // Filter sidebar links based on user role
+  // Filter links based on role
   const filteredLinks = useMemo(() => {
     return sidebarLinks.filter((link) => !link.type || user?.role === link.type);
   }, [user]);
 
-  // Reusable button styles
   const buttonStyles =
     "w-full rounded-md bg-greenBtn px-4 py-2 text-white font-semibold hover:opacity-90 transition";
 
   return (
     <aside
       ref={sidebarRef}
-      className={`bg-bgSidebar absolute z-[100] left-0 top-14 lg:pt-16 flex h-screen w-72 flex-col overflow-y-hidden duration-200 ease-linear lg:static lg:translate-x-0 ${
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      }`}
+      className={`bg-bgSidebar shadow-xl absolute z-[100] left-0 top-14 lg:top-0 lg:pt-16 flex h-screen w-72 flex-col overflow-y-hidden duration-300 ease-in-out
+      ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+      lg:translate-x-0 lg:static`}
     >
+      {/* ===== USER PROFILE CARD ===== */}
+      <div className="flex flex-col items-center gap-2 px-4 py-6 border-b bg-white/5 backdrop-blur-md">
+        <div className="w-14 h-14 flex items-center justify-center rounded-full bg-white/20 shadow-inner">
+          <FiUser className="text-2xl text-caribbeangreen-500" />
+        </div>
+        <h3 className="text-btnColor font-semibold text-lg capitalize">
+          {user?.name || "User"}
+        </h3>
       
+      </div>
 
-      {/* Menu Links */}
+      {/* ===== MENU LINKS ===== */}
       <MenuLinks links={filteredLinks} setSidebarOpen={setSidebarOpen} />
 
-      {/* Logout/Login Section */}
-      <div className="p-4">
+      {/* ===== FOOTER (LOGOUT / LOGIN) ===== */}
+      <div className="p-4 border-t border-white/10 bg-bgSidebar">
         {token ? (
           <button
             className={buttonStyles}
@@ -92,16 +98,16 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   );
 }
 
-// MenuLinks Component for better modularity
+// ===== MENU LINKS LIST =====
 function MenuLinks({ links, setSidebarOpen }) {
   return (
-    <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-      <div className="flex flex-col">
+    <div className="flex-1 overflow-y-auto no-scrollbar">
+      <div className="flex flex-col p-2">
         {links.map((link) => (
           <SidebarLink
             key={link.id}
             link={link}
-            setSidebarOpen={setSidebarOpen} // Pass setSidebarOpen here
+            setSidebarOpen={setSidebarOpen} // closes mobile sidebar when clicked
           />
         ))}
       </div>

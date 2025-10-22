@@ -62,8 +62,14 @@ export const leadEndpoints = {
     REQUEST_ADVANCE_MS_TEAMS_APPROVAL: BASE_URL + '/request-advance-ms-teams-approval',
     RM_POINTS_HISTORY:BASE_URL + '/rm-points-history',
     JRM_CODED_ALL_LEDAS:BASE_URL + '/get-jrm-coded-list',
-      MF_CLIENTS_CALL_API: BASE_URL + '/get-all-mf-clients',
+    MF_CLIENTS_CALL_API: BASE_URL + '/get-all-mf-clients',
     MF_CALL_DONE_API: BASE_URL + '/mark-mf-call-done',
+
+
+    //new clients for call
+    SUBMIT_LEAD_FOR_CALL_APPROVAL: BASE_URL + '/new-client-call-update',
+    SUBMIT_BASIC_MS_TEAMS_LEAD_STATUS: BASE_URL + '/submit-basic-ms-teams-update',
+    SUBMIT_MF_LEAD_STATUS: BASE_URL + '/submit-mf-lead-status',
      
   };
   
@@ -105,6 +111,24 @@ export const adminEndpoints = {
     GET_ADVANCE_MSTEAMS_LEADS_LIST_API: BASE_URL + "/get-adavance-msteams-list",
     ADVANCE_MS_DETAILS_SENT_API: BASE_URL + "/advance-ms-details_sent",
     HANDLE_OLD_LEAD_APPROVAL: BASE_URL + "/approve-old-lead",
+
+    //batchtes
+    GET_ALL_BATCH_CODES: BASE_URL + "/batches",
+    CREATE_BATCH: BASE_URL + "/batches",
+    UPDATE_BATCH : (id) => BASE_URL + `/batch/${id}`, // PUT
+    DELETE_BATCH :(id) => BASE_URL + `/batch/${id}`, // DELETE
+    ALL_BATCHES: BASE_URL + "/all-batches",
+    GET_PENDING_NEW_CLIENT_CALL_REQUESTS: BASE_URL + '/new-client/pending',
+    APPROVE_OR_REJECT_NEW_CALL_REQUEST: BASE_URL + '/new-client/approve',
+    APPROVE_OR_REJECT_BASIC_MS_REQUEST: BASE_URL + '/admin/basic-ms/requests',
+    GET_PENDING_BASIC_MS_REQUESTS: BASE_URL + "/ms-clients/pending",
+    GET_PENDING_SIP_REQUESTS_API: BASE_URL + "/sip-coverted-requests",
+    APPROVE_CONVERTED_SIP_REQUEST: BASE_URL + "/mf/sip-review",
+
+    GET_APPROVED_SIP_REQUESTS_API: BASE_URL + "/mf/sip-approved",
+    GET_APPROVED_SIP_STATS_API: BASE_URL +"/mf/sip-approved-stats",
+    GET_APPROVED_SIP_BATCHES_API:BASE_URL + "/mf/sip-approved-batches",
+
 
 
 
