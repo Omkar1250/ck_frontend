@@ -111,6 +111,8 @@ export const adminEndpoints = {
     GET_ADVANCE_MSTEAMS_LEADS_LIST_API: BASE_URL + "/get-adavance-msteams-list",
     ADVANCE_MS_DETAILS_SENT_API: BASE_URL + "/advance-ms-details_sent",
     HANDLE_OLD_LEAD_APPROVAL: BASE_URL + "/approve-old-lead",
+    RM_PREVIEW:BASE_URL+"/next-rm-preview",
+    RM_DROPDOWN:BASE_URL+"/rm/dropdown",
 
     //batchtes
     GET_ALL_BATCH_CODES: BASE_URL + "/batches",

@@ -6,16 +6,19 @@ import { format } from "timeago.js";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
 import Select from "react-select";
+
 import {
   handleCodedAction,
   codedRequestList,
-  getAllMainRms,
   getAllBatchCodes,
+  getAllMainRmDropdown,
+  getRmPreview
 } from "../../operations/adminApi";
 
 const CodedRequest = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
+
   const {
     codedRequests = [],
     loading,
@@ -31,8 +34,10 @@ const CodedRequest = () => {
   const [modalAction, setModalAction] = useState("");
   const [batchCode, setBatchCode] = useState("");
   const [allbatches, setAllBatches] = useState([]);
+
   const [rmList, setRmList] = useState([]);
   const [selectedRm, setSelectedRm] = useState(null);
+  const [nextRmName, setNextRmName] = useState("");
 
   useEffect(() => {
     dispatch(codedRequestList(currentPage, 5, searchQuery));
@@ -40,12 +45,8 @@ const CodedRequest = () => {
 
   useEffect(() => {
     const fetchRms = async () => {
-      try {
-        const data = await getAllMainRms(token);
-        setRmList(Array.isArray(data) ? data : [data]);
-      } catch {
-        toast.error("Failed to fetch RM list.");
-      }
+      const data = await getAllMainRmDropdown(token);
+      setRmList(data || []);
     };
     fetchRms();
   }, [token]);
@@ -62,15 +63,51 @@ const CodedRequest = () => {
     fetchBatches();
   }, [token]);
 
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      dispatch(codedRequestList(currentPage + 1, 5, searchQuery));
+  const fetchNextRM = async () => {
+    const rm = await getRmPreview(token);
+    if (rm) {
+      setSelectedRm(rm.id);
+      setNextRmName(rm.name);
+
+      setRmList((prev) => [
+        { id: rm.id, name: `⭐ ${rm.name} (Next in Rotation)` },
+        ...prev.filter((x) => x.id !== rm.id),
+      ]);
     }
   };
 
-  const handlePrev = () => {
-    if (currentPage > 1) {
-      dispatch(codedRequestList(currentPage - 1, 5, searchQuery));
+  const openModal = async (lead, action) => {
+    setSelectedLead(lead);
+    setModalAction(action);
+    setIsModalOpen(true);
+
+    if (action === "approve") {
+      await fetchNextRM();
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedLead(null);
+    setModalAction("");
+    setBatchCode("");
+    setSelectedRm(null);
+    setNextRmName("");
+  };
+
+  const handleCodedActionSubmit = async () => {
+    if (modalAction === "approve" && !batchCode) {
+      toast.error("Please select Batch Code.");
+      return;
+    }
+
+    try {
+      await handleCodedAction(token, selectedLead?.id, modalAction, batchCode);
+      toast.success(`Request ${modalAction === "approve" ? "approved" : "rejected"}!`);
+      closeModal();
+      dispatch(codedRequestList(currentPage, 5, searchQuery));
+    } catch (error) {
+      toast.error(error.message || "Failed to process request.");
     }
   };
 
@@ -82,35 +119,16 @@ const CodedRequest = () => {
   const openWhatsApp = (number) => window.open(`https://wa.me/${number}`, "_blank");
   const makeCall = (number) => (window.location.href = `tel:${number}`);
 
-  const handleCodedActionSubmit = async () => {
-    if (modalAction === "approve" && (!batchCode || !selectedRm)) {
-      toast.error("Please select both Batch Code and RM.");
-      return;
-    }
-    try {
-      await handleCodedAction(token, selectedLead?.id, modalAction, batchCode, selectedRm);
-      toast.success(`Request ${modalAction === "approve" ? "approved" : "rejected"}!`);
-      setIsModalOpen(false);
-      setBatchCode("");
-      setSelectedRm(null);
-      dispatch(codedRequestList(currentPage, 5, searchQuery));
-    } catch (error) {
-      toast.error(error.message || "Failed to process request.");
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      dispatch(codedRequestList(currentPage + 1, 5, searchQuery));
     }
   };
 
-  const openModal = (lead, action) => {
-    setSelectedLead(lead);
-    setModalAction(action);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedLead(null);
-    setModalAction("");
-    setBatchCode("");
-    setSelectedRm(null);
+  const handlePrev = () => {
+    if (currentPage > 1) {
+      dispatch(codedRequestList(currentPage - 1, 5, searchQuery));
+    }
   };
 
   return (
@@ -144,7 +162,6 @@ const CodedRequest = () => {
 
       <Pagination currentPage={currentPage} totalPages={totalPages} handleNext={handleNext} handlePrev={handlePrev} />
 
-      {/* ✅ Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
@@ -166,14 +183,23 @@ const CodedRequest = () => {
               className="mb-4"
             />
 
-            <label className="text-sm font-semibold text-gray-600 mb-1 block">Assign RM</label>
+            <label className="text-sm font-semibold text-gray-600 mb-1 block">Assign RM (Auto Selected)</label>
             <Select
               options={rmList.map((rm) => ({ value: rm.id, label: rm.name }))}
               onChange={(opt) => setSelectedRm(opt?.value || null)}
-              value={selectedRm ? rmList.map((rm) => ({ value: rm.id, label: rm.name })).find((r) => r.value === selectedRm) : null}
+              value={
+                selectedRm
+                  ? rmList.map((rm) => ({ value: rm.id, label: rm.name }))
+                      .find((r) => r.value === selectedRm)
+                  : null
+              }
               isSearchable
-              className="mb-4"
+              className="mb-2"
             />
+
+            <p className="text-xs text-green-600 font-semibold">
+              ✅ Auto Assigned RM: <span className="text-gray-900">{nextRmName}</span>
+            </p>
           </div>
         )}
         <p className="text-center mt-3 text-gray-600">Are you sure?</p>
@@ -182,7 +208,6 @@ const CodedRequest = () => {
   );
 };
 
-/* ✅ Lead Grid */
 const LeadGrid = ({ leads, copyToClipboard, openWhatsApp, makeCall, openModal }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
     {leads.map((lead) => (
@@ -191,7 +216,6 @@ const LeadGrid = ({ leads, copyToClipboard, openWhatsApp, makeCall, openModal })
   </div>
 );
 
-/* ✅ Lead Card */
 const LeadCard = ({ lead, copyToClipboard, openWhatsApp, makeCall, openModal }) => (
   <div className="bg-white border p-5 shadow-md rounded-2xl hover:shadow-xl transition-all duration-300">
     <div className="flex justify-between mb-2">
@@ -224,7 +248,6 @@ const PhoneRow = ({ label, onCopy, onCall, onWhatsapp }) => (
   </div>
 );
 
-/* ✅ Pagination */
 const Pagination = ({ currentPage, totalPages, handleNext, handlePrev }) => (
   <div className="flex justify-center items-center gap-6 mt-10">
     <button onClick={handlePrev} disabled={currentPage === 1} className={`px-6 py-2 rounded-full text-white w-36 ${currentPage === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-btnColor hover:opacity-90"}`}>Previous</button>
@@ -233,7 +256,6 @@ const Pagination = ({ currentPage, totalPages, handleNext, handlePrev }) => (
   </div>
 );
 
-/* ✅ Error Component */
 const ErrorState = ({ retry }) => (
   <div className="text-center mt-16">
     <p className="text-red-500 text-lg">Something went wrong</p>

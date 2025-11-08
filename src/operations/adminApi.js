@@ -144,7 +144,8 @@ const {
     GET_APPROVED_SIP_REQUESTS_API,
     GET_APPROVED_SIP_STATS_API,
     GET_APPROVED_SIP_BATCHES_API,
-    
+    RM_PREVIEW,
+    RM_DROPDOWN
 
 } = adminEndpoints;
 
@@ -161,6 +162,32 @@ export const createRm = async (token, formData) => {
     }
 };
 
+
+
+export const getRmPreview = async (token) => {
+  try {
+    const response = await apiConnector(
+      "GET",
+      RM_PREVIEW,   // this is "/next-rm-preview"
+      null,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+
+    if (!response?.data?.success) {
+      throw new Error("Something went wrong");
+    }
+
+    // ✅ Return RM info to UI
+    return response.data.rm; 
+
+  } catch (error) {
+    console.error("Error :", error?.message || error);
+    toast.error("Failed to fetch next RM");
+    return null;
+  }
+};
 
 
 export const getAllRms = async (token) => {
@@ -1063,6 +1090,24 @@ export const createMainRm = async (token, formData) => {
 export const getAllMainRms = async (token) => {
   try {
     const response = await apiConnector("GET", GET_ALL_MAIN_RM_API, null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    if (!response?.data?.success) {
+      throw new Error("Something went wrong");
+    }
+
+   
+    return response.data.rms;
+  } catch (error) {
+    console.error("Error getting RMs:", error?.message || error);
+    toast.error("Failed to fetch team");
+    return null;
+  }
+};
+export const getAllMainRmDropdown = async (token) => {
+  try {
+    const response = await apiConnector("GET", RM_DROPDOWN, null, {
       Authorization: `Bearer ${token}`,
     });
 
