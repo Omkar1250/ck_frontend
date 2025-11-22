@@ -4,49 +4,73 @@ import {
   FaWhatsapp,
   FaCopy,
   FaPhoneAlt,
+  FaSyncAlt,
 } from "react-icons/fa";
 import FormModal from "../../Components/FormModal";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
-import { fetElgibleOldBasicMsClients, oldBasicIdPassSent } from "../../operations/adminApi";
+import {
+  fetElgibleOldBasicMsClients,
+  oldBasicIdPassSent,
+  getAllBatchCodes,
+} from "../../operations/adminApi";
 import { setCurrentPage } from "../../Slices/adminSlices/msLeads";
 
 const RmEligibleOldBasicLeads = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
-  const { oldBasicMsLeads = [], loading, error, currentPage, totalPages,totalOldBasicMsLeads } = useSelector(
-    (state) => state.oldBasicIdPassLeads
-  );
+
+  const {
+    oldBasicMsLeads = [],
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    totalOldBasicMsLeads,
+  } = useSelector((state) => state.oldBasicIdPassLeads);
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [batchCodes, setBatchCodes] = useState([]);
+  const [selectedBatch, setSelectedBatch] = useState("");
 
+  // Fetch batch codes
   useEffect(() => {
-    dispatch(fetElgibleOldBasicMsClients(currentPage || 1, 5, searchQuery));
-  }, [dispatch, currentPage, searchQuery]);
+    const fetchBatches = async () => {
+      const res = await getAllBatchCodes(token);
+      if (res?.success) setBatchCodes(res.data || []);
+    };
+    fetchBatches();
+  }, [token]);
 
-    const handleNext = () => {
-      if (currentPage < totalPages) {
-        const newPage = currentPage + 1;
-        dispatch(setCurrentPage(newPage)); // Dispatch the action
-        dispatch(fetElgibleOldBasicMsClients(newPage, 5, searchQuery)); // Fetch leads for new page
-      }
-    };
-  
-    const handlePrev = () => {
-      if (currentPage > 1) {
-        const newPage = currentPage - 1;
-        dispatch(setCurrentPage(newPage)); // Dispatch the action
-        dispatch(fetElgibleOldBasicMsClients(newPage, 5, searchQuery)); // Fetch leads for new page
-      }
-    };
-  
+  // Fetch Old Basic MS Leads
+  useEffect(() => {
+    dispatch(
+      fetElgibleOldBasicMsClients(currentPage || 1, 5, searchQuery, selectedBatch)
+    );
+  }, [dispatch, currentPage, searchQuery, selectedBatch]);
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      const newPage = currentPage + 1;
+      dispatch(setCurrentPage(newPage));
+      dispatch(fetElgibleOldBasicMsClients(newPage, 5, searchQuery, selectedBatch));
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentPage > 1) {
+      const newPage = currentPage - 1;
+      dispatch(setCurrentPage(newPage));
+      dispatch(fetElgibleOldBasicMsClients(newPage, 5, searchQuery, selectedBatch));
+    }
+  };
 
   const copyToClipboard = (number) => {
     navigator.clipboard.writeText(number);
-    toast.success("Phone number copied!");
+    toast.success("Copied!");
   };
 
   const openWhatsApp = (number) => {
@@ -69,52 +93,82 @@ const RmEligibleOldBasicLeads = () => {
 
   const handleSendMsDetails = async () => {
     if (!selectedLead) return;
-  
+
     try {
-    const res=  await oldBasicIdPassSent(token,selectedLead.id, {action: 'approve'});
-      toast.success("MS Teams details sent successfully!");
-      dispatch(fetElgibleOldBasicMsClients(currentPage, 5, searchQuery));
+      await oldBasicIdPassSent(token, selectedLead.id, { action: "approve" });
+      toast.success("MS Teams details sent!");
+      dispatch(
+        fetElgibleOldBasicMsClients(currentPage, 5, searchQuery, selectedBatch)
+      );
       closeFormModal();
-    } catch (error) {
-      toast.error("Failed to send MS Teams details.");
-      console.error(error)
+    } catch {
+      toast.error("Failed to send details.");
     }
   };
-  return (
-    <div className="max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8">
-    <p className="text-center text-xl font-mono ">Pending <span className="text-btnColor">{totalOldBasicMsLeads}</span></p>
-      <div className="mb-4">
-        <SearchInput
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onClear={() => setSearchQuery("")}
-          placeholder="Search by name or mobile number..."
-          className="w-full md:w-1/2 mx-auto"
-        />
-      </div>
 
-      {loading ? (
-        <p className="text-blue-600 text-center mt-6 text-lg">Loading...</p>
-      ) : error ? (
-        <div className="text-center mt-16">
-          <p className="text-red-500 text-lg">{error}</p>
-          <button
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            onClick={() =>
-              dispatch(fetElgibleOldBasicMsClients(currentPage || 1, 5, searchQuery))
-            }
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedBatch("");
+    dispatch(fetElgibleOldBasicMsClients(1, 5, "", ""));
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      {/* Header */}
+      <h2 className="text-center text-xl font-mono mb-6">
+        Pending <span className="text-btnColor">{totalOldBasicMsLeads}</span>
+      </h2>
+
+      {/* Filters */}
+      <div className="bg-white border shadow-sm p-4 rounded-xl mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+          {/* Batch Filter */}
+          <select
+            value={selectedBatch}
+            onChange={(e) => setSelectedBatch(e.target.value)}
+            className="w-full rounded-lg border px-3 py-2"
           >
-            Retry
+            <option value="">All Batches</option>
+            {batchCodes.map((batch, index) => (
+              <option key={index} value={batch.batch_code}>
+                {batch.batch_code}
+              </option>
+            ))}
+          </select>
+
+          {/* Search */}
+          <SearchInput
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onClear={() => setSearchQuery("")}
+            placeholder="Search name or mobile…"
+          />
+
+          {/* Reset */}
+          <button
+            onClick={clearFilters}
+            className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2"
+          >
+            <FaSyncAlt /> Reset
           </button>
         </div>
+      </div>
+
+      {/* Leads */}
+      {loading ? (
+        <p className="text-center text-blue-600">Loading…</p>
+      ) : error ? (
+        <p className="text-center text-red-600">{error}</p>
       ) : oldBasicMsLeads.length === 0 ? (
-        <p className="text-gray-600 text-center text-lg">No leads found.</p>
+        <p className="text-center text-gray-600">No leads found</p>
       ) : (
         <LeadGrid
           leads={oldBasicMsLeads}
-          copyToClipboard={copyToClipboard}
           openWhatsApp={openWhatsApp}
           makeCall={makeCall}
+          copyToClipboard={copyToClipboard}
           openModal={openModal}
         />
       )}
@@ -125,146 +179,137 @@ const RmEligibleOldBasicLeads = () => {
         handleNext={handleNext}
         handlePrev={handlePrev}
       />
-   <FormModal isFormModalOpen={isFormModalOpen} closeModal={closeFormModal}>
-  <div className="p-4">
-    <h3 className="text-xl font-semibold text-gray-800 mb-4">
-      Confirm MS Teams ID Pass
-    </h3>
-    <p className="text-gray-700 ">
-      Are you sure you want to send MS Teams details to this user?
-    </p>
 
-    <div className="bg-gray-100   mb-4">
-      <p className="text-gray-800 flex items-center gap-2 text-sm">
-        <span className="text-sm">Name:</span> {selectedLead?.account_opening_name}
-        <FaCopy
-          className="text-gray-500 cursor-pointer"
-          onClick={() => copyToClipboard(selectedLead?.account_opening_name)}
-        />
-      </p>
-      <p className="text-gray-800 flex items-center gap-2 text-sm">
-        <span className="text-sm">Mobile:</span> {selectedLead?.mobile_number}
-        <FaCopy
-          className="text-gray-500 cursor-pointer"
-          onClick={() => copyToClipboard(selectedLead?.mobile_number)}
-        />
-      </p>
-    </div>
+      {/* Modal */}
+      <FormModal isFormModalOpen={isFormModalOpen} closeModal={closeFormModal}>
+        <div className="p-4">
+          <h3 className="text-lg font-semibold mb-4">
+            Send MS Teams ID Pass
+          </h3>
 
-    <div className="flex items-center justify-center gap-4">
-  <button
-    onClick={handleSendMsDetails}
-    className="px-3 py-2 bg-btnColor text-white rounded-md text-sm "
-  >
-    Yes
-  </button>
-  <button
-    onClick={closeFormModal}
-    className="px-3 py-2 bg-btnColor text-white rounded-md text-sm"
-  >
-    Cancel
-  </button>
-</div>
-  </div>
-</FormModal>
+          <div className="bg-gray-100 p-3 rounded-lg mb-4">
+            <p>
+              <strong>Name:</strong> {selectedLead?.account_opening_name}
+            </p>
+            <p>
+              <strong>Mobile:</strong> {selectedLead?.mobile_number}
+            </p>
+          </div>
 
-     
+          <div className="flex justify-end gap-4">
+            <button
+              onClick={handleSendMsDetails}
+              className="px-4 py-2 bg-btnColor text-white rounded-lg"
+            >
+              Send
+            </button>
+            <button
+              onClick={closeFormModal}
+              className="px-4 py-2 bg-gray-300 rounded-lg"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </FormModal>
     </div>
   );
 };
 
-const LeadGrid = ({
-  leads,
-  copyToClipboard,
-  openWhatsApp,
-  makeCall,
-  openModal,
-}) => (
+/* Lead Grid */
+const LeadGrid = ({ leads, openWhatsApp, makeCall, copyToClipboard, openModal }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {leads.map((lead) => (
       <LeadCard
         key={lead.id}
         lead={lead}
-        copyToClipboard={copyToClipboard}
         openWhatsApp={openWhatsApp}
         makeCall={makeCall}
-        openModal={openModal} 
+        copyToClipboard={copyToClipboard}
+        openModal={openModal}
       />
     ))}
   </div>
 );
 
+/* Lead Card */
 const LeadCard = ({
   lead,
-  copyToClipboard,
   openWhatsApp,
   makeCall,
+  copyToClipboard,
   openModal,
 }) => (
-  
-  <div className="bg-white inset-0 shadow-md rounded-xl p-3 flex flex-col justify-between h-full">
-    <div>
-      <h3 className="text-lg font-semibold text-gray-800">{lead.account_opening_name}</h3>
-      <div className="mt-2 space-y-2">
-        <div className="flex items-center space-x-2">
-          <FaWhatsapp onClick={()=>openWhatsApp(lead.whatsapp_number)} className="text-caribbeangreen-600" />
-          <span onClick={()=>openWhatsApp(lead.whatsapp_number)}>{lead.whatsapp_number} </span>
-          <FaCopy
-            onClick={() => copyToClipboard(lead.whatsapp_number)}
-            className="text-gray-500 cursor-pointer"
-          />
-        </div>
-        <div className="flex items-center space-x-2">
-          <FaPhoneAlt onClick={() =>  makeCall(lead.mobile_number)} className="text-blue-600" />
-          <span onClick={() =>  makeCall(lead.mobile_number)}>{lead.mobile_number}</span>
-          <FaCopy
-            onClick={() => copyToClipboard(lead.mobile_number)}
-            className="text-gray-500 cursor-pointer"
-          />
-        </div>
+  <div className="bg-white border rounded-xl p-4 shadow hover:shadow-lg transition">
+    <h3 className="text-lg font-semibold">{lead.account_opening_name}</h3>
+
+    <div className="mt-3 space-y-2">
+      <div className="flex items-center gap-2">
+        <FaWhatsapp
+          className="text-green-600 cursor-pointer"
+          onClick={() => openWhatsApp(lead.whatsapp_number)}
+        />
+        <span>{lead.whatsapp_number}</span>
+        <FaCopy
+          className="cursor-pointer"
+          onClick={() => copyToClipboard(lead.whatsapp_number)}
+        />
+      </div>
+
+      <div className="flex items-center gap-2">
+        <FaPhoneAlt
+          className="text-blue-600 cursor-pointer"
+          onClick={() => makeCall(lead.mobile_number)}
+        />
+        <span>{lead.mobile_number}</span>
+        <FaCopy
+          className="cursor-pointer"
+          onClick={() => copyToClipboard(lead.mobile_number)}
+        />
       </div>
     </div>
 
-    <div className="mt-4 text-sm text-richblack-500">
-      
-      <p className="text-pink-300">Batch Code : {lead.batch_code}</p>
-       <p className="text-pink-300">Batch Type : {lead.batch_type}</p>
-    </div>
+    <p className="mt-3 text-sm text-gray-600">
+      Batch: <strong>{lead.batch_code}</strong> ({lead.batch_type})
+    </p>
+     <p className="mt-3 text-sm text-gray-600">
+      JRM: <strong>{lead.jrm_name}</strong>
+    </p>
+    <p className="mt-3 text-sm text-gray-600">
+      RM: <strong>{lead.rm_name}</strong>
+    </p>
 
-    <div className="mt-4 ">
-      <button
-        onClick={() => openModal(lead)}
-        className="w-full bg-btnColor text-white py-2 rounded-md hover:bg-green-700"
-      >
-        Send
-      </button>
-    </div>
+    <button
+      onClick={() => openModal(lead)}
+      className="w-full mt-4 bg-btnColor text-white py-2 rounded-lg hover:bg-green-700"
+    >
+      Send
+    </button>
   </div>
 );
 
+/* Pagination */
 const Pagination = ({ currentPage, totalPages, handleNext, handlePrev }) => (
-  <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mt-10">
+  <div className="flex justify-center items-center gap-4 mt-8">
     <button
       onClick={handlePrev}
       disabled={currentPage === 1}
-      className={`px-5 py-2 rounded-lg text-white text-base w-36 ${
-        currentPage === 1
-          ? "bg-gray-400 cursor-not-allowed"
-          : "bg-blue-600 hover:bg-blue-700"
+      className={`px-4 py-2 rounded-lg text-white ${
+        currentPage === 1 ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
       }`}
     >
       Previous
     </button>
-    <span className="text-gray-800 font-semibold text-lg text-center">
-      Page {currentPage} of {totalPages}
+
+    <span className="text-lg font-semibold">
+      {currentPage} / {totalPages}
     </span>
+
     <button
       onClick={handleNext}
       disabled={currentPage === totalPages}
-      className={`px-5 py-2 rounded-lg text-white text-base w-36 ${
-        currentPage === totalPages
-          ? "bg-gray-400 cursor-not-allowed"
-          : "bg-blue-600 hover:bg-blue-700"
+      className={`px-4 py-2 rounded-lg text-white ${
+        currentPage === totalPages ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
       }`}
     >
       Next

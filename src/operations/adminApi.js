@@ -945,10 +945,15 @@ export const approveLeadAction = (token,leadId, action, batch_code, rmId) => asy
   }
 };
 
-export const getAllMsLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+export const getAllMsLeads = (
+  page = 1,
+  limit = 5,
+  search = "",
+  batch_code = ""
+) => async (dispatch, getState) => {
   try {
     dispatch(setMsLoading());
-  
+
     const { token } = getState().auth;
 
     // Construct query parameters
@@ -956,28 +961,29 @@ export const getAllMsLeads = (page = 1, limit = 5, search = "") => async (dispat
       page,
       limit,
       ...(search.trim() && { search }),
+      ...(batch_code.trim() && { batch_code }),
     }).toString();
 
-    // Construct the full URL with query parameters
     const url = `${MS_TEAMS_ID_PASS_API}?${queryParams}`;
 
-    // Send the GET request with the constructed URL and Authorization header
     const response = await apiConnector("GET", url, null, {
       Authorization: `Bearer ${token}`,
     });
 
-    // Handle the response
     if (response?.data?.success) {
       dispatch(setMsSuccess(response?.data));
     } else {
-      const errorMessage = response?.data?.message || "Failed to fetch Ms-Teams leads";
-      dispatch(setMsError(errorMessage));
+      dispatch(
+        setMsError(
+          response?.data?.message || "Failed to fetch Ms-Teams leads"
+        )
+      );
     }
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.error("M-i-pass API Error:", error);
+      console.error("Ms-Teams Fetch Error:", error);
     }
-    dispatch(setMsError(error?.message || "Error Ms Under Us Requests"));
+    dispatch(setMsError(error?.message || "Error fetching Ms-Teams leads"));
   }
 };
 
@@ -1163,7 +1169,12 @@ export const deleteMainRm = async (token, rmId) => {
 };
 
 
-export const getAllAdvaceMsLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+export const getAllAdvaceMsLeads = (
+  page = 1,
+  limit = 5,
+  search = "",
+  batch_code = ""
+) => async (dispatch, getState) => {
   try {
     dispatch(setAdvanceMsLoading());
   
@@ -1174,30 +1185,33 @@ export const getAllAdvaceMsLeads = (page = 1, limit = 5, search = "") => async (
       page,
       limit,
       ...(search.trim() && { search }),
+      ...(batch_code.trim() && { batch_code }),
     }).toString();
 
-    // Construct the full URL with query parameters
+    // Full API URL
     const url = `${GET_ADVANCE_MSTEAMS_LEADS_LIST_API}?${queryParams}`;
 
-    // Send the GET request with the constructed URL and Authorization header
+    // Request
     const response = await apiConnector("GET", url, null, {
       Authorization: `Bearer ${token}`,
     });
 
-    // Handle the response
+    // Response Handling
     if (response?.data?.success) {
       dispatch(setAdvanceMsSuccess(response?.data));
     } else {
-      const errorMessage = response?.data?.message || "Failed to fetch Ms-Teams leads";
-      dispatch(setAdvanceMsError(errorMessage));
+      dispatch(
+        setAdvanceMsError(response?.data?.message || "Failed to fetch Advance MS Teams leads")
+      );
     }
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.error("M-i-pass API Error:", error);
+      console.error("Advance MS Teams API Error:", error);
     }
-    dispatch(setAdvanceMsError(error?.message || "Error Ms Under Us Requests"));
+    dispatch(setAdvanceMsError(error?.message || "Error fetching Advance MS Teams leads"));
   }
 };
+
 
 export const advanceMsDetailsAction = async (token, leadId, action) => {
   try {
@@ -1320,10 +1334,15 @@ export const advanceMsDetailsAction = async (token, leadId, action) => {
 
 
 
-  export const fetElgibleOldBasicMsClients = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+  export const fetElgibleOldBasicMsClients = (
+  page = 1,
+  limit = 5,
+  search = "",
+  batch_code = ""
+) => async (dispatch, getState) => {
   try {
     dispatch(setMsPassBasicLoading());
-  
+
     const { token } = getState().auth;
 
     // Construct query parameters
@@ -1331,32 +1350,39 @@ export const advanceMsDetailsAction = async (token, leadId, action) => {
       page,
       limit,
       ...(search.trim() && { search }),
+      ...(batch_code.trim() && { batch_code }),
     }).toString();
 
-    // Construct the full URL with query parameters
+    // Full API URL
     const url = `${FETCH_ELIGIBLE_OLD_BASIC_CLIENTS_FOR_MS_TEAMS}?${queryParams}`;
 
-    // Send the GET request with the constructed URL and Authorization header
+    // API - GET request
     const response = await apiConnector("GET", url, null, {
       Authorization: `Bearer ${token}`,
     });
 
-    // Handle the response
+    // Handle response
     if (response?.data?.success) {
       dispatch(setMsPassBasicSuccess(response?.data));
     } else {
-      const errorMessage = response?.data?.message || "Failed to fetch Ms-Teams leads";
-      dispatch(setMsPassBasicError(errorMessage));
+      dispatch(
+        setMsPassBasicError(
+          response?.data?.message || "Failed to fetch MS Teams leads"
+        )
+      );
     }
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.error("M-i-pass API Error:", error);
+      console.error("Old Basic MS API Error:", error);
     }
-    dispatch(setMsPassBasicError(error?.message || "Error Ms Under Us Requests"));
+    dispatch(
+      setMsPassBasicError(error?.message || "Error fetching MS Teams leads")
+    );
   }
 };
 
-  export const fetchElgibleOldAdvanceMsClients = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
+
+  export const fetchElgibleOldAdvanceMsClients = (page = 1, limit = 5, search = "",batch_code = "") => async (dispatch, getState) => {
   try {
     dispatch(setMsPassAdvanceLoading());
   
@@ -1367,6 +1393,7 @@ export const advanceMsDetailsAction = async (token, leadId, action) => {
       page,
       limit,
       ...(search.trim() && { search }),
+      ...(batch_code.trim() && { batch_code }),
     }).toString();
 
     // Construct the full URL with query parameters

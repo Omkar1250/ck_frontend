@@ -113,7 +113,6 @@ export const adminEndpoints = {
     HANDLE_OLD_LEAD_APPROVAL: BASE_URL + "/approve-old-lead",
     RM_PREVIEW:BASE_URL+"/next-rm-preview",
     RM_DROPDOWN:BASE_URL+"/rm/dropdown",
-
     //batchtes
     GET_ALL_BATCH_CODES: BASE_URL + "/batches",
     CREATE_BATCH: BASE_URL + "/batches",

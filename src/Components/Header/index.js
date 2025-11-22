@@ -87,7 +87,7 @@ const Header = ({
           {token && (
             <>
               {/* Broker Name */}
-              <span className="hidden sm:block text-sm font-semibold text-pink-200">
+              <span className=" text-sm font-semibold text-pink-200">
                 Angel One
               </span>
 
