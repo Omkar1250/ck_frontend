@@ -1843,53 +1843,55 @@ export const rmTransactionsSummary = (page = 1, limit = 5, search = "") => async
 
 //jrm CODED LIST
 //ALL new clients
-export const jrmCodedAllLeads = (page = 1, limit = 5, search = "") => async (dispatch, getState) => {
-  try {
-    // Dispatch loading state
-    dispatch(setJrmBasicMsTeamsClientsLoading());
+export const jrmCodedAllLeads = (page = 1, limit = 5, search = "") => 
+  async (dispatch, getState) => {
+    try {
+      // Set loading state
+      dispatch(setJrmBasicMsTeamsClientsLoading());
 
-    // Retrieve token from Redux state
-    const { token } = getState().auth;
+      // Token
+      const { token } = getState().auth;
 
-    // Construct query string
-    const queryParams = { page, limit };
-    if (search.trim()) {
-      queryParams.search = search;
-    }
-    const query = new URLSearchParams(queryParams).toString();
+      // Query Params
+      const queryParams = { page, limit };
+      if (search.trim()) queryParams.search = search;
 
-    // Make the GET API call
-    const response = await apiConnector(
-      "GET",
-      `${JRM_CODED_ALL_LEDAS}?${query}`,
-      null,
-      {
-        Authorization: `Bearer ${token}`, // Pass token in headers
+      const query = new URLSearchParams(queryParams).toString();
+
+      // API Call
+      const response = await apiConnector(
+        "GET",
+        `${JRM_CODED_ALL_LEDAS}?${query}`, 
+        null,
+        {
+          Authorization: `Bearer ${token}`,
+        }
+      );
+
+      // SUCCESS
+      if (response?.data?.success) {
+        dispatch(setJrmBasicMsTeamsClientsSuccess(response.data));
+        console.log("JRM ALL CLIENTS API:", response.data);
+      } 
+      // FAILURE
+      else {
+        const msg = response?.data?.message || "Failed to fetch Coded Clients";
+        dispatch(setJrmBasicMsTeamsClientsError(msg));
       }
-    );
 
-   
+    } catch (error) {
+      console.error("Coded Approved API Error Details:", {
+        message: error.message,
+        response: error.response,
+      });
 
-    // Check response and dispatch success or error
-    if (response?.data?.success) {
-      dispatch(setJrmBasicMsTeamsClientsSuccess(response?.data));
-      console.log(response?.data)
-    } else {
-      const errorMessage = response?.data?.message || "Failed to fetch Coded Clients";
-      console.warn("ALL CLIENTS API Error:", errorMessage);
-      dispatch(setOldBasicLeadsError(errorMessage));
+      dispatch(
+        setJrmBasicMsTeamsClientsError(
+          error?.message || "Something went wrong while fetching clients"
+        )
+      );
     }
-  } catch (error) {
-    // Debug: Full error details
-    console.error("Coded Approved API Error Details:", {
-      message: error.message,
-      stack: error.stack,
-      response: error.response,
-    });
-
-    dispatch(setJrmBasicMsTeamsClientsError(error?.message || "Error All Clients"));
-  }
-};
+  };
 
 
 export const mFClientsForCall = (

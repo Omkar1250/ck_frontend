@@ -9,34 +9,123 @@ import FormModal from "../../Components/FormModal";
 import CreateRmForm from "./Components/CreateRmForm";
 
 /* ----------------------- Card Component ----------------------- */
-const RmCard = ({ rm, copyToClipboard, openWhatsApp, makeCall, openEditModal }) => (
-  <div className="p-5 border shadow-md rounded-xl bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-    {/* Title + User ID */}
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
-      <h3 className="text-lg font-semibold text-gray-800 break-words">{rm.name}</h3>
-      <p className="text-sm text-gray-500 font-medium">USER ID: {rm.userid}</p>
+const RmCard = ({
+  rm,
+  copyToClipboard,
+  openWhatsApp,
+  makeCall,
+  openEditModal,
+}) => (
+  <div className="
+      p-5 
+      border border-gray-200 
+      rounded-2xl 
+      bg-white 
+      shadow-sm 
+      hover:shadow-lg 
+      hover:-translate-y-1 
+      transition-all 
+      duration-300 
+      w-full 
+      flex 
+      flex-col 
+      gap-4
+    "
+  >
+
+    {/* Top Section */}
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+      {/* Name */}
+      <div className="flex-1">
+        <h3 className="text-lg font-semibold text-gray-900 leading-tight break-words">
+          {rm.name}
+        </h3>
+        <p className="text-xs text-gray-500 mt-1">
+          USER ID: <span className="font-medium text-gray-700">{rm.userid}</span>
+        </p>
+      </div>
+
+      {/* Status Badge */}
+      <span
+        className={`
+          text-xs 
+          font-semibold 
+           text-center
+          px-3 py-1 
+          rounded-full 
+          shadow 
+          whitespace-nowrap
+          ${Number(rm.is_active) === 1
+            ? "bg-caribbeangreen-100 text-white"
+            : "bg-delBtn text-white"
+          }
+        `}
+      >
+        {Number(rm.is_active) === 1 ? "Active" : "Not Active"}
+      </span>
     </div>
 
-    {/* Phone */}
-    <div className="flex flex-wrap items-center gap-3 text-gray-700 mb-2">
-      <span className="break-all">{rm.personal_number}</span>
-      <div className="flex gap-3 text-lg">
-        <FaWhatsapp onClick={() => openWhatsApp(rm.personal_number)} className="text-green-600 hover:text-green-700 cursor-pointer" />
-        <FaCopy onClick={() => copyToClipboard(rm.personal_number)} className="text-blue-500 hover:text-blue-700 cursor-pointer" />
-        <FaPhoneAlt onClick={() => makeCall(rm.personal_number)} className="text-blue-600 hover:text-blue-700 cursor-pointer" />
+    {/* Personal Number Section */}
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="text-gray-800 font-medium break-all">
+        {rm.personal_number}
+      </div>
+
+      <div className="flex items-center gap-4 text-xl">
+
+        <FaWhatsapp
+          onClick={() => openWhatsApp(rm.personal_number)}
+          className="text-green-600 hover:text-green-700 cursor-pointer transition"
+        />
+
+        <FaCopy
+          onClick={() => copyToClipboard(rm.personal_number)}
+          className="text-blue-500 hover:text-blue-700 cursor-pointer transition"
+        />
+
+        <FaPhoneAlt
+          onClick={() => makeCall(rm.personal_number)}
+          className="text-blue-600 hover:text-blue-700 cursor-pointer transition"
+        />
+
       </div>
     </div>
 
-    {/* CK Number + Edit */}
-    <div className="flex flex-wrap justify-between items-center gap-3">
-      <div className="flex items-center gap-3 text-gray-700">
+    {/* CK Number + Edit Button */}
+    <div className="flex flex-wrap items-center justify-between gap-3">
+
+      {/* CK Number */}
+      <div className="flex items-center gap-4 text-gray-800 font-medium">
+
         <span className="break-all">{rm.ck_number}</span>
-        <FaWhatsapp onClick={() => openWhatsApp(rm.ck_number)} className="text-green-600 text-lg hover:text-green-700 cursor-pointer" />
-        <FaCopy onClick={() => copyToClipboard(rm.ck_number)} className="text-blue-500 text-lg hover:text-blue-700 cursor-pointer" />
+
+        <FaWhatsapp
+          onClick={() => openWhatsApp(rm.ck_number)}
+          className="text-green-600 text-xl hover:text-green-700 cursor-pointer transition"
+        />
+
+        <FaCopy
+          onClick={() => copyToClipboard(rm.ck_number)}
+          className="text-blue-500 text-xl hover:text-blue-700 cursor-pointer transition"
+        />
+
       </div>
+
+      {/* Edit Button */}
       <button
         onClick={() => openEditModal(rm)}
-        className="px-4 py-1 bg-btnColor text-white rounded-md shadow hover:bg-opacity-90 transition text-sm"
+        className="
+          px-4 py-1.5 
+          bg-btnColor 
+          text-white 
+          rounded-lg 
+          shadow-md 
+          hover:bg-opacity-90 
+          transition 
+          text-sm
+          font-medium
+        "
       >
         Edit
       </button>
@@ -68,7 +157,8 @@ const RmProfile = () => {
 
   const [rmList, setRmList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("az"); // 'az' | 'za' | 'new' | 'old'
+  const [sortBy, setSortBy] = useState("az");
+  const [statusFilter, setStatusFilter] = useState("all"); // ⭐ NEW FILTER
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -112,14 +202,15 @@ const RmProfile = () => {
     setisEditModalOpen(false);
     setIsAddModalOpen(false);
     setSelectedrm(null);
-    // Refresh list after modal closes (useful after create/update)
     fetchRms();
   }, [fetchRms]);
 
+  /* ---------------- Filter + Search + Sort Combined -------------- */
   const filteredSortedRms = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
     let list = rmList;
 
+    // 🔍 Search Filter
+    const q = searchQuery.trim().toLowerCase();
     if (q) {
       list = list.filter(
         (rm) =>
@@ -129,35 +220,40 @@ const RmProfile = () => {
       );
     }
 
-    const safeName = (s) => (s || "").toLowerCase();
+    // ⭐ Status Filter
+    if (statusFilter === "active") {
+      list = list.filter((rm) => Number(rm.is_active) === 1);
+    } else if (statusFilter === "inactive") {
+      list = list.filter((rm) => Number(rm.is_active) === 0);
+    }
 
-    // Sorting
+    // Sort
+    const safe = (v) => (v || "").toLowerCase();
     switch (sortBy) {
       case "az":
-        list = [...list].sort((a, b) => safeName(a.name).localeCompare(safeName(b.name)));
+        list = [...list].sort((a, b) => safe(a.name).localeCompare(safe(b.name)));
         break;
       case "za":
-        list = [...list].sort((a, b) => safeName(b.name).localeCompare(safeName(a.name)));
+        list = [...list].sort((a, b) => safe(b.name).localeCompare(safe(a.name)));
         break;
       case "new":
-        // assuming higher id is newer
-        list = [...list].sort((a, b) => (b.id || 0) - (a.id || 0));
+        list = [...list].sort((a, b) => b.id - a.id);
         break;
       case "old":
-        list = [...list].sort((a, b) => (a.id || 0) - (b.id || 0));
+        list = [...list].sort((a, b) => a.id - b.id);
         break;
       default:
         break;
     }
 
     return list;
-  }, [rmList, searchQuery, sortBy]);
+  }, [rmList, searchQuery, sortBy, statusFilter]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-      {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-semibold">All RM Profiles</h2>
           <span className="px-2 py-0.5 text-sm rounded-full border">
@@ -165,7 +261,6 @@ const RmProfile = () => {
           </span>
         </div>
 
-        {/* Add RM (Outline button) */}
         <button
           onClick={() => { setSelectedrm(null); setIsAddModalOpen(true); }}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-md border-2 border-btnColor text-btnColor hover:bg-gray-50 transition"
@@ -175,8 +270,10 @@ const RmProfile = () => {
         </button>
       </div>
 
-      {/* Controls: Search + Sort */}
+      {/* Search + Sort + Status Filter */}
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between mb-3">
+
+        {/* Search */}
         <div className="w-full sm:max-w-md">
           <SearchInput
             value={searchQuery}
@@ -186,27 +283,47 @@ const RmProfile = () => {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-gray-600">Sort</label>
-          <div className="relative">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="appearance-none border rounded-md py-2 pl-3 pr-8 bg-white focus:outline-none focus:ring-2 focus:ring-gray-300"
-            >
-              <option value="az">A → Z</option>
-              <option value="za">Z → A</option>
-              <option value="new">Newest</option>
-              <option value="old">Oldest</option>
-            </select>
-            <FiChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500" />
+        {/* Sort + Status */}
+        <div className="flex gap-3 flex-wrap justify-between sm:justify-end w-full sm:w-auto">
+
+          {/* Sort */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">Sort</label>
+            <div className="relative">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="appearance-none border rounded-md py-2 pl-3 pr-8 bg-white focus:ring-2 focus:ring-gray-300"
+              >
+                <option value="az">A → Z</option>
+                <option value="za">Z → A</option>
+                <option value="new">Newest</option>
+                <option value="old">Oldest</option>
+              </select>
+              <FiChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500" />
+            </div>
           </div>
+
+          {/* ⭐ Status Filter */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border rounded-md py-2 px-3 bg-white focus:ring-2 focus:ring-gray-300"
+            >
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="inactive">Not Active</option>
+            </select>
+          </div>
+
         </div>
       </div>
 
       {/* Content */}
       {loading ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-4">
+        <div className="grid gap-6 grid-cols-2  mt-4">
           {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : error ? (
@@ -214,7 +331,7 @@ const RmProfile = () => {
       ) : filteredSortedRms.length === 0 ? (
         <p className="text-center py-6 text-gray-500">No RM found.</p>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-4">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  mt-4">
           {filteredSortedRms.map((rm) => (
             <RmCard
               key={rm.id}
