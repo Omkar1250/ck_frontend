@@ -313,6 +313,9 @@ const LeadCard = ({ lead, copyToClipboard, openWhatsApp, makeCall, openModal }) 
   <span className="text-green-600 font-semibold">
     JRM: {lead.jrm_name || "-"}
   </span>
+  <span className="text-caribbeangreen-300 font-semibold">
+    Batch Code: {lead.batch_code || "-"}
+  </span>
 </div>
 
       </div>
