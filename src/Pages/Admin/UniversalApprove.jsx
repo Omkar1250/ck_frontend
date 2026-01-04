@@ -306,7 +306,15 @@ const LeadCard = ({ lead, copyToClipboard, openWhatsApp, makeCall, openModal }) 
           <FaCopy className="cursor-pointer text-gray-600" onClick={() => copyToClipboard(lead.mobile_number)} />
           Copy Number
         </p>
-        <span className="text-pin-500 font-semibold">JRM: {lead.jrm_name}</span>
+        <div className="flex flex-col text-sm">
+  <span className="text-blue-600 font-semibold">
+    RM: {lead.rm_name || "-"}
+  </span>
+  <span className="text-green-600 font-semibold">
+    JRM: {lead.jrm_name || "-"}
+  </span>
+</div>
+
       </div>
 
       <div className="flex flex-wrap gap-2 mt-4">
