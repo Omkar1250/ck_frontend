@@ -32,47 +32,47 @@ export default function CreateBatchForm({ closeModal }) {
   return (
     <form
       onSubmit={handleCreate}
-      className="space-y-5 px-4 pb-6 pt-2 w-[95%] max-w-md mx-auto"
+      className="space-y-5 px-2 pb-4 pt-2 w-full max-w-md mx-auto"
     >
       {/* Title */}
-      <h2 className="text-xl font-semibold text-center mb-1">
+      <h2 className="text-xl font-semibold text-center text-richblack-5">
         Create New Batch
       </h2>
-      <div className="w-16 h-[3px] bg-btnColor mx-auto rounded-full mb-2"></div>
+      <div className="w-16 h-[3px] mx-auto rounded-full" style={{ background: 'linear-gradient(90deg, #6473AA, #8B5CF6)' }} />
 
       {/* Batch Code */}
       <div className="relative">
-        <FiHash className="absolute left-3 top-3 text-gray-400 text-lg" />
+        <FiHash className="absolute left-3 top-3 text-richblack-400 text-lg" />
         <input
           type="text"
           placeholder="Batch Code"
           value={batch_code}
           onChange={(e) => setBatchCode(e.target.value)}
-          className="border w-full pl-10 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-btnColor transition"
+          className="glass-input w-full pl-10 p-2.5 text-sm"
         />
       </div>
 
       {/* Description */}
       <div className="relative">
-        <FiFileText className="absolute left-3 top-3 text-gray-400 text-lg" />
+        <FiFileText className="absolute left-3 top-3 text-richblack-400 text-lg" />
         <textarea
           placeholder="Description (optional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="border w-full pl-10 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-btnColor transition"
+          className="glass-input w-full pl-10 p-2.5 text-sm min-h-[80px] resize-y"
         />
       </div>
 
       {/* Status */}
       <div className="relative">
-        <FiToggleLeft className="absolute left-3 top-3 text-gray-400 text-lg" />
+        <FiToggleLeft className="absolute left-3 top-3 text-richblack-400 text-lg" />
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="border w-full pl-10 p-2 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-btnColor transition"
+          className="glass-input w-full pl-10 p-2.5 text-sm appearance-none cursor-pointer"
         >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="active" className="bg-richblack-800 text-richblack-5">Active</option>
+          <option value="inactive" className="bg-richblack-800 text-richblack-5">Inactive</option>
         </select>
       </div>
 
@@ -80,7 +80,7 @@ export default function CreateBatchForm({ closeModal }) {
       <button
         type="submit"
         disabled={loading}
-        className="bg-btnColor text-white p-2 rounded-md w-full hover:bg-opacity-90 transition"
+        className="btn-gradient w-full py-3 rounded-xl text-sm font-medium"
       >
         {loading ? "Creating..." : "Create Batch"}
       </button>

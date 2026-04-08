@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./Pages/Login";
 import PrivateRoute from "./Components/PrivateRoute";
 import DefaultLayout from "./Layout/DefaultLayout";
+import Loader from "./Components/Loader";
 import CreateRole from "./Pages/Admin/CreateRole";
 import { useSelector } from "react-redux";
 import { ACCOUNT_TYPE } from "./utils/constants";
@@ -57,12 +58,13 @@ const Payment = lazy(() => import("./Pages/Admin/Payment"));
 const ConversionPoint = lazy(() => import("./Pages/Admin/ConversionPoint"));
 const UnderUsRequest = lazy(() => import("./Pages/Admin/UnderUsRequest"));
 const DeleteRequest = lazy(() => import("./Pages/Admin/DeleteRequest"));
+const AdminProfile = lazy(() => import("./Pages/Admin/AdminProfile"));
 const NotFound = lazy(() => import("./Pages/NotFound")); // 404 Page
 
 function App() {
   const {user} = useSelector((state)=>state.profile)
    return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0e17' }}><Loader /></div>}>
       {/* ✅ Token Refresher added outside of <Routes> */}
       <TokenExpiryWatcher />
 
@@ -89,6 +91,7 @@ function App() {
         {/* Admin Routes */}
         {user?.role === ACCOUNT_TYPE.ADMIN && (
           <Route element={<PrivateRoute><DefaultLayout /></PrivateRoute>}>
+            <Route path="/dashboard/my-profile" element={<AdminProfile />} />
             <Route path="/dashboard/view-team-profile" element={<ProfileTab />} />
             <Route path="/dashboard/admin" element={<CreateRole />} />
             <Route path="/dashboard/ms-team-id-pass" element={<MsTeamsId />} />

@@ -6,7 +6,6 @@ export default function SidebarLink({ link, setSidebarOpen }) {
   const location = useLocation();
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
-  // Detect screen size -> only close sidebar on mobile
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
     window.addEventListener("resize", handleResize);
@@ -17,31 +16,48 @@ export default function SidebarLink({ link, setSidebarOpen }) {
   const isActive = matchRoute(link.path);
 
   const handleClick = () => {
-    if (!isDesktop) setSidebarOpen(false); // Close only on small screens
+    if (!isDesktop) setSidebarOpen(false);
   };
 
   return (
     <NavLink
       to={link.path}
       onClick={handleClick}
-      className={`relative flex items-center gap-3 px-6 py-3 text-sm font-medium rounded-md transition-all duration-300
-      ${isActive ? "text-white bg-btnColor shadow-md" : "text-gray-300 hover:bg-white/10 hover:text-white"}`}
+      className={`relative flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl 
+      transition-all duration-200 group
+      ${isActive 
+        ? "text-accentPrimary shadow-md" 
+        : "text-textSecondary hover:text-textColor hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
+      }`}
+      style={isActive ? {
+        background: 'var(--bg-card)',
+        boxShadow: 'var(--shadow-card)',
+        border: '1px solid var(--border-color)',
+      } : {}}
     >
-      {/* Active route indicator bar */}
+      {/* Active indicator bar */}
       <span
-        className={`absolute left-0 top-0 h-full w-[3px] bg-white rounded-r-full transition-all duration-300
-        ${isActive ? "opacity-100" : "opacity-0"}`}
-      ></span>
+        className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full transition-all duration-300
+        ${isActive ? "h-5 opacity-100" : "h-0 opacity-0"}`}
+        style={isActive ? { background: 'var(--accent-gradient)' } : {}}
+      />
 
-      {/* Icon (if provided) */}
+      {/* Icon */}
       {link.icon && (
-        <span className={`text-lg ${isActive ? "text-white" : "text-gray-300"}`}>
+        <span className={`text-lg transition-colors duration-200 ${
+          isActive ? "text-accentPrimary" : "text-textMuted group-hover:text-textSecondary"
+        }`}>
           {link.icon}
         </span>
       )}
 
       {/* Name */}
       <span className="truncate">{link.name}</span>
+
+      {/* Active glow dot */}
+      {isActive && (
+        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-caribbeangreen-100 animate-pulseGlow" />
+      )}
     </NavLink>
   );
 }

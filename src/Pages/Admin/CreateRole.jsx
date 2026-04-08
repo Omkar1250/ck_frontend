@@ -5,7 +5,7 @@ import CreateRoleForm from "./Components/CreateRoleForm";
 import CreateRmForm from "./Components/CreateRmForm";
 import CreateBatchForm from "./Components/CreateBatchForm";
 import ViewBatchesModal from "./Components/ViewBatchesModal";
-import { FiUsers, FiUserPlus, FiLayers, FiEye } from "react-icons/fi";
+import { FiUsers, FiUserPlus, FiLayers, FiEye, FiUser, FiPhone, FiHash, FiCreditCard } from "react-icons/fi";
 
 export default function CreateRole() {
   const [isFormModalOpen, setFormModalOpen] = useState(false);
@@ -14,54 +14,70 @@ export default function CreateRole() {
   const [isViewBatchModalOpen, setViewBatchModalOpen] = useState(false);
   const { user } = useSelector((state) => state.profile);
 
+  const actionButtons = [
+    { icon: <FiUsers />, label: "Create New JRM", onClick: () => setFormModalOpen(true) },
+    { icon: <FiUserPlus />, label: "Create New RM", onClick: () => setRmModalOpen(true) },
+    { icon: <FiLayers />, label: "Create Batch", onClick: () => setBatchModalOpen(true) },
+    { icon: <FiEye />, label: "Show All Batches", onClick: () => setViewBatchModalOpen(true) },
+  ];
+
+  const profileItems = [
+    { icon: <FiUser />, label: "Name", value: user.name },
+    { icon: <FiHash />, label: "User ID", value: user.user_id },
+    { icon: <FiPhone />, label: "Mobile", value: user.personal_number },
+    { icon: <FiCreditCard />, label: "CK No", value: user.ck_number },
+  ];
+
   return (
-    <div className="min-h-screen w-full px-4 py-10 flex flex-col items-center gap-10 bg-gray-50">
+    <div className="min-h-screen w-full px-4 py-10 flex flex-col items-center gap-8">
       
       {/* Page Title */}
-      <h1 className="text-2xl sm:text-3xl font-semibold text-richblack-800 mt-10 text-center">
-        Admin Controls & Role Management
-      </h1>
+      <div className="text-center mt-6 animate-fadeInUp">
+        <h1 className="text-2xl sm:text-3xl font-bold text-richblack-5">
+          Admin Controls
+        </h1>
+        <p className="text-sm text-richblack-300 mt-2">Manage roles, batches, and team settings</p>
+      </div>
 
       {/* ================== Action Button Group ================== */}
-      <div className="w-full max-w-4xl bg-white shadow-md rounded-xl p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="w-full max-w-4xl glass-card p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 animate-fadeInUp"
+        style={{ animationDelay: '100ms' }}>
         
-        <button
-          className="flex items-center justify-center gap-2 w-full p-3 text-white bg-btnColor rounded-md hover:bg-opacity-90 transition-all duration-200"
-          onClick={() => setFormModalOpen(true)}
-        >
-          <FiUsers className="text-lg" /> Create New JRM
-        </button>
-
-        <button
-          className="flex items-center justify-center gap-2 w-full p-3 text-white bg-btnColor rounded-md hover:bg-opacity-90 transition-all duration-200"
-          onClick={() => setRmModalOpen(true)}
-        >
-          <FiUserPlus className="text-lg" /> Create New RM
-        </button>
-
-        <button
-          className="flex items-center justify-center gap-2 w-full p-3 text-white bg-btnColor rounded-md hover:bg-opacity-90 transition-all duration-200"
-          onClick={() => setBatchModalOpen(true)}
-        >
-          <FiLayers className="text-lg" /> Create Batch
-        </button>
-
-        <button
-          className="flex items-center justify-center gap-2 w-full p-3 text-white bg-btnColor rounded-md hover:bg-opacity-90 transition-all duration-200"
-          onClick={() => setViewBatchModalOpen(true)}
-        >
-          <FiEye className="text-lg" /> Show All Batches
-        </button>
+        {actionButtons.map((btn, index) => (
+          <button
+            key={index}
+            className="group flex items-center justify-center gap-2.5 w-full p-3.5 rounded-xl text-sm font-medium
+              text-white transition-all duration-200 hover:translate-y-[-2px] hover:shadow-lg active:scale-[0.98]"
+            style={{ 
+              background: 'linear-gradient(135deg, #6473AA, #8B5CF6)',
+            }}
+            onClick={btn.onClick}
+          >
+            <span className="text-lg group-hover:scale-110 transition-transform duration-200">{btn.icon}</span>
+            {btn.label}
+          </button>
+        ))}
 
       </div>
 
       {/* ================== User Info Card ================== */}
-      <div className="w-full max-w-md bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-richblack-800 text-center mb-3">Your Profile Info</h2>
-        <p className="text-richblack-700"><strong>Name:</strong> {user.name}</p>
-        <p className="text-richblack-700 mt-2"><strong>User ID:</strong> {user.user_id}</p>
-        <p className="text-richblack-700 mt-2"><strong>Mobile:</strong> {user.personal_number}</p>
-        <p className="text-richblack-700 mt-2"><strong>CK No:</strong> {user.ck_number}</p>
+      <div className="w-full max-w-md glass-card p-6 animate-fadeInUp" style={{ animationDelay: '200ms' }}>
+        <h2 className="text-base font-semibold text-richblack-5 mb-4 pb-3 border-b border-white/[0.06]">
+          Your Profile Info
+        </h2>
+        <div className="space-y-3.5">
+          {profileItems.map((item, index) => (
+            <div key={index} className="flex items-center gap-3 group">
+              <span className="text-richblack-400 group-hover:text-btnColor transition-colors duration-200">
+                {item.icon}
+              </span>
+              <div>
+                <p className="text-[10px] text-richblack-400 uppercase tracking-wider font-medium">{item.label}</p>
+                <p className="text-sm text-richblack-5 font-medium">{item.value}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ================== Modals ================== */}

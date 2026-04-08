@@ -4,7 +4,7 @@ import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
 import { FiPlus, FiChevronDown } from "react-icons/fi";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
-import { getAllMainRms } from "../../operations/adminApi";
+import { getAllMainRms, toggleUserStatus } from "../../operations/adminApi";
 import FormModal from "../../Components/FormModal";
 import CreateRmForm from "./Components/CreateRmForm";
 
@@ -15,6 +15,7 @@ const RmCard = ({
   openWhatsApp,
   makeCall,
   openEditModal,
+  handleToggleStatus,
 }) => (
   <div className="
       p-5 
@@ -49,30 +50,32 @@ const RmCard = ({
       {/* Status Badge */}
       <span
         className={`
-          text-xs 
-          font-semibold 
-           text-center
+          text-[10px] 
+          font-bold 
+          uppercase
+          tracking-wider
+          text-center
           px-3 py-1 
-          rounded-full 
-          shadow 
+          rounded-md 
+          shadow-sm
           whitespace-nowrap
           ${Number(rm.is_active) === 1
             ? "bg-caribbeangreen-100 text-white"
-            : "bg-delBtn text-white"
+            : "bg-red-500 text-white"
           }
         `}
       >
-        {Number(rm.is_active) === 1 ? "Active" : "Not Active"}
+        {Number(rm.is_active) === 1 ? "Active" : "Inactive"}
       </span>
     </div>
 
     {/* Personal Number Section */}
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="text-gray-800 font-medium break-all">
+      <div className="text-gray-800 font-medium break-all text-sm">
         {rm.personal_number}
       </div>
 
-      <div className="flex items-center gap-4 text-xl">
+      <div className="flex items-center gap-4 text-lg">
 
         <FaWhatsapp
           onClick={() => openWhatsApp(rm.personal_number)}
@@ -93,42 +96,60 @@ const RmCard = ({
     </div>
 
     {/* CK Number + Edit Button */}
-    <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex flex-wrap items-center justify-between gap-3 mt-auto pt-2 border-t">
 
       {/* CK Number */}
-      <div className="flex items-center gap-4 text-gray-800 font-medium">
+      <div className="flex items-center gap-3 text-gray-700 font-medium text-sm">
 
         <span className="break-all">{rm.ck_number}</span>
 
         <FaWhatsapp
           onClick={() => openWhatsApp(rm.ck_number)}
-          className="text-green-600 text-xl hover:text-green-700 cursor-pointer transition"
+          className="text-green-600 text-lg hover:text-green-700 cursor-pointer transition"
         />
 
         <FaCopy
           onClick={() => copyToClipboard(rm.ck_number)}
-          className="text-blue-500 text-xl hover:text-blue-700 cursor-pointer transition"
+          className="text-blue-500 text-lg hover:text-blue-700 cursor-pointer transition"
         />
 
       </div>
 
-      {/* Edit Button */}
-      <button
-        onClick={() => openEditModal(rm)}
-        className="
-          px-4 py-1.5 
-          bg-btnColor 
-          text-white 
-          rounded-lg 
-          shadow-md 
-          hover:bg-opacity-90 
-          transition 
-          text-sm
-          font-medium
-        "
-      >
-        Edit
-      </button>
+      {/* Actions */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => handleToggleStatus(rm.id, Number(rm.is_active) === 1)}
+          className={`
+            px-3 py-1.5 
+            rounded-lg 
+            text-xs
+            font-bold
+            transition
+            ${Number(rm.is_active) === 1 
+              ? "bg-red-50 text-red-600 hover:bg-red-100" 
+              : "bg-green-50 text-green-600 hover:bg-green-100"}
+          `}
+        >
+          {Number(rm.is_active) === 1 ? "Deactivate" : "Activate"}
+        </button>
+        <button
+          onClick={() => openEditModal(rm)}
+          className="
+            px-4 py-1.5 
+            bg-btnColor 
+            text-white 
+            rounded-lg 
+            shadow-md 
+            hover:shadow-lg
+            active:scale-95
+            transition-all 
+            text-xs
+            font-bold
+          "
+        >
+          Edit
+        </button>
+      </div>
     </div>
   </div>
 );
@@ -158,7 +179,7 @@ const RmProfile = () => {
   const [rmList, setRmList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("az");
-  const [statusFilter, setStatusFilter] = useState("all"); // ⭐ NEW FILTER
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -204,6 +225,21 @@ const RmProfile = () => {
     setSelectedrm(null);
     fetchRms();
   }, [fetchRms]);
+
+  const handleToggleStatus = async (id, isActive) => {
+    const confirmText = isActive 
+      ? "Are you sure you want to DEACTIVATE this RM? They will not be able to login or receive new leads." 
+      : "Are you sure you want to ACTIVATE this RM?";
+    
+    if (!window.confirm(confirmText)) return;
+
+    const newStatus = await toggleUserStatus(token, id, "mainRm");
+    if (newStatus !== null) {
+      setRmList((prev) => 
+        prev.map((item) => item.id === id ? { ...item, is_active: newStatus } : item)
+      );
+    }
+  };
 
   /* ---------------- Filter + Search + Sort Combined -------------- */
   const filteredSortedRms = useMemo(() => {
@@ -340,6 +376,7 @@ const RmProfile = () => {
               openWhatsApp={openWhatsApp}
               makeCall={makeCall}
               openEditModal={openEditModal}
+              handleToggleStatus={handleToggleStatus}
             />
           ))}
         </div>

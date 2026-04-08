@@ -145,9 +145,65 @@ const {
     GET_APPROVED_SIP_STATS_API,
     GET_APPROVED_SIP_BATCHES_API,
     RM_PREVIEW,
-    RM_DROPDOWN
+    RM_DROPDOWN,
+    CHANGE_PASSWORD_API,
+    TOGGLE_USER_STATUS_API
 
 } = adminEndpoints;
+
+export const toggleUserStatus = async (token, id, role) => {
+  const toastId = toast.loading("Updating user status...");
+  try {
+    const response = await apiConnector(
+      "POST",
+      TOGGLE_USER_STATUS_API(id),
+      { role },
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response.data.message);
+    }
+
+    toast.success(response.data.message);
+    return response.data.is_active;
+  } catch (error) {
+    console.error("Toggle User Status API Error:", error);
+    toast.error(error?.response?.data?.message || "Failed to update status");
+    return null;
+  } finally {
+    toast.dismiss(toastId);
+  }
+};
+
+export const changePassword = async (token, passwords) => {
+  const toastId = toast.loading("Updating password...");
+  try {
+    const response = await apiConnector(
+      "POST",
+      CHANGE_PASSWORD_API,
+      passwords,
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response.data.message);
+    }
+
+    toast.success("Password updated successfully");
+    return true;
+  } catch (error) {
+    console.error("Change Password API Error:", error);
+    toast.error(error?.response?.data?.message || "Failed to update password");
+    return false;
+  } finally {
+    toast.dismiss(toastId);
+  }
+};
 
 export const createRm = async (token, formData) => {
     try {

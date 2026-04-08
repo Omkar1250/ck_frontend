@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect } from 'react';
 import { FaCopy, FaPhoneAlt, FaWhatsapp } from 'react-icons/fa';
+import { HiX } from 'react-icons/hi';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Modal = ({
   isOpen,
@@ -15,12 +17,18 @@ const Modal = ({
 }) => {
   const handleSubmit = () => {
     onSubmit();
-    onClose(); // Close immediately after submission
+    onClose();
   };
 
   const copyToClipboard = useCallback((number) => {
     navigator.clipboard.writeText(number);
-    toast.success("Phone number copied!");
+    toast.success("Phone number copied!", {
+      style: {
+        background: '#161d29',
+        color: '#F1F2FF',
+        border: '1px solid rgba(100,115,170,0.2)',
+      },
+    });
   }, []);
 
   const openWhatsApp = useCallback((number) => {
@@ -39,78 +47,104 @@ const Modal = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white max-w-md w-full rounded-2xl shadow-xl p-6 sm:p-8 relative"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">
-          {title}
-        </h2>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex justify-center items-center p-4"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+            className="glass-card max-w-md w-full p-6 sm:p-8 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center
+                text-richblack-300 hover:text-richblack-5 hover:bg-white/[0.06] transition-all duration-150"
+            >
+              <HiX className="w-4 h-4" />
+            </button>
 
-        <div className="text-gray-700 mb-4 text-sm sm:text-base">
-          <p><strong>Name:</strong> {name}</p>
+            <h2 className="text-xl font-semibold mb-5 text-richblack-5">
+              {title}
+            </h2>
 
-          <div className="flex flex-wrap items-center gap-3 mt-2">
-            <span>{mobile_number}</span>
-            <FaWhatsapp
-              aria-label="Open WhatsApp"
-              onClick={() => openWhatsApp(mobile_number)}
-              className="text-greenBtn text-xl hover:text-green-700 cursor-pointer"
-            />
-            <FaCopy
-              aria-label="Copy number"
-              onClick={() => copyToClipboard(mobile_number)}
-              className="text-richblack-200 text-xl hover:text-blue-600 cursor-pointer"
-            />
-            <FaPhoneAlt
-              aria-label="Call number"
-              onClick={() => makeCall(mobile_number)}
-              className="text-blue-600 text-xl hover:text-blue-700 cursor-pointer"
-            />
-          </div>
+            <div className="text-richblack-100 mb-4 text-sm space-y-3">
+              <p><span className="text-richblack-300 text-xs uppercase tracking-wider">Name</span><br />
+                <span className="font-medium text-base">{name}</span>
+              </p>
 
-          {whatsapp_mobile_number && (
-            <div className="flex items-center gap-3 mt-4">
-              <span>{whatsapp_mobile_number}</span>
-              <FaWhatsapp
-                aria-label="Open WhatsApp"
-                onClick={() => openWhatsApp(whatsapp_mobile_number)}
-                className="text-greenBtn text-xl hover:text-green-700 cursor-pointer"
-              />
-              <FaCopy
-                aria-label="Copy number"
-                onClick={() => copyToClipboard(whatsapp_mobile_number)}
-                className="text-richblack-200 text-xl hover:text-blue-600 cursor-pointer"
-              />
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <span className="text-richblack-100 font-mono text-sm">{mobile_number}</span>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => openWhatsApp(mobile_number)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-caribbeangreen-100/10 
+                      hover:bg-caribbeangreen-100/20 transition-all duration-150">
+                    <FaWhatsapp className="text-caribbeangreen-100 text-sm" />
+                  </button>
+                  <button onClick={() => copyToClipboard(mobile_number)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/[0.04] 
+                      hover:bg-white/[0.08] transition-all duration-150">
+                    <FaCopy className="text-richblack-200 text-sm" />
+                  </button>
+                  <button onClick={() => makeCall(mobile_number)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-200/10 
+                      hover:bg-blue-200/20 transition-all duration-150">
+                    <FaPhoneAlt className="text-blue-200 text-sm" />
+                  </button>
+                </div>
+              </div>
+
+              {whatsapp_mobile_number && (
+                <div className="flex items-center gap-3 pt-1">
+                  <span className="text-richblack-100 font-mono text-sm">{whatsapp_mobile_number}</span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => openWhatsApp(whatsapp_mobile_number)}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center bg-caribbeangreen-100/10 
+                        hover:bg-caribbeangreen-100/20 transition-all duration-150">
+                      <FaWhatsapp className="text-caribbeangreen-100 text-sm" />
+                    </button>
+                    <button onClick={() => copyToClipboard(whatsapp_mobile_number)}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/[0.04] 
+                        hover:bg-white/[0.08] transition-all duration-150">
+                      <FaCopy className="text-richblack-200 text-sm" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div className="mb-4">{children}</div>
+            <div className="mb-5">{children}</div>
 
-        <div className="flex justify-end space-x-3 mt-6">
-          <button
-            onClick={onClose}
-            className="bg-delBtn hover:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
-          >
-            {action}
-          </button>
-        </div>
-      </div>
-    </div>
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/[0.06]">
+              <button
+                onClick={onClose}
+                className="btn-ghost px-5 py-2.5 text-sm rounded-xl"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="btn-gradient px-5 py-2.5 text-sm rounded-xl"
+              >
+                {action}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

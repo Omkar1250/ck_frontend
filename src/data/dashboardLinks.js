@@ -71,20 +71,26 @@ export const sidebarLinks = [
   // },
   {
     id: 11,
+    name: "My Profile",
+    path: "/dashboard/my-profile",
+    type: ACCOUNT_TYPE.ADMIN,
+  },
+  {
+    id: 12,
     name: "Admin Controls",
     path: "/dashboard/admin",
     type: ACCOUNT_TYPE.ADMIN,
     
   },
   {
-    id: 12,
+    id: 13,
     name: "View Team Profile",
     path: "/dashboard/view-team-profile",
     type: ACCOUNT_TYPE.ADMIN,
     
   },
   {
-    id: 13,
+    id: 133,
     name: "Basic Ms Team ID Pass",
     path: "/dashboard/ms-team-id-pass",
     type: ACCOUNT_TYPE.ADMIN,

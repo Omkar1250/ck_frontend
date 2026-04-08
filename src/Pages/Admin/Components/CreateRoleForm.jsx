@@ -32,7 +32,7 @@ export default function CreateRoleForm({ closeModal, rm }) {
       setValue("password", rm.password || "");
       setValue("confirmPassword", rm.password || "");
     }
-  }, [rm, setValue]);
+  }, [rm, setValue, isEdit]);
 
   const onSubmit = async (data) => {
     if (data.password && data.password !== data.confirmPassword) {
@@ -83,23 +83,23 @@ export default function CreateRoleForm({ closeModal, rm }) {
 
   const InputField = ({ label, name, type = "text", icon: Icon, validation = {} }) => (
     <div className="relative">
-      {Icon && <Icon className="absolute left-3 top-3 text-gray-400 text-lg" />}
+      {Icon && <Icon className="absolute left-3 top-3 text-richblack-400 text-lg" />}
       <input
         type={type}
         placeholder={label}
         {...register(name, validation)}
-        className="w-full pl-10 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-btnColor transition"
+        className="glass-input w-full pl-10 p-2.5 text-sm"
       />
-      {errors[name] && <p className="text-pink-500 text-xs mt-1">{errors[name].message}</p>}
+      {errors[name] && <p className="text-pink-200 text-xs mt-1">{errors[name].message}</p>}
     </div>
   );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 px-4 pb-6 pt-3 w-[95%] max-w-xl mx-auto">
-      <h2 className="text-xl font-semibold text-center">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 px-2 pb-4 pt-2 w-full max-w-xl mx-auto">
+      <h2 className="text-xl font-semibold text-center text-richblack-5">
         {isEdit ? "Update JRM" : "Create JRM"}
       </h2>
-      <div className="w-16 h-[3px] bg-btnColor mx-auto rounded-full mb-2"></div>
+      <div className="w-16 h-[3px] mx-auto rounded-full" style={{ background: 'linear-gradient(90deg, #6473AA, #8B5CF6)' }} />
 
       {/* Grid Inputs */}
       <div className="grid md:grid-cols-2 gap-4">
@@ -121,28 +121,28 @@ export default function CreateRoleForm({ closeModal, rm }) {
       {/* Password & Confirm */}
       <div className="grid md:grid-cols-2 gap-4">
         <div className="relative">
-          <FiKey className="absolute left-3 top-3 text-gray-400 text-lg" />
+          <FiKey className="absolute left-3 top-3 text-richblack-400 text-lg" />
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Password"
             {...register("password", !isEdit ? { required: "Password is required" } : {})}
-            className="w-full pl-10 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-btnColor transition"
+            className="glass-input w-full pl-10 pr-10 p-2.5 text-sm"
           />
-          <span onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 cursor-pointer text-gray-500">
+          <span onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 cursor-pointer text-richblack-400 hover:text-richblack-100 transition-colors">
             {showPassword ? <FiEyeOff /> : <FiEye />}
           </span>
-          {errors.password && <p className="text-pink-500 text-xs mt-1">{errors.password.message}</p>}
+          {errors.password && <p className="text-pink-200 text-xs mt-1">{errors.password.message}</p>}
         </div>
 
         <div className="relative">
-          <FiKey className="absolute left-3 top-3 text-gray-400 text-lg" />
+          <FiKey className="absolute left-3 top-3 text-richblack-400 text-lg" />
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Confirm Password"
             {...register("confirmPassword", !isEdit ? { required: "Confirm password is required" } : {})}
-            className="w-full pl-10 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-btnColor transition"
+            className="glass-input w-full pl-10 p-2.5 text-sm"
           />
-          {errors.confirmPassword && <p className="text-pink-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
+          {errors.confirmPassword && <p className="text-pink-200 text-xs mt-1">{errors.confirmPassword.message}</p>}
         </div>
       </div>
 
@@ -153,7 +153,7 @@ export default function CreateRoleForm({ closeModal, rm }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-btnColor text-white py-3 rounded-md font-medium hover:bg-opacity-90 transition disabled:opacity-60"
+          className="btn-gradient w-full py-3 rounded-xl text-sm font-medium"
         >
           {loading ? (isEdit ? "Updating..." : "Creating...") : isEdit ? "Update" : "Create"}
         </button>
@@ -162,7 +162,7 @@ export default function CreateRoleForm({ closeModal, rm }) {
           <button
             type="button"
             onClick={() => setDeleteModal(true)}
-            className="w-full border border-red-500 text-red-600 py-3 rounded-md font-medium hover:bg-red-50 transition"
+            className="btn-danger w-full py-3 rounded-xl text-sm font-medium"
           >
             Delete
           </button>
@@ -171,7 +171,7 @@ export default function CreateRoleForm({ closeModal, rm }) {
         <button
           type="button"
           onClick={closeModal}
-          className="w-full border py-3 rounded-md font-medium hover:bg-gray-50 transition"
+          className="btn-ghost w-full py-3 rounded-xl text-sm font-medium"
         >
           Cancel
         </button>
@@ -179,23 +179,24 @@ export default function CreateRoleForm({ closeModal, rm }) {
 
       {/* Delete Confirmation Modal */}
       {deleteModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-lg">
-            <p className="font-semibold text-center text-lg">Delete JRM?</p>
-            <p className="text-sm text-center text-gray-600 mt-1">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4"
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
+          <div className="glass-card p-6 w-full max-w-sm animate-scaleIn">
+            <p className="font-semibold text-center text-lg text-richblack-5">Delete JRM?</p>
+            <p className="text-sm text-center text-richblack-300 mt-1">
               This action cannot be undone.
             </p>
             <div className="mt-5 flex gap-3">
               <button
                 onClick={() => setDeleteModal(false)}
-                className="w-1/2 border py-2 rounded-md hover:bg-gray-50 transition"
+                className="btn-ghost w-1/2 py-2.5 rounded-xl text-sm"
               >
                 Cancel
               </button>
               <button
                 disabled={loading}
                 onClick={handleDelete}
-                className="w-1/2 bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition"
+                className="btn-danger w-1/2 py-2.5 rounded-xl text-sm"
               >
                 {loading ? "Deleting..." : "Delete"}
               </button>

@@ -4,43 +4,81 @@ import { FaWhatsapp, FaCopy, FaPhoneAlt } from "react-icons/fa";
 import { FiPlus, FiChevronDown } from "react-icons/fi";
 import toast from "react-hot-toast";
 import SearchInput from "../../Components/SearchInput";
-import { getAllRms } from "../../operations/adminApi";
+import { getAllRms, toggleUserStatus } from "../../operations/adminApi";
 import FormModal from "../../Components/FormModal";
 import CreateRoleForm from "./Components/CreateRoleForm";
 
 /* ----------------------- Card Component ----------------------- */
-const RmCard = ({ rm, copyToClipboard, openWhatsApp, makeCall, openEditModal }) => (
-  <div className="p-5 border shadow-md rounded-xl bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-    {/* Title + User ID */}
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
-      <h3 className="text-lg font-semibold text-gray-800 break-words">{rm.name}</h3>
-      <p className="text-sm text-gray-500 font-medium">USER ID: {rm.userid}</p>
+const RmCard = ({ rm, copyToClipboard, openWhatsApp, makeCall, openEditModal, handleToggleStatus }) => (
+  <div className="p-5 border shadow-md rounded-xl bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col gap-3">
+    {/* Title + User ID + Status Badge */}
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="flex-1">
+        <h3 className="text-lg font-semibold text-gray-800 break-words">{rm.name}</h3>
+        <p className="text-xs text-gray-500 font-medium tracking-tight">USER ID: {rm.userid}</p>
+      </div>
+      <span
+        className={`
+          text-[10px] 
+          font-bold 
+          uppercase
+          tracking-wider
+          text-center
+          px-3 py-1 
+          rounded-md 
+          shadow-sm
+          whitespace-nowrap
+          ${Number(rm.is_active) === 1
+            ? "bg-caribbeangreen-100 text-white"
+            : "bg-red-500 text-white"
+          }
+        `}
+      >
+        {Number(rm.is_active) === 1 ? "Active" : "Inactive"}
+      </span>
     </div>
 
     {/* Phone */}
-    <div className="flex flex-wrap items-center gap-3 text-gray-700 mb-2">
-      <span className="break-all">{rm.personal_number}</span>
-      <div className="flex gap-3 text-lg">
+    <div className="flex flex-wrap items-center justify-between gap-3 text-gray-700">
+      <span className="break-all text-sm font-medium">{rm.personal_number}</span>
+      <div className="flex gap-4 text-lg">
         <FaWhatsapp onClick={() => openWhatsApp(rm.personal_number)} className="text-green-600 hover:text-green-700 cursor-pointer" />
         <FaCopy onClick={() => copyToClipboard(rm.personal_number)} className="text-blue-500 hover:text-blue-700 cursor-pointer" />
         <FaPhoneAlt onClick={() => makeCall(rm.personal_number)} className="text-blue-600 hover:text-blue-700 cursor-pointer" />
       </div>
     </div>
 
-    {/* CK Number + Edit */}
-    <div className="flex flex-wrap justify-between items-center gap-3">
-      <div className="flex items-center gap-3 text-gray-700">
+    {/* CK Number + Actions */}
+    <div className="flex flex-wrap justify-between items-center gap-3 mt-auto pt-2 border-t">
+      <div className="flex items-center gap-3 text-gray-700 font-medium text-sm">
         <span className="break-all">{rm.ck_number}</span>
         <FaWhatsapp onClick={() => openWhatsApp(rm.ck_number)} className="text-green-600 text-lg hover:text-green-700 cursor-pointer" />
         <FaCopy onClick={() => copyToClipboard(rm.ck_number)} className="text-blue-500 text-lg hover:text-blue-700 cursor-pointer" />
       </div>
 
-      <button
-        onClick={() => openEditModal(rm)}
-        className="px-4 py-1 bg-btnColor text-white rounded-md shadow hover:bg-opacity-90 transition text-sm"
-      >
-        Edit
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => handleToggleStatus(rm.id, Number(rm.is_active) === 1)}
+          className={`
+            px-3 py-1.5 
+            rounded-lg 
+            text-xs
+            font-bold
+            transition
+            ${Number(rm.is_active) === 1 
+              ? "bg-red-50 text-red-600 hover:bg-red-100" 
+              : "bg-green-50 text-green-600 hover:bg-green-100"}
+          `}
+        >
+          {Number(rm.is_active) === 1 ? "Deactivate" : "Activate"}
+        </button>
+        <button
+          onClick={() => openEditModal(rm)}
+          className="px-4 py-1.5 bg-btnColor text-white rounded-lg shadow hover:opacity-90 active:scale-95 transition text-xs font-bold"
+        >
+          Edit
+        </button>
+      </div>
     </div>
   </div>
 );
@@ -70,6 +108,7 @@ const TeamProfile = () => {
   const [rmList, setRmList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("az");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -117,6 +156,21 @@ const TeamProfile = () => {
     fetchData();
   }, [fetchData]);
 
+  const handleToggleStatus = async (id, isActive) => {
+    const confirmText = isActive 
+      ? "Are you sure you want to DEACTIVATE this JRM? They will not be able to login or receive points." 
+      : "Are you sure you want to ACTIVATE this JRM?";
+    
+    if (!window.confirm(confirmText)) return;
+
+    const newStatus = await toggleUserStatus(token, id, "rm");
+    if (newStatus !== null) {
+      setRmList((prev) => 
+        prev.map((item) => item.id === id ? { ...item, is_active: newStatus } : item)
+      );
+    }
+  };
+
   /* ----------------------- Search + Sort ----------------------- */
   const filteredSortedRms = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -130,6 +184,13 @@ const TeamProfile = () => {
           rm.personal_number?.includes(q) ||
           rm.ck_number?.includes(q)
       );
+    }
+
+    // Status Filter
+    if (statusFilter === "active") {
+      list = list.filter((rm) => Number(rm.is_active) === 1);
+    } else if (statusFilter === "inactive") {
+      list = list.filter((rm) => Number(rm.is_active) === 0);
     }
 
     const safe = (val) => (val || "").toLowerCase();
@@ -153,7 +214,7 @@ const TeamProfile = () => {
     }
 
     return list;
-  }, [rmList, searchQuery, sortBy]);
+  }, [rmList, searchQuery, sortBy, statusFilter]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -177,7 +238,7 @@ const TeamProfile = () => {
         </button>
       </div>
 
-      {/* Controls: Search + Sort */}
+      {/* Controls: Search + Sort + Status */}
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between mb-3">
         <div className="w-full sm:max-w-md">
           <SearchInput
@@ -188,20 +249,38 @@ const TeamProfile = () => {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-gray-600">Sort</label>
-          <div className="relative">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="appearance-none border rounded-md py-2 pl-3 pr-8 bg-white focus:outline-none focus:ring-2 focus:ring-gray-300"
-            >
-              <option value="az">A → Z</option>
-              <option value="za">Z → A</option>
-              <option value="new">Newest</option>
-              <option value="old">Oldest</option>
-            </select>
-            <FiChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500" />
+        <div className="flex gap-4 items-center flex-wrap sm:justify-end">
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">Sort</label>
+            <div className="relative">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="appearance-none border rounded-md py-2 pl-3 pr-8 bg-white focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm font-medium"
+              >
+                <option value="az">A → Z</option>
+                <option value="za">Z → A</option>
+                <option value="new">Newest</option>
+                <option value="old">Oldest</option>
+              </select>
+              <FiChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500" />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">Status</label>
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="appearance-none border rounded-md py-2 pl-3 pr-8 bg-white focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm font-medium"
+              >
+                <option value="all">All</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+               <FiChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500" />
+            </div>
           </div>
         </div>
       </div>
@@ -225,6 +304,7 @@ const TeamProfile = () => {
               openWhatsApp={openWhatsApp}
               makeCall={makeCall}
               openEditModal={openEditModal}
+              handleToggleStatus={handleToggleStatus}
             />
           ))}
         </div>

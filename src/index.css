@@ -1,3 +1,659 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS — Dark Space-Gray Theme
+   ═══════════════════════════════════════════════════ */
+:root {
+  /* LIGHT MODE (DEFAULT) - OFF-WHITE PREMIUM PALETTE */
+  --bg-primary: #F8F9FA;
+  --bg-secondary: #FFFFFF;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card-solid: #FFFFFF;
+  --bg-sidebar: #FDFDFD;
+  --bg-header: rgba(250, 250, 252, 0.85);
+  --bg-input: #FFFFFF;
+
+  --accent-primary: #6473AA;
+  --accent-secondary: #8B5CF6;
+  --accent-gradient: linear-gradient(135deg, #6473AA 0%, #8B5CF6 100%);
+  --accent-green: #05A77B;
+  --accent-pink: #D43D63;
+  --accent-blue: #118AB2;
+
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #9CA3AF;
+
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border-glow: rgba(100, 115, 170, 0.2);
+
+  --shadow-glow: 0 0 15px rgba(100, 115, 170, 0.05);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-elevated: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark {
+  /* DARK MODE (SPACE GRAY) */
+  --bg-primary: #0a0e17;
+  --bg-secondary: #101827;
+  --bg-card: rgba(22, 29, 41, 0.8);
+  --bg-card-solid: #161d29;
+  --bg-sidebar: rgba(10, 14, 23, 0.97);
+  --bg-header: rgba(10, 14, 23, 0.85);
+  --bg-input: rgba(22, 29, 41, 0.6);
+
+  --accent-primary: #6473AA;
+  --accent-secondary: #8B5CF6;
+  --accent-gradient: linear-gradient(135deg, #6473AA 0%, #8B5CF6 100%);
+  --accent-green: #06D6A0;
+  --accent-pink: #EF476F;
+  --accent-blue: #118AB2;
+
+  --text-primary: #F1F2FF;
+  --text-secondary: #999DAA;
+  --text-muted: #585D69;
+
+  --border-color: rgba(100, 115, 170, 0.15);
+  --border-glow: rgba(100, 115, 170, 0.3);
+
+  --shadow-glow: 0 0 20px rgba(100, 115, 170, 0.1);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-elevated: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════
+   GLOBAL RESET & BASE
+   ═══════════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════════════════
+   SELECTION
+   ═══════════════════════════════════════════════════ */
+::selection {
+  background: rgba(100, 115, 170, 0.4);
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════
+   SCROLLBAR STYLING
+   ═══════════════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 115, 170, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 115, 170, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════════════════ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(100, 115, 170, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(100, 115, 170, 0.4); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* ═══════════════════════════════════════════════════
+   REUSABLE COMPONENT CLASSES
+   ═══════════════════════════════════════════════════ */
+@layer components {
+  /* Glass card with dark frosted-glass effect */
+  .glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+  }
+
+  .glass-card-hover {
+    transition: all var(--transition-base);
+  }
+
+  .glass-card-hover:hover {
+    border-color: var(--border-glow);
+    box-shadow: var(--shadow-glow), var(--shadow-card);
+    transform: translateY(-2px);
+  }
+
+  /* Glass sidebar */
+  .glass-sidebar {
+    background: var(--bg-sidebar);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-right: 1px solid var(--border-color);
+  }
+
+  /* Glass header */
+  .glass-header {
+    background: var(--bg-header);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  /* Glass input */
+  .glass-input {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+  }
+
+  .glass-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .glass-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(100, 115, 170, 0.15);
+  }
+
+  /* Gradient button */
+  .btn-gradient {
+    background: var(--accent-gradient);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-gradient:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(100, 115, 170, 0.35);
+  }
+
+  .btn-gradient:active {
+    transform: translateY(0);
+  }
+
+  .btn-gradient:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Danger button */
+  .btn-danger {
+    background: linear-gradient(135deg, #EF476F, #d63384);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(239, 71, 111, 0.3);
+  }
+
+  /* Ghost button */
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .btn-ghost:hover {
+    background: rgba(100, 115, 170, 0.1);
+    border-color: var(--border-glow);
+    color: var(--text-primary);
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+@layer utilities {
+  /* No scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Animations as Tailwind utilities */
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  .animate-fadeInUp {
+    animation: fadeInUp 0.4s ease-out forwards;
+  }
+
+  .animate-fadeInDown {
+    animation: fadeInDown 0.3s ease-out forwards;
+  }
+
+  .animate-slideInLeft {
+    animation: slideInLeft 0.3s ease-out forwards;
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 0.25s ease-out forwards;
+  }
+
+  .animate-pulseGlow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    background-size: 200% auto;
+    animation: shimmer 2s linear infinite;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-gradientShift {
+    background-size: 200% 200%;
+    animation: gradientShift 4s ease infinite;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   THEME-AWARE OVERRIDES
+   ═══════════════════════════════════════════════════ */
+
+.dark {
+  /* --- Background overrides --- */
+  .bg-white {
+    background-color: var(--bg-card-solid) !important;
+  }
+
+  .bg-gray-50,
+  .bg-gray-100 {
+    background-color: transparent !important;
+  }
+
+  /* --- Text overrides: fix invisible text on dark bg --- */
+  .text-gray-800,
+  .text-gray-900,
+  .text-richblack-800,
+  .text-richblack-700,
+  .text-richblack-600 {
+    color: var(--text-primary) !important;
+  }
+
+  .text-gray-700 {
+    color: #C5C7D4 !important;
+  }
+
+  .text-gray-600,
+  .text-richblack-500,
+  .text-richblack-400 {
+    color: var(--text-secondary) !important;
+  }
+
+  .text-gray-500 {
+    color: var(--text-muted) !important;
+  }
+
+  .text-gray-400 {
+    color: #6E727F !important;
+  }
+
+  .text-gray-300 {
+    color: #838894 !important;
+  }
+
+  /* Override dark text classes when used as background colors */
+  .text-black {
+    color: var(--text-primary) !important;
+  }
+
+  /* --- Border overrides --- */
+  .border-gray-100,
+  .border-gray-200,
+  .border-gray-300 {
+    border-color: var(--border-color) !important;
+  }
+
+  .border {
+    border-color: var(--border-color);
+  }
+
+  /* --- Shadow overrides for dark --- */
+  .shadow-lg {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .shadow-xl {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .shadow-md {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  /* --- Input/Select dark theme --- */
+  input:not([type="checkbox"]):not([type="radio"]):not(.glass-input),
+  textarea:not(.glass-input),
+  select:not(.glass-input) {
+    background-color: var(--bg-input) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):not(.glass-input)::placeholder,
+  textarea:not(.glass-input)::placeholder {
+    color: var(--text-muted) !important;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):not(.glass-input):focus,
+  textarea:not(.glass-input):focus,
+  select:not(.glass-input):focus {
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 0 0 3px rgba(100, 115, 170, 0.15) !important;
+    outline: none !important;
+  }
+
+  /* Select dropdown options */
+  select option {
+    background-color: #161d29;
+    color: var(--text-primary);
+  }
+
+  /* --- Table dark theme --- */
+  table {
+    border-color: var(--border-color);
+  }
+
+  thead {
+    background-color: rgba(100, 115, 170, 0.08);
+  }
+
+  thead th {
+    color: var(--text-secondary) !important;
+    border-color: var(--border-color) !important;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  tbody tr {
+    border-color: var(--border-color) !important;
+    transition: background-color 0.15s ease;
+  }
+
+  tbody tr:hover {
+    background-color: rgba(100, 115, 170, 0.04) !important;
+  }
+
+  tbody td {
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+  }
+
+  /* --- Card/Panel overrides --- */
+  .rounded-lg,
+  .rounded-xl,
+  .rounded-2xl {
+    border-color: var(--border-color);
+  }
+
+  /* --- React-Select dark theme --- */
+  [class*="__control"] {
+    background-color: var(--bg-input) !important;
+    border-color: var(--border-color) !important;
+  }
+
+  [class*="__menu"] {
+    background-color: var(--bg-card-solid) !important;
+    border: 1px solid var(--border-color) !important;
+  }
+
+  [class*="__option"] {
+    color: var(--text-primary) !important;
+  }
+
+  [class*="__option--is-focused"] {
+    background-color: rgba(100, 115, 170, 0.12) !important;
+  }
+
+  [class*="__option--is-selected"] {
+    background-color: var(--accent-primary) !important;
+  }
+
+  [class*="__single-value"],
+  [class*="__input-container"],
+  [class*="__placeholder"] {
+    color: var(--text-primary) !important;
+  }
+
+  [class*="__placeholder"] {
+    color: var(--text-muted) !important;
+  }
+
+  /* --- React-Datepicker dark theme --- */
+  .react-datepicker {
+    background-color: var(--bg-card-solid) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .react-datepicker__header {
+    background-color: rgba(100, 115, 170, 0.08) !important;
+    border-color: var(--border-color) !important;
+  }
+
+  .react-datepicker__current-month,
+  .react-datepicker__day-name,
+  .react-datepicker-time__header {
+    color: var(--text-primary) !important;
+  }
+
+  .react-datepicker__day {
+    color: var(--text-primary) !important;
+  }
+
+  .react-datepicker__day:hover {
+    background-color: rgba(100, 115, 170, 0.15) !important;
+  }
+
+  .react-datepicker__day--selected,
+  .react-datepicker__day--keyboard-selected {
+    background-color: var(--accent-primary) !important;
+    color: #fff !important;
+  }
+
+  .react-datepicker__navigation-icon::before {
+    border-color: var(--text-secondary) !important;
+  }
+
+  /* --- Recharts tooltip dark theme --- */
+  .recharts-default-tooltip {
+    background-color: var(--bg-card-solid) !important;
+    border-color: var(--border-color) !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .recharts-tooltip-label {
+    color: var(--text-primary) !important;
+  }
+
+  .recharts-tooltip-item {
+    color: var(--text-secondary) !important;
+  }
+
+  /* --- Hover button color fix --- */
+  .hover\:bg-gray-50:hover,
+  .hover\:bg-gray-100:hover {
+    background-color: rgba(100, 115, 170, 0.08) !important;
+  }
+
+  .hover\:bg-red-50:hover {
+    background-color: rgba(239, 71, 111, 0.08) !important;
+  }
+
+  /* --- Badge-like elements --- */
+  .bg-green-100 {
+    background-color: rgba(6, 214, 160, 0.12) !important;
+  }
+  .text-green-700,
+  .text-green-800 {
+    color: #06D6A0 !important;
+  }
+
+  .bg-red-100 {
+    background-color: rgba(239, 71, 111, 0.12) !important;
+  }
+  .text-red-700,
+  .text-red-800,
+  .text-red-600,
+  .text-red-500 {
+    color: #F37290 !important;
+  }
+
+  .bg-blue-100 {
+    background-color: rgba(17, 138, 178, 0.12) !important;
+  }
+  .text-blue-700,
+  .text-blue-800,
+  .text-blue-600 {
+    color: #47A5C5 !important;
+  }
+
+  .bg-yellow-100 {
+    background-color: rgba(255, 214, 10, 0.12) !important;
+  }
+  .text-yellow-700,
+  .text-yellow-800 {
+    color: #FFD60A !important;
+  }
+
+  /* --- Misc fixes --- */
+  .divide-gray-200 > * + * {
+    border-color: var(--border-color) !important;
+  }
+
+  .ring-gray-300 {
+    --tw-ring-color: var(--border-color) !important;
+  }
+
+  /* Fix bg-opacity on dark cards */
+  .bg-opacity-75 {
+    --tw-bg-opacity: 0.6 !important;
+  }
+
+  /* Toast styling */
+  [data-sonner-toaster],
+  .go2072408551 {
+    background-color: var(--bg-card-solid) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+  }
+}

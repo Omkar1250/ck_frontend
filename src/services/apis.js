@@ -146,6 +146,8 @@ export const adminEndpoints = {
     SENT_OLD_ADVANCE_MS_TEAMS_ID_PASS_API: BASE_URL + '/sent-old-advance-id-pass',
     REQUSTS_FOR_ADVANCE_MS_TEAMS_LOGIN: BASE_URL + '/get-advance-ms-teams-requests',
     APPROVE_ADVANCE_MS_TEAMS_REQUEST_API: BASE_URL + '/approve-advance-ms-teams-request',
+    CHANGE_PASSWORD_API: BASE_URL + '/change-password',
+    TOGGLE_USER_STATUS_API: (id) => BASE_URL + `/toggle-user-status/${id}`,
   
 
 

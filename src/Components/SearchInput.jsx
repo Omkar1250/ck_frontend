@@ -1,22 +1,27 @@
 import React from "react";
-import { X } from "lucide-react";
+import { X, Search } from "lucide-react";
 
 const SearchInput = ({ value, onChange, placeholder = "Search...", onClear }) => {
   return (
     <div className="flex justify-center my-4 relative w-full max-w-md mx-auto">
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-richblack-400 pointer-events-none">
+        <Search size={16} />
+      </div>
       <input
         type="text"
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full border border-gray-300 p-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+        className="glass-input w-full pl-10 pr-10 py-2.5 text-sm rounded-xl"
       />
       {value && (
         <button
           onClick={onClear}
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg 
+            flex items-center justify-center text-richblack-400 
+            hover:text-pink-200 hover:bg-pink-200/10 transition-all duration-150"
         >
-          <X size={18} />
+          <X size={14} />
         </button>
       )}
     </div>

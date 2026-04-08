@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  darkMode: 'class',
   theme: {
     fontFamily: {
       inter: ["Inter", "sans-serif"],
@@ -9,16 +10,20 @@ module.exports = {
     },
     colors: {
       white: "#fff",
-      bgSidebar:"#DADADA",
-      textColor:"#111111",
-      btnColor:"#6473AA",
-      greenBtn:"#61D74A",
-      delBtn:"#E61D12",
-      bgCard:"#E61D12",
-      bgAprCard:"#E0ECFF",
-      bgUni:"#51E1FF",
+      textColor: "var(--text-primary)",
+      textPrimary: "var(--text-primary)",
+      textSecondary: "var(--text-secondary)",
+      textMuted: "var(--text-muted)",
+      borderColor: "var(--border-color)",
+      accentPrimary: "var(--accent-primary)",
+      btnColor: "#6473AA",
+      greenBtn: "#61D74A",
+      delBtn: "#E61D12",
+      bgCard: "#E61D12",
+      bgAprCard: "#E0ECFF",
+      bgUni: "#51E1FF",
       black: "#000",
-      transparent: "#ffffff00",
+      transparent: "transparent",
       richblack: {
         5: "#F1F2FF",
         25: "#DBDDEA",
@@ -136,6 +141,65 @@ module.exports = {
       maxWidth: {
         maxContent: "1260px",
         maxContentTab: "650px"
+      },
+      animation: {
+        fadeIn: "fadeIn 0.3s ease-out forwards",
+        fadeInUp: "fadeInUp 0.4s ease-out forwards",
+        fadeInDown: "fadeInDown 0.3s ease-out forwards",
+        slideInLeft: "slideInLeft 0.3s ease-out forwards",
+        scaleIn: "scaleIn 0.25s ease-out forwards",
+        pulseGlow: "pulseGlow 2s ease-in-out infinite",
+        shimmer: "shimmer 2s linear infinite",
+        float: "float 3s ease-in-out infinite",
+        gradientShift: "gradientShift 4s ease infinite",
+      },
+      keyframes: {
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        fadeInUp: {
+          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        fadeInDown: {
+          "0%": { opacity: "0", transform: "translateY(-10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        slideInLeft: {
+          "0%": { opacity: "0", transform: "translateX(-20px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        scaleIn: {
+          "0%": { opacity: "0", transform: "scale(0.95)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        pulseGlow: {
+          "0%, 100%": { boxShadow: "0 0 5px rgba(100,115,170,0.2)" },
+          "50%": { boxShadow: "0 0 20px rgba(100,115,170,0.4)" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% center" },
+          "100%": { backgroundPosition: "200% center" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        gradientShift: {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
+        },
+      },
+      backdropBlur: {
+        xs: "2px",
+      },
+      boxShadow: {
+        glow: "0 0 20px rgba(100,115,170,0.1)",
+        "glow-lg": "0 0 40px rgba(100,115,170,0.15)",
+        card: "0 8px 32px rgba(0,0,0,0.3)",
+        elevated: "0 20px 60px rgba(0,0,0,0.5)",
       },
     },
   },
