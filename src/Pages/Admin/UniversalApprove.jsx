@@ -25,103 +25,116 @@ import { setCurrentPage } from "../../Slices/adminSlices/allLeadSlice";
 
 /* =============== Sub-components =============== */
 
-const StatusBadge = ({ status, label }) => {
-  const configs = {
-    approved: { icon: <FaCheckCircle />, bg: "bg-emerald-500/10", text: "text-emerald-500", label: "Approved" },
-    requested: { icon: <FaClock />, bg: "bg-amber-500/10", text: "text-amber-500", label: "Pending" },
-    rejected: { icon: <FaExclamationCircle />, bg: "bg-rose-500/10", text: "text-rose-500", label: "Rejected" },
-    default: { icon: null, bg: "bg-white/5", text: "text-textMuted", label: "Incomplete" }
-  };
-  const config = configs[status] || configs.default;
-  
-  return (
-    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${config.bg} ${config.text}`}>
-      {config.icon}
-      <span>{label || config.label}</span>
-    </div>
-  );
-};
-
-const ActionButton = ({ action, status, onClick }) => {
-  const isApproved = status === "approved";
-  return (
-    <button
-      onClick={onClick}
-      disabled={isApproved}
-      className={`px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-300 flex flex-col items-center gap-1
-        ${isApproved 
-          ? "bg-emerald-500/5 text-emerald-500 cursor-default opacity-60" 
-          : "bg-white/5 text-textColor hover:bg-accentPrimary/10 hover:text-accentPrimary border border-white/[0.05] hover:border-accentPrimary/20"
-        }`}
-    >
-      <span className="opacity-60">{action.replace('_request', '').replace('_', ' ')}</span>
-      <StatusBadge status={status} label={status === 'approved' ? 'YES' : status === 'requested' ? 'SET' : 'NO'} />
-    </button>
-  );
-};
-
 const LeadCard = ({ lead, copyToClipboard, openWhatsApp, makeCall, openModal }) => {
+  const displayNames = {
+    "under_us": "Under US",
+    "code_request": "Coded",
+    "aoma_request": "AOMA",
+    "activation_request": "Activation",
+    "ms_teams_request": "MS Teams",
+    "sip_request": "SIP"
+  };
+
+  const actionKeys = [
+    "under_us", 
+    "code_request", 
+    "aoma_request", 
+    "activation_request", 
+    "ms_teams_request", 
+    "sip_request"
+  ];
+
+  const getTime = (dateString) => {
+    if (!dateString) return "02:55 PM";
+    try {
+      return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return "02:55 PM";
+    }
+  };
+
   return (
-    <div className="glass-card group p-5 flex flex-col justify-between hover:shadow-glow transition-all duration-300 border border-white/[0.05] hover:border-accentPrimary/20 relative overflow-hidden">
-      <div className="relative z-10">
-        <div className="flex items-start justify-between mb-4">
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold text-textColor tracking-tight uppercase leading-tight">{lead.name}</h3>
-            <div className="flex items-center gap-3">
-               <div className="flex items-center gap-1.5 text-textSecondary text-xs">
-                <FiUser className="text-accentPrimary" />
-                <span className="font-semibold">{lead.rm_name || "-"}</span>
-              </div>
-              <div className="w-1 h-1 rounded-full bg-white/20" />
-              <div className="flex items-center gap-1.5 text-textSecondary text-xs">
-                <FiLayers className="text-accentPrimary" />
-                <span className="font-semibold">{lead.batch_code || "No Batch"}</span>
-              </div>
-            </div>
-          </div>
+    <div className="bg-white rounded-lg border-2 border-[#1ea1f1] p-4 flex flex-col gap-4 shadow-sm relative w-full font-sans transition-all hover:shadow-md">
+      {/* Top Row: Name and Time */}
+      <div className="flex justify-between items-center">
+        <h3 className="text-gray-800 text-lg font-medium">
+          {lead.name || "Unknown Lead"}
+        </h3>
+        <span className="text-gray-400 text-sm font-medium">
+          {getTime(lead.created_at)}
+        </span>
+      </div>
+
+      {/* Middle Row: Phone and RM */}
+      <div className="flex flex-wrap justify-between items-center gap-y-2 gap-x-1">
+        <div className="flex items-center gap-2">
+          {/* Call */}
           <button 
-            onClick={() => openModal(lead, "delete")}
-            className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all active:scale-90"
+            onClick={() => makeCall(lead.mobile_number)} 
+            className="flex items-center justify-center w-7 h-7 bg-gray-100 rounded text-gray-500 hover:bg-gray-200 transition-colors"
           >
-            <FiTrash2 size={16} />
+            <FaPhoneAlt size={12} />
           </button>
+          
+          {/* WhatsApp */}
+          <button 
+            onClick={() => openWhatsApp(lead.mobile_number)} 
+            className="flex items-center justify-center w-7 h-7 bg-green-50 rounded text-green-500 hover:bg-green-100 transition-colors"
+          >
+            <FaWhatsapp size={16} />
+          </button>
+
+          <span className="text-gray-500 font-medium text-sm ml-1">{lead.mobile_number}</span>
+          
+          <button 
+            onClick={() => copyToClipboard(lead.mobile_number)} 
+            className="text-gray-600 hover:text-gray-800"
+          >
+            <FaCopy size={14} />
+          </button>
+          
+          <span className="text-gray-400 font-medium text-sm ml-1">{lead.mobile_number}</span>
         </div>
 
-        <div className="space-y-3 mb-6">
-          {/* Contact Strip */}
-          <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/[0.05]">
-            <div className="space-y-0.5">
-              <p className="text-[9px] uppercase font-bold tracking-widest text-textMuted">Contact Primary</p>
-              <span className="text-xs font-bold tracking-wider text-textColor">{lead.mobile_number}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaPhoneAlt 
-                onClick={() => makeCall(lead.mobile_number)} 
-                className="p-2 w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white transition-all cursor-pointer" 
-              />
-              <FaWhatsapp 
-                onClick={() => openWhatsApp(lead.mobile_number)} 
-                className="p-2 w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all cursor-pointer" 
-              />
-               <FaCopy 
-                onClick={() => copyToClipboard(lead.mobile_number)} 
-                className="p-2 w-8 h-8 rounded-lg bg-white/10 text-textMuted hover:text-textColor transition-all cursor-pointer" 
-              />
-            </div>
-          </div>
+        <div className="text-indigo-500 text-sm font-medium">
+          {lead.rm_name || "JRM"} : {lead.batch_code || "N/A"}
         </div>
+      </div>
 
-        {/* Action Grid */}
-        <div className="grid grid-cols-3 gap-2">
-          {["under_us", "code_request", "aoma_request", "activation_request", "ms_teams_request", "sip_request"].map((action) => (
-            <ActionButton 
-              key={action} 
-              action={action} 
-              status={lead[`${action}_status`]} 
+      {/* Actions Grid */}
+      <div className="flex flex-wrap gap-3 mt-1 items-center">
+        {actionKeys.map((action) => {
+          const status = lead[`${action}_status`];
+          const isApproved = status === "approved";
+          // To match the specific icon formatting for the check mark in the image
+          return (
+            <button
+              key={action}
               onClick={() => openModal(lead, action)}
-            />
-          ))}
-        </div>
+              disabled={isApproved}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-[15px] font-medium border
+                ${isApproved 
+                  ? "bg-cyan-100 text-cyan-900 border-cyan-300 cursor-default dark:bg-cyan-900/40 dark:text-cyan-100 dark:border-cyan-700" 
+                  : "bg-cyan-100 text-cyan-900 border-cyan-300 hover:bg-cyan-200 transition-colors dark:bg-cyan-900/40 dark:text-cyan-100 dark:border-cyan-700 dark:hover:bg-cyan-800/60"
+                }`}
+            >
+              {displayNames[action]}
+              {isApproved && (
+                <span className="flex items-center justify-center w-4 h-4 rounded-full border border-green-500 text-green-500">
+                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="10px" width="10px" xmlns="http://www.w3.org/2000/svg"><path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"></path></svg>
+                </span>
+              )}
+            </button>
+          );
+        })}
+
+        {/* Delete Button always at the end/right */}
+        <button
+          onClick={() => openModal(lead, "delete")}
+          className="ml-auto px-5 py-1.5 bg-red-500 text-white rounded-md text-[15px] font-medium hover:bg-red-600 transition-colors dark:bg-red-600 dark:hover:bg-red-700"
+        >
+          Delete
+        </button>
       </div>
     </div>
   );
@@ -285,19 +298,19 @@ const UniversalApprove = () => {
           {modalAction === "code_request" && (
             <div className="space-y-4 pt-2">
               <div className="space-y-1.5">
-                <label className="text-[10px] uppercase font-bold tracking-widest text-textMuted ml-1">Assign Batch Code</label>
+                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 dark:text-gray-400 ml-1">Assign Batch Code</label>
                 <Select styles={customSelectStyles} options={allbatches.map((b) => ({ value: b.batch_code, label: b.batch_code }))} onChange={(opt) => setBatchCode(opt?.value || "")} value={batch_code ? { value: batch_code, label: batch_code } : null} isSearchable />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] uppercase font-bold tracking-widest text-textMuted ml-1">Assign Relationship Manager</label>
-                <select value={selectedRm} onChange={(e) => setSelectedRm(e.target.value)} className="w-[100%] bg-white/5 border border-white/10 p-3 rounded-xl text-textColor font-medium focus:outline-none focus:border-accentPrimary transition-all">
+                <label className="text-[10px] uppercase font-bold tracking-widest text-gray-500 dark:text-gray-400 ml-1">Assign Relationship Manager</label>
+                <select value={selectedRm} onChange={(e) => setSelectedRm(e.target.value)} className="w-[100%] bg-white/5 border border-white/10 p-3 rounded-xl text-gray-800 dark:text-white font-medium focus:outline-none focus:border-accentPrimary transition-all">
                   <option value="" className="bg-bgSecondary">Manual Selection</option>
                   {rmList.map((rm) => <option key={rm.id} value={rm.id} className="bg-bgSecondary">{rm.name}</option>)}
                 </select>
               </div>
             </div>
           )}
-          <p className="text-textSecondary text-sm mt-4 italic">Final confirmation required before processing this action.</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-4 italic">Final confirmation required before processing this action.</p>
         </Modal>
 
         <Modal isOpen={isDeleteModalOpen} onClose={closeModals} onSubmit={handleRmDelete} name={selectedLead?.name} mobile_number={selectedLead?.mobile_number} title="System Deletion" action="Delete Forever">

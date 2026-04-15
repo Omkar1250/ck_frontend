@@ -76,17 +76,17 @@ const Modal = ({
               <HiX className="w-4 h-4" />
             </button>
 
-            <h2 className="text-xl font-semibold mb-5 text-richblack-5">
+            <h2 className="text-xl font-semibold mb-5 text-gray-900 dark:text-white">
               {title}
             </h2>
 
-            <div className="text-richblack-100 mb-4 text-sm space-y-3">
-              <p><span className="text-richblack-300 text-xs uppercase tracking-wider">Name</span><br />
-                <span className="font-medium text-base">{name}</span>
+            <div className="text-gray-700 dark:text-gray-200 mb-4 text-sm space-y-3">
+              <p><span className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Name</span><br />
+                <span className="font-medium text-base text-gray-900 dark:text-white">{name}</span>
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-1">
-                <span className="text-richblack-100 font-mono text-sm">{mobile_number}</span>
+                <span className="text-gray-700 dark:text-gray-200 font-mono text-sm">{mobile_number}</span>
                 <div className="flex items-center gap-2">
                   <button onClick={() => openWhatsApp(mobile_number)}
                     className="w-8 h-8 rounded-lg flex items-center justify-center bg-caribbeangreen-100/10 
@@ -108,7 +108,7 @@ const Modal = ({
 
               {whatsapp_mobile_number && (
                 <div className="flex items-center gap-3 pt-1">
-                  <span className="text-richblack-100 font-mono text-sm">{whatsapp_mobile_number}</span>
+                  <span className="text-gray-700 dark:text-gray-200 font-mono text-sm">{whatsapp_mobile_number}</span>
                   <div className="flex items-center gap-2">
                     <button onClick={() => openWhatsApp(whatsapp_mobile_number)}
                       className="w-8 h-8 rounded-lg flex items-center justify-center bg-caribbeangreen-100/10 
@@ -118,7 +118,7 @@ const Modal = ({
                     <button onClick={() => copyToClipboard(whatsapp_mobile_number)}
                       className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/[0.04] 
                         hover:bg-white/[0.08] transition-all duration-150">
-                      <FaCopy className="text-richblack-200 text-sm" />
+                      <FaCopy className="text-gray-500 dark:text-gray-400 text-sm" />
                     </button>
                   </div>
                 </div>
