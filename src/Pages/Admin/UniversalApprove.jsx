@@ -96,8 +96,10 @@ const LeadCard = ({ lead, copyToClipboard, openWhatsApp, makeCall, openModal }) 
           <span className="text-gray-400 font-medium text-sm ml-1">{lead.mobile_number}</span>
         </div>
 
-        <div className="text-indigo-500 text-sm font-medium">
-          {lead.rm_name || "JRM"} : {lead.batch_code || "N/A"}
+        <div className="flex flex-col gap-1">
+           <span className="ext-gray-400 font-medium text-sm">JRM: {lead.jrm_name}</span>
+           <span className="ext-gray-400 font-medium text-sm">RM: {lead.rm_name}</span>
+           <span className="ext-gray-400 font-medium text-sm">Batch: {lead.batch_code}</span>
         </div>
       </div>
 
@@ -114,13 +116,13 @@ const LeadCard = ({ lead, copyToClipboard, openWhatsApp, makeCall, openModal }) 
               disabled={isApproved}
               className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-[15px] font-medium border
                 ${isApproved 
-                  ? "bg-cyan-100 text-cyan-900 border-cyan-300 cursor-default dark:bg-cyan-900/40 dark:text-cyan-100 dark:border-cyan-700" 
-                  : "bg-cyan-100 text-cyan-900 border-cyan-300 hover:bg-cyan-200 transition-colors dark:bg-cyan-900/40 dark:text-cyan-100 dark:border-cyan-700 dark:hover:bg-cyan-800/60"
+                  ? "bg-caribbeangreen-100 text-caribbeangreen-900 border-caribbeangreen-300 cursor-default dark:bg-caribbeangreen-900/40 dark:text-caribbeangreen-100 dark:border-caribbeangreen-700/50" 
+                  : "bg-blue-100 text-blue-900 border-blue-300 hover:bg-blue-200 transition-colors dark:bg-blue-900/40 dark:text-blue-100 dark:border-blue-700/50 dark:hover:bg-blue-800/60"
                 }`}
             >
               {displayNames[action]}
               {isApproved && (
-                <span className="flex items-center justify-center w-4 h-4 rounded-full border border-green-500 text-green-500">
+                <span className="flex items-center justify-center w-4 h-4 rounded-full border border-caribbeangreen-500 text-caribbeangreen-500">
                   <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="10px" width="10px" xmlns="http://www.w3.org/2000/svg"><path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"></path></svg>
                 </span>
               )}
